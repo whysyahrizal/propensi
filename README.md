@@ -1,3 +1,9 @@
+# Backlog Yoshelin
+- Autentikasi (login/logout)
+- Manajemen Profil Personel
+- Manajemen Cuti
+- Dashboard Monitoring (Overall/ Summary)
+- Pengumuman 
 # IF-ELSE — Propensi 2025/2026 Genap
 
 Project backend menggunakan **Django** untuk memenuhi persiapan environment pengembangan pada mata kuliah Propensi.
