@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Detail Personel</h1>
+    <a href="{% url 'personel_list' %}" class="btn btn-secondary">← Kembali ke Daftar</a>
+</div>
+
+<div class="card">
+    <p><span class="label">Nama:</span> {{ personel.nama }}</p>
+    <p><span class="label">NIP:</span> {{ personel.nip }}</p>
+    <p><span class="label">Unit/Satker:</span> {{ personel.unit.nama }}</p>
+    <p><span class="label">Status:</span> {% if personel.is_active %}Aktif{% else %}Nonaktif{% endif %}</p>
+    <p><span class="label">Dibuat:</span> {{ personel.created_at }}</p>
+    <p><span class="label">Diupdate:</span> {{ personel.updated_at }}</p>
+</div>
+
+<div style="margin-top:16px;">
+    <a href="{% url 'personel_update' personel.id %}" class="btn btn-warning">Edit</a>
+</div>
+{% endblock %}

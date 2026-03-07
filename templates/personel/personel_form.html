@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="topbar">
+    <h1>{% if object %}Edit Personel{% else %}Tambah Personel{% endif %}</h1>
+    <a href="{% url 'personel_list' %}" class="btn btn-secondary">← Kembali</a>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Nama</label>
+    {{ form.nama }}
+    {% if form.nama.errors %}
+        <div class="message error">{{ form.nama.errors }}</div>
+    {% endif %}
+
+    <label>NIP</label>
+    {{ form.nip }}
+    {% if form.nip.errors %}
+        <div class="message error">{{ form.nip.errors }}</div>
+    {% endif %}
+
+    <label>Unit/Satker</label>
+    {{ form.unit }}
+    {% if form.unit.errors %}
+        <div class="message error">{{ form.unit.errors }}</div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">Simpan</button>
+</form>
+{% endblock %}

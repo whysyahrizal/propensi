@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>Daftar Personel</h1>
+        <p>Total data: {{ total_data }}</p>
+    </div>
+    <a href="{% url 'personel_create' %}" class="btn btn-primary">+ Tambah Personel</a>
+</div>
+
+<form method="get">
+    <div class="filter-box">
+        <div>
+            <label>Cari Nama / NIP</label>
+            <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="Cari personel...">
+        </div>
+        <div>
+            <label>Filter Unit/Satker</label>
+            <select name="unit" class="form-control">
+                <option value="">Semua Unit</option>
+                {% for unit in units %}
+                    <option value="{{ unit.id }}" {% if selected_unit == unit.id|stringformat:"s" %}selected{% endif %}>
+                        {{ unit.nama }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+</form>
+
+{% if personels %}
+<table>
+    <thead>
+        <tr>
+            <th>Nama</th>
+            <th>NIP</th>
+            <th>Unit/Satker</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for personel in personels %}
+        <tr>
+            <td>{{ personel.nama }}</td>
+            <td>{{ personel.nip }}</td>
+            <td>{{ personel.unit.nama }}</td>
+            <td class="actions">
+                <a href="{% url 'personel_detail' personel.id %}" class="btn btn-secondary">Detail</a>
+                <a href="{% url 'personel_update' personel.id %}" class="btn btn-warning">Edit</a>
+                <form method="post" action="{% url 'personel_delete' personel.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menonaktifkan personel ini?')">Nonaktifkan</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?q={{ q }}&unit={{ selected_unit }}&page=1">First</a>
+        <a href="?q={{ q }}&unit={{ selected_unit }}&page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+
+    <span>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?q={{ q }}&unit={{ selected_unit }}&page={{ page_obj.next_page_number }}">Next</a>
+        <a href="?q={{ q }}&unit={{ selected_unit }}&page={{ page_obj.paginator.num_pages }}">Last</a>
+    {% endif %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>Data personel tidak ditemukan</h3>
+    <p>Coba ubah kata kunci pencarian atau filter unit.</p>
+</div>
+{% endif %}
+{% endblock %}
