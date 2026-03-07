@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
@@ -9,14 +8,7 @@ from .models import Personel, Unit
 from .forms import PersonelForm
 
 
-class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    login_url = '/admin/login/'
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-
-class PersonelListView(AdminRequiredMixin, ListView):
+class PersonelListView(ListView):
     model = Personel
     template_name = 'personel/personel_list.html'
     context_object_name = 'personels'
@@ -47,7 +39,7 @@ class PersonelListView(AdminRequiredMixin, ListView):
         return context
 
 
-class PersonelDetailView(AdminRequiredMixin, DetailView):
+class PersonelDetailView(DetailView):
     model = Personel
     template_name = 'personel/personel_detail.html'
     context_object_name = 'personel'
@@ -56,7 +48,7 @@ class PersonelDetailView(AdminRequiredMixin, DetailView):
         return Personel.objects.select_related('unit').filter(is_active=True)
 
 
-class PersonelCreateView(AdminRequiredMixin, CreateView):
+class PersonelCreateView(CreateView):
     model = Personel
     form_class = PersonelForm
     template_name = 'personel/personel_form.html'
@@ -71,7 +63,7 @@ class PersonelCreateView(AdminRequiredMixin, CreateView):
         return super().form_invalid(form)
 
 
-class PersonelUpdateView(AdminRequiredMixin, UpdateView):
+class PersonelUpdateView(UpdateView):
     model = Personel
     form_class = PersonelForm
     template_name = 'personel/personel_form.html'
@@ -90,7 +82,7 @@ class PersonelUpdateView(AdminRequiredMixin, UpdateView):
         return super().form_invalid(form)
 
 
-class PersonelDeleteView(AdminRequiredMixin, View):
+class PersonelDeleteView(View):
     def post(self, request, pk):
         personel = get_object_or_404(Personel, pk=pk, is_active=True)
         personel.is_active = False
