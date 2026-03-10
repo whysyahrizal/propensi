@@ -2,7 +2,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Personel, Satker
+from .models import Personel, Satker, Role
 
 
 def redirect_root(request):
@@ -188,3 +188,136 @@ def hapus_personel_view(request, pk):
         return redirect('accounts:daftar_personel')
 
     return render(request, 'accounts/konfirmasi_hapus.html', {'personel': personel})
+
+
+# ─── EPIC03 — Manajemen Role (PBI-011 to PBI-015) ────────────────────────────
+
+def _superadmin_required(request):
+    """Cek apakah user adalah superadmin; kembalikan True jika boleh akses."""
+    return request.user.is_authenticated and request.user.role == 'superadmin'
+
+
+@login_required
+def daftar_role(request):
+    """PBI-011 — Tampilkan daftar semua role dengan pagination & search."""
+    if not _superadmin_required(request):
+        messages.error(request, 'Akses ditolak. Hanya Superadmin yang dapat mengelola role.')
+        return redirect('dashboard:index')
+
+    q = request.GET.get('q', '').strip()
+    role_list = Role.objects.all()
+    if q:
+        role_list = role_list.filter(nama__icontains=q)
+
+    # Pagination manual (10 per halaman)
+    from django.core.paginator import Paginator
+    paginator = Paginator(role_list, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'accounts/role/daftar_role.html', {
+        'page_obj': page_obj,
+        'total': role_list.count(),
+        'q': q,
+    })
+
+
+@login_required
+def detail_role(request, pk):
+    """PBI-012 — Tampilkan detail role; 404 jika tidak ditemukan."""
+    if not _superadmin_required(request):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+
+    role = get_object_or_404(Role, pk=pk)
+    pengguna_list = role.personel_set.filter(is_active=True).select_related('satker')
+    return render(request, 'accounts/role/detail_role.html', {
+        'role': role,
+        'pengguna_list': pengguna_list,
+    })
+
+
+@login_required
+def tambah_role(request):
+    """PBI-013 — Tambah role baru; validasi nama tidak kosong & unik."""
+    if not _superadmin_required(request):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+
+    if request.method == 'POST':
+        nama = request.POST.get('nama', '').strip()
+        deskripsi = request.POST.get('deskripsi', '').strip()
+
+        if not nama:
+            messages.error(request, 'Nama role tidak boleh kosong.')
+        elif Role.objects.filter(nama__iexact=nama).exists():
+            messages.error(request, f'Role dengan nama "{nama}" sudah ada.')
+        else:
+            role = Role.objects.create(nama=nama, deskripsi=deskripsi)
+            messages.success(request, f'Role "{role.nama}" berhasil ditambahkan.')
+            return redirect('accounts:daftar_role')
+
+    return render(request, 'accounts/role/form_role.html', {
+        'action': 'tambah',
+        'form_data': request.POST if request.method == 'POST' else {},
+    })
+
+
+@login_required
+def edit_role(request, pk):
+    """PBI-014 — Edit nama/deskripsi role; validasi nama tetap unik."""
+    if not _superadmin_required(request):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+
+    role = get_object_or_404(Role, pk=pk)
+
+    if request.method == 'POST':
+        nama = request.POST.get('nama', '').strip()
+        deskripsi = request.POST.get('deskripsi', '').strip()
+
+        if not nama:
+            messages.error(request, 'Nama role tidak boleh kosong.')
+        elif Role.objects.filter(nama__iexact=nama).exclude(pk=pk).exists():
+            messages.error(request, f'Role dengan nama "{nama}" sudah digunakan.')
+        else:
+            role.nama = nama
+            role.deskripsi = deskripsi
+            role.save()
+            messages.success(request, f'Role "{role.nama}" berhasil diperbarui.')
+            return redirect('accounts:detail_role', pk=role.pk)
+
+    return render(request, 'accounts/role/form_role.html', {
+        'action': 'edit',
+        'role': role,
+        'form_data': request.POST if request.method == 'POST' else {},
+    })
+
+
+@login_required
+def hapus_role(request, pk):
+    """PBI-015 — Hapus role; tolak jika masih dipakai pengguna aktif."""
+    if not _superadmin_required(request):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+
+    role = get_object_or_404(Role, pk=pk)
+    jumlah_pengguna = role.personel_set.filter(is_active=True).count()
+
+    if request.method == 'POST':
+        if jumlah_pengguna > 0:
+            messages.error(
+                request,
+                f'Role "{role.nama}" tidak dapat dihapus karena masih digunakan oleh '
+                f'{jumlah_pengguna} pengguna aktif.'
+            )
+            return redirect('accounts:detail_role', pk=role.pk)
+        nama = role.nama
+        role.delete()
+        messages.success(request, f'Role "{nama}" berhasil dihapus.')
+        return redirect('accounts:daftar_role')
+
+    return render(request, 'accounts/role/konfirmasi_hapus_role.html', {
+        'role': role,
+        'jumlah_pengguna': jumlah_pengguna,
+    })

@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Satker, Personel
+from .models import Satker, Personel, Role
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['nama', 'deskripsi', 'jumlah_pengguna', 'dibuat_pada']
+    search_fields = ['nama']
 
 
 @admin.register(Satker)
@@ -19,7 +25,7 @@ class PersonelAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('nrp', 'password')}),
         ('Informasi Personel', {'fields': ('nama_lengkap', 'pangkat', 'jabatan', 'satker', 'email', 'no_hp', 'foto')}),
-        ('Role & Akses', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Role & Akses', {'fields': ('role', 'role_obj', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
     )
     add_fieldsets = (
         (None, {

@@ -1,5 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.utils import timezone
+
+
+class Role(models.Model):
+    """Role yang dapat dikelola secara dinamis oleh Superadmin (EPIC03)."""
+    nama = models.CharField(max_length=100, unique=True, verbose_name='Nama Role')
+    deskripsi = models.TextField(blank=True, verbose_name='Deskripsi')
+    dibuat_pada = models.DateTimeField(default=timezone.now, verbose_name='Dibuat Pada')
+
+    class Meta:
+        verbose_name = 'Role'
+        verbose_name_plural = 'Role'
+        ordering = ['nama']
+
+    def __str__(self):
+        return self.nama
+
+    def jumlah_pengguna(self):
+        return self.personel_set.filter(is_active=True).count()
 
 
 class Satker(models.Model):
@@ -72,6 +91,10 @@ class Personel(AbstractBaseUser, PermissionsMixin):
         related_name='personel', verbose_name='Satuan Kerja'
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='personel', verbose_name='Role')
+    role_obj = models.ForeignKey(
+        Role, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='personel_set', verbose_name='Role (Object)'
+    )
     foto = models.ImageField(upload_to='foto_personel/', blank=True, null=True, verbose_name='Foto')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
