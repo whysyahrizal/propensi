@@ -147,7 +147,7 @@
         </div>
         <div>
             <h2 class="person-name">{{ personel.nama }}</h2>
-            <div class="person-nip">NIP. {{ personel.nip }}</div>
+            <div class="person-nip">ID. {{ personel.id|stringformat:"05d" }} &bull; NIP. {{ personel.nip }}</div>
         </div>
     </div>
     <div class="detail-body">
