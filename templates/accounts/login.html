@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Login — SIRAGA Korlantas{% endblock %}
+
+{% block full_page %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f2347] via-[#1a3a6b] to-[#0f2347] p-4">
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <!-- Accent strip -->
+      <div class="h-1 w-full bg-[#d4a017]"></div>
+
+      <div class="px-8 pt-10 pb-9">
+        <!-- Logo + Title -->
+        <div class="flex flex-col items-center gap-4 mb-8">
+          {% load static %}
+          <img src="{% static 'images/logo-siraga.png' %}"
+               alt="Logo SIRAGA Korlantas"
+               class="h-20 w-auto object-contain"
+               onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';" />
+          <div id="logo-fallback"
+               class="hidden w-16 h-16 rounded-2xl bg-[#1a3a6b] items-center justify-center">
+            <span class="text-white font-bold text-xl">S</span>
+          </div>
+          <div class="text-center">
+            <h1 class="text-xl font-bold text-[#1a3a6b]">SIRAGA Korlantas</h1>
+            <p class="text-xs text-gray-500 mt-1">Sistem Informasi Kehadiran dan Penugasan</p>
+          </div>
+          <div class="h-px w-16 bg-gray-200"></div>
+          <p class="text-xs text-gray-500 text-center">Silakan masuk dengan akun personel Anda</p>
+        </div>
+
+        <!-- Error messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="mb-4 px-4 py-2.5 rounded-lg text-sm
+                    {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{% url 'accounts:login' %}" class="flex flex-col gap-5">
+          {% csrf_token %}
+
+          <!-- NRP -->
+          <div class="flex flex-col gap-1.5">
+            <label for="nrp" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+              NRP / Username
+            </label>
+            <input
+              id="nrp"
+              name="nrp"
+              type="text"
+              placeholder="Masukkan NRP atau Username"
+              required
+              autocomplete="username"
+              class="h-11 w-full px-4 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="flex flex-col gap-1.5">
+            <label for="password" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Masukkan Password"
+              required
+              autocomplete="current-password"
+              class="h-11 w-full px-4 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
+            />
+          </div>
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            class="w-full h-12 mt-1 rounded-xl bg-[#1a3a6b] text-white text-sm font-bold uppercase tracking-wider hover:bg-[#2d5da6] transition-colors shadow-lg flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+            </svg>
+            Masuk (Login)
+          </button>
+        </form>
+
+        <!-- Footer links -->
+        <div class="mt-6 flex flex-col items-center gap-3">
+          <div class="h-px w-full bg-gray-200"></div>
+          <p class="text-xs text-gray-500">
+            Belum punya akun?
+            <a href="{% url 'accounts:register' %}" class="text-[#d4a017] hover:underline font-semibold">
+              Daftar di sini
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-[11px] text-white/50 mt-6">
+      Korlantas Polri &copy; 2026. Seluruh hak dilindungi.
+    </p>
+  </div>
+</div>
+{% endblock %}
