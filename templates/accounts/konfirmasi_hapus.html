@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Hapus Personel — SIRAGA{% endblock %}
+{% block page_title %}Konfirmasi Hapus Personel{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-lg">
+  <a href="{% url 'accounts:daftar_personel' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali
+  </a>
+  <div class="rounded-2xl bg-white border border-red-200 shadow-sm overflow-hidden">
+    <div class="h-1 bg-red-500"></div>
+    <div class="px-8 py-7">
+      <div class="flex items-start gap-4 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">Hapus Personel "{{ personel.nama_lengkap }}"?</h1>
+          <p class="text-sm text-gray-500 mt-1">NRP: {{ personel.nrp }} · {{ personel.get_role_display }}</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-amber-50 border border-amber-200 mb-6">
+        <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <p class="text-xs text-amber-700">Tindakan ini tidak dapat dibatalkan. Seluruh data absensi, cuti, dan penugasan terkait personel ini akan tetap tersimpan.</p>
+      </div>
+      <div class="flex items-center justify-end gap-3">
+        <a href="{% url 'accounts:daftar_personel' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
+        <form method="POST">
+          {% csrf_token %}
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">Ya, Hapus</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

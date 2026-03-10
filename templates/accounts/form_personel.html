@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{% if action == 'edit' %}Edit{% else %}Tambah{% endif %} Personel — SIRAGA{% endblock %}
+{% block page_title %}{% if action == 'edit' %}Edit Personel{% else %}Tambah Personel Baru{% endif %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-2xl">
+  <a href="{% url 'accounts:daftar_personel' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali ke Daftar Personel
+  </a>
+  <div class="card overflow-hidden">
+    <div class="h-1 w-full {% if action == 'edit' %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
+    <div class="px-8 py-7">
+      <h1 class="text-lg font-bold text-gray-900 mb-6">{% if action == 'edit' %}Edit Data: {{ personel.nama_lengkap }}{% else %}Tambah Personel Baru{% endif %}</h1>
+      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-5">
+        {% csrf_token %}
+        {% if action == 'tambah' %}
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">NRP <span class="text-red-500">*</span></label>
+            <input name="nrp" type="text" required placeholder="cth. 123456789" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lengkap <span class="text-red-500">*</span></label>
+            <input name="nama_lengkap" type="text" required placeholder="Nama sesuai identitas" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+        </div>
+        {% else %}
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lengkap <span class="text-red-500">*</span></label>
+          <input name="nama_lengkap" type="text" required value="{{ personel.nama_lengkap }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+        </div>
+        {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pangkat</label>
+            <select name="pangkat" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+              <option value="">Pilih Pangkat</option>
+              {% for val, label in pangkat_choices %}
+              <option value="{{ val }}" {% if personel.pangkat == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Jabatan</label>
+            <input name="jabatan" type="text" value="{{ personel.jabatan|default:'' }}" placeholder="Jabatan saat ini" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Satuan Kerja</label>
+            <select name="satker" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+              <option value="">Pilih Satker</option>
+              {% for s in satker_list %}
+              <option value="{{ s.pk }}" {% if personel.satker_id == s.pk %}selected{% endif %}>{{ s.kode }} — {{ s.nama }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Role</label>
+            <select name="role" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+              {% for val, label in role_choices %}
+              <option value="{{ val }}" {% if personel.role == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Email</label>
+            <input name="email" type="email" value="{{ personel.email|default:'' }}" placeholder="email@example.com" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">No. HP</label>
+            <input name="no_hp" type="tel" value="{{ personel.no_hp|default:'' }}" placeholder="08xxxxxxxxxx" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+        </div>
+        {% if action == 'tambah' %}
+        <div class="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-700">
+          Password default: <strong>siraga2026</strong> — personel wajib menggantinya setelah login pertama.
+        </div>
+        {% endif %}
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <a href="{% url 'accounts:daftar_personel' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
+          <button type="submit" class="px-5 py-2.5 rounded-xl {% if action == 'edit' %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
+            {% if action == 'edit' %}Simpan Perubahan{% else %}Tambah Personel{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

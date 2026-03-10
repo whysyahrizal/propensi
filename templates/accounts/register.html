@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daftar Akun — SIRAGA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#1a3a6b'},accent:{DEFAULT:'#d4a017'}}}}}</script>
+</head>
+<body class="min-h-full bg-gradient-to-br from-[#0d1f40] via-[#1a3a6b] to-[#2d5da6] flex items-center justify-center px-4 py-8">
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div class="h-1.5 w-full bg-[#d4a017]"></div>
+      <div class="px-8 py-8">
+        <div class="flex flex-col items-center gap-2 mb-8">
+          <img src="{% static 'images/logo-siraga.png' %}" alt="SIRAGA" class="w-12 h-12 object-contain"/>
+          <h1 class="text-xl font-bold text-[#1a3a6b]">Daftar Akun SIRAGA</h1>
+          <p class="text-sm text-gray-500">Isi data diri untuk membuat akun baru</p>
+        </div>
+
+        {% if messages %}
+        <div class="mb-4 flex flex-col gap-1.5">
+          {% for m in messages %}
+          <div class="px-3 py-2 rounded-lg text-xs font-medium {% if m.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">{{ m }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" class="flex flex-col gap-4">
+          {% csrf_token %}
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">NRP <span class="text-red-500">*</span></label>
+              <input name="nrp" type="text" required placeholder="Nomor Registrasi Polri" class="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama <span class="text-red-500">*</span></label>
+              <input name="nama_lengkap" type="text" required placeholder="Nama lengkap" class="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pangkat</label>
+            <select name="pangkat" class="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+              <option value="">Pilih Pangkat</option>
+              {% for val, label in pangkat_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Satuan Kerja</label>
+            <select name="satker" class="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+              <option value="">Pilih Satker</option>
+              {% for s in satker_list %}<option value="{{ s.pk }}">{{ s.kode }} — {{ s.nama }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Password <span class="text-red-500">*</span></label>
+            <input name="password1" type="password" required placeholder="Min. 8 karakter" class="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Konfirmasi Password <span class="text-red-500">*</span></label>
+            <input name="password2" type="password" required placeholder="Ulangi password" class="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+          <button type="submit" class="w-full h-11 rounded-xl bg-[#1a3a6b] text-white font-bold text-sm hover:bg-[#2d5da6] transition-colors mt-2">Daftar Sekarang</button>
+        </form>
+        <p class="text-center text-sm text-gray-500 mt-4">Sudah punya akun? <a href="{% url 'accounts:login' %}" class="text-[#1a3a6b] font-semibold hover:underline">Login</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}{% if pengumuman %}Edit{% else %}Buat{% endif %} Pengumuman — SIRAGA{% endblock %}
+{% block page_title %}{% if pengumuman %}Edit{% else %}Buat{% endif %} Pengumuman{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-2xl">
+  <a href="{% url 'pengumuman:daftar' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>Kembali
+  </a>
+  <div class="card overflow-hidden">
+    <div class="h-1 {% if pengumuman %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
+    <div class="px-8 py-7">
+      <h1 class="text-lg font-bold text-gray-900 mb-6">{% if pengumuman %}Edit Pengumuman{% else %}Buat Pengumuman Baru{% endif %}</h1>
+      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-5">
+        {% csrf_token %}
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Judul <span class="text-red-500">*</span></label>
+          <input name="judul" type="text" required value="{{ pengumuman.judul|default:'' }}" placeholder="Judul pengumuman" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Konten <span class="text-red-500">*</span></label>
+          <textarea name="konten" required rows="8" placeholder="Isi pengumuman..." class="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">{{ pengumuman.konten|default:'' }}</textarea>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Lampiran (opsional)</label>
+          <input name="lampiran" type="file" class="text-sm text-gray-600"/>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="checkbox" name="is_published" id="is_published" {% if pengumuman.is_published or not pengumuman %}checked{% endif %} class="w-4 h-4 rounded text-[#1a3a6b]"/>
+          <label for="is_published" class="text-sm font-medium text-gray-700">Terbitkan sekarang</label>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <a href="{% url 'pengumuman:daftar' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700">Batal</a>
+          <button type="submit" class="px-5 py-2.5 rounded-xl {% if pengumuman %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
+            {% if pengumuman %}Simpan Perubahan{% else %}Terbitkan Pengumuman{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
