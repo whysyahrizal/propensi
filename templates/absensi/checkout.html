@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Check-Out — SIRAGA{% endblock %}
+{% block page_title %}Check-Out Absensi{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-lg">
+  <div class="card overflow-hidden">
+    <div class="h-1 bg-blue-500"></div>
+    <div class="px-8 py-7">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/></svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">Check-Out Absensi</h1>
+          <p class="text-sm text-gray-500" id="jam_sekarang">Memuat waktu...</p>
+        </div>
+      </div>
+
+      {% if absensi %}
+      <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 mb-6">
+        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Check-In</p>
+        <p class="text-base font-bold text-gray-900">{{ absensi.waktu_masuk|time:"H:i" }} WIB</p>
+      </div>
+      {% if absensi.waktu_keluar %}
+      <div class="flex flex-col items-center gap-2 py-4 text-center">
+        <p class="text-base font-bold text-gray-900">Anda sudah check-out hari ini</p>
+        <p class="text-sm text-gray-500">Pukul {{ absensi.waktu_keluar|time:"H:i" }} WIB</p>
+        <a href="{% url 'absensi:rekap' %}" class="mt-2 text-sm font-semibold text-[#1a3a6b] hover:underline">Lihat Rekap →</a>
+      </div>
+      {% else %}
+      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-5">
+        {% csrf_token %}
+        <div id="lokasi_info" class="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3.5">
+          <p class="text-xs font-semibold text-blue-700">📍 Mendeteksi lokasi GPS...</p>
+          <input type="hidden" name="latitude" id="lat"/>
+          <input type="hidden" name="longitude" id="lon"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Foto Selfie</label>
+          <input name="selfie_keluar" type="file" accept="image/*" capture="user" class="text-sm text-gray-600"/>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-sm">
+          ✓ Konfirmasi Check-Out
+        </button>
+      </form>
+      {% endif %}
+      {% else %}
+      <div class="text-center py-6">
+        <p class="text-sm text-gray-500 mb-3">Anda belum melakukan check-in hari ini.</p>
+        <a href="{% url 'absensi:checkin' %}" class="px-5 py-2.5 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700">Check-In Dulu</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  function updateJam() { const el = document.getElementById('jam_sekarang'); if(el) el.textContent = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' WIB'; }
+  setInterval(updateJam, 1000); updateJam();
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => { document.getElementById('lat').value = pos.coords.latitude; document.getElementById('lon').value = pos.coords.longitude; document.getElementById('lokasi_info').innerHTML = '<p class="text-xs font-semibold text-green-700">📍 Lokasi: '+pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5)+'</p>'; },
+      () => { document.getElementById('lokasi_info').innerHTML = '<p class="text-xs text-amber-700">⚠ Gagal mendeteksi lokasi.</p>'; }
+    );
+  }
+</script>
+{% endblock %}

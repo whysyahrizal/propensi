@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Detail Sprin — SIRAGA{% endblock %}
+{% block page_title %}Detail Sprin{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-3xl">
+  <a href="{% url 'sprin:daftar' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali ke Daftar Sprin
+  </a>
+  <div class="card overflow-hidden">
+    <div class="h-1 bg-[#1a3a6b]"></div>
+    <div class="px-6 py-5">
+      <div class="flex items-start justify-between gap-4 mb-5">
+        <div>
+          <p class="text-xs font-mono text-gray-400 mb-1">{{ sprin.nomor }}</p>
+          <h1 class="text-xl font-bold text-gray-900">{{ sprin.perihal }}</h1>
+          <p class="text-sm text-gray-500 mt-1">{{ sprin.tanggal|date:"d F Y" }}</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="badge badge-{{ sprin.status }} px-3 py-1 text-sm">{{ sprin.get_status_display }}</span>
+          {% if sprin.status == 'draft' and user.role in 'operator,pimpinan,superadmin' %}
+          <a href="{% url 'sprin:edit' sprin.pk %}" class="h-9 px-4 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 inline-flex items-center">Edit</a>
+          <a href="{% url 'sprin:hapus' sprin.pk %}" class="h-9 px-4 rounded-lg border border-red-200 text-sm font-semibold text-red-600 hover:bg-red-50 inline-flex items-center">Hapus</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
+          <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Dasar</p>
+          <p class="text-sm text-gray-800">{{ sprin.dasar|default:"—" }}</p>
+        </div>
+        <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
+          <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Pejabat Penandatangan</p>
+          <p class="text-sm text-gray-800">{{ sprin.pejabat_penandatangan|default:"—" }}</p>
+        </div>
+        {% if sprin.waktu_mulai %}
+        <div class="rounded-xl bg-gray-50 border border-gray-100 p-4">
+          <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Periode Penugasan</p>
+          <p class="text-sm text-gray-800">{{ sprin.waktu_mulai|date:"d M Y" }} s.d. {{ sprin.waktu_selesai|date:"d M Y"|default:"—" }}</p>
+        </div>
+        {% endif %}
+        <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 sm:col-span-2">
+          <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Isi Perintah</p>
+          <p class="text-sm text-gray-800 leading-relaxed">{{ sprin.isi_perintah|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if personel_sprin %}
+  <div class="card overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-100">
+      <h2 class="text-sm font-bold text-gray-900">Personel yang Ditugaskan</h2>
+    </div>
+    <div class="divide-y divide-gray-100">
+      {% for ps in personel_sprin %}
+      <div class="flex items-center gap-3 px-5 py-3">
+        <div class="w-8 h-8 rounded-full bg-[#1a3a6b]/10 flex items-center justify-center text-[#1a3a6b] text-xs font-bold shrink-0">{{ ps.personel.nama_lengkap|first|upper }}</div>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-gray-900">{{ ps.personel.nama_lengkap }}</p>
+          <p class="text-xs text-gray-500">{{ ps.personel.pangkat }} · {{ ps.jabatan_dalam_sprin|default:"—" }}</p>
+        </div>
+        <span class="text-xs text-gray-400">#{{ ps.nomor_urut }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

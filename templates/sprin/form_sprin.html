@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}{% if sprin %}Edit{% else %}Buat{% endif %} Sprin — SIRAGA{% endblock %}
+{% block page_title %}{% if sprin %}Edit Sprin{% else %}Buat Sprin Baru{% endif %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-2xl">
+  <a href="{% url 'sprin:daftar' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali
+  </a>
+  <div class="card overflow-hidden">
+    <div class="h-1 {% if sprin %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
+    <div class="px-8 py-7">
+      <h1 class="text-lg font-bold text-gray-900 mb-6">{% if sprin %}Edit Sprin: {{ sprin.nomor }}{% else %}Buat Surat Perintah Baru{% endif %}</h1>
+      <form method="POST" class="flex flex-col gap-5">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nomor Sprin <span class="text-red-500">*</span></label>
+            <input name="nomor" type="text" required value="{{ sprin.nomor|default:'' }}" placeholder="cth. SP/123/III/2026/Korlantas" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Tanggal <span class="text-red-500">*</span></label>
+            <input name="tanggal" type="date" required value="{{ sprin.tanggal|date:'Y-m-d'|default:'' }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Perihal <span class="text-red-500">*</span></label>
+          <input name="perihal" type="text" required value="{{ sprin.perihal|default:'' }}" placeholder="Ringkasan isi perintah" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Dasar</label>
+          <input name="dasar" type="text" value="{{ sprin.dasar|default:'' }}" placeholder="Dasar hukum / peraturan" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Isi Perintah</label>
+          <textarea name="isi_perintah" rows="4" placeholder="Detail tugas dan perintah yang diberikan..." class="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">{{ sprin.isi_perintah|default:'' }}</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Mulai</label>
+            <input name="waktu_mulai" type="date" value="{{ sprin.waktu_mulai|date:'Y-m-d'|default:'' }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Selesai</label>
+            <input name="waktu_selesai" type="date" value="{{ sprin.waktu_selesai|date:'Y-m-d'|default:'' }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pejabat Penandatangan</label>
+          <input name="pejabat_penandatangan" type="text" value="{{ sprin.pejabat_penandatangan|default:'' }}" placeholder="Nama dan pangkat pejabat" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <a href="{% url 'sprin:daftar' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
+          <button type="submit" class="px-5 py-2.5 rounded-xl {% if sprin %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
+            {% if sprin %}Simpan Perubahan{% else %}Buat Sprin{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
