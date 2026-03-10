@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Monitoring — SIRAGA{% endblock %}
+{% block page_title %}Dashboard Monitoring{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+
+  {# Greeting #}
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Selamat datang, {{ user.nama_pangkat|default:user.nama_lengkap }} 👋</h1>
+    <p class="text-sm text-gray-500 mt-0.5">{{ today|date:"l, d F Y" }} · {{ user.get_role_display }}</p>
+  </div>
+
+  {# Stats Cards #}
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="card p-5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+      </div>
+      <div>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Personel</p>
+        <p class="text-2xl font-bold text-gray-900">{{ total_personel }}</p>
+      </div>
+    </div>
+
+    <div class="card p-5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Hadir Hari Ini</p>
+        <p class="text-2xl font-bold text-gray-900">{{ hadir_hari_ini }}</p>
+      </div>
+    </div>
+
+    <div class="card p-5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </div>
+      <div>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Cuti Menunggu</p>
+        <p class="text-2xl font-bold text-gray-900">{{ pengajuan_menunggu }}</p>
+      </div>
+    </div>
+
+    <div class="card p-5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-[#1a3a6b]/10 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6 text-[#1a3a6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Sprin Aktif</p>
+        <p class="text-2xl font-bold text-gray-900">{{ sprin_aktif|length }}</p>
+      </div>
+    </div>
+  </div>
+
+  {# Two-column: Sprin Aktif + Pengumuman #}
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+    {# Sprin Aktif #}
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-gray-900">Sprin Aktif</h2>
+          <p class="text-xs text-gray-500">Penugasan yang sedang berjalan</p>
+        </div>
+        <a href="{% url 'sprin:daftar' %}" class="text-xs font-semibold text-[#1a3a6b] hover:underline">Lihat Semua</a>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {% for sprin in sprin_aktif %}
+        <div class="px-5 py-3 hover:bg-gray-50 transition-colors">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ sprin.perihal }}</p>
+              <p class="text-xs text-gray-500">{{ sprin.nomor }} · {{ sprin.tanggal|date:"d M Y" }}</p>
+            </div>
+            <span class="badge badge-aktif shrink-0">Aktif</span>
+          </div>
+        </div>
+        {% empty %}
+        <div class="py-10 text-center text-sm text-gray-400">Tidak ada sprin aktif saat ini.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Pengumuman Terbaru #}
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-gray-900">Pengumuman Terbaru</h2>
+          <p class="text-xs text-gray-500">Informasi terkini untuk personel</p>
+        </div>
+        <a href="{% url 'pengumuman:daftar' %}" class="text-xs font-semibold text-[#1a3a6b] hover:underline">Lihat Semua</a>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {% for p in pengumuman_terbaru %}
+        <a href="{% url 'pengumuman:detail' p.pk %}" class="block px-5 py-3 hover:bg-gray-50 transition-colors">
+          <p class="text-sm font-semibold text-gray-900 truncate">{{ p.judul }}</p>
+          <p class="text-xs text-gray-500">{{ p.dibuat_pada|date:"d M Y" }} · {{ p.dibuat_oleh.nama_lengkap|default:"—" }}</p>
+        </a>
+        {% empty %}
+        <div class="py-10 text-center text-sm text-gray-400">Belum ada pengumuman.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  {# Quick Actions — Cuti Menunggu #}
+  {% if pengajuan_menunggu > 0 %}
+  <div class="flex items-center gap-4 px-5 py-4 rounded-xl bg-amber-50 border border-amber-200">
+    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+      <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+    </div>
+    <div class="flex-1">
+      <p class="text-sm font-bold text-amber-800">Ada {{ pengajuan_menunggu }} pengajuan cuti menunggu persetujuan</p>
+      <p class="text-xs text-amber-600">Segera tinjau dan berikan keputusan.</p>
+    </div>
+    <a href="{% url 'cuti:daftar' %}" class="px-4 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors shrink-0">
+      Tinjau Sekarang
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
