@@ -20,4 +20,6 @@ class PersonelForm(forms.ModelForm):
             raise forms.ValidationError('NIP sudah digunakan.')
         if not nip.isdigit():
             raise forms.ValidationError('NIP harus berupa angka.')
+        if len(nip) != 8:
+            raise forms.ValidationError('NIP harus tepat 8 digit.')
         return nip
