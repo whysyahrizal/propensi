@@ -1,0 +1,255 @@
+{% extends "personel/base.html" %}
+
+{% block content %}
+<style>
+    .detail-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 24px;
+        margin-bottom: 22px;
+    }
+
+    .detail-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px;
+        border-radius: var(--radius-md);
+        color: white;
+        border: 1px solid rgba(16, 185, 129, .3);
+        margin-bottom: 16px;
+    }
+
+    .avatar-circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+
+    .person-name {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    .person-nip {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .detail-body {
+        padding: 0 4px 6px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+    }
+
+    .info-group {
+        background: #F8FAFC;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 14px;
+    }
+
+    .info-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .badge-success { background: #DCFCE7; color: #065F46; }
+
+    .table-container {
+        margin-top: 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-container td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .table-container tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .detail-actions {
+        margin-top: 18px;
+        border-radius: var(--radius-md);
+        border: 1px solid #D1FAE5;
+        padding: 16px;
+    }
+
+    .detail-actions p {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+
+    .detail-actions form > div {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .input-field {
+        padding: 10px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        width: 100%;
+    }
+
+    .page-header {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-start;
+    }
+</style>
+
+<div class="page-header mb-6">
+    <a href="{% url 'sprin:all_sprin' %}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
+    </a>
+</div>
+
+<div class="detail-card">
+
+    <div class="detail-header" style="background: {% if sprin.status == 'Disetujui' %}linear-gradient(135deg, #10B981, #34D399){% elif sprin.status == 'Ditolak' %}linear-gradient(135deg, #EF4444, #F87171){% else %}linear-gradient(135deg, var(--primary), var(--primary-light)){% endif %};">
+        <div class="avatar-circle">
+            <i class="fa-solid fa-file-shield"></i>
+        </div>
+        <div>
+            <h2 class="person-name">{{ sprin.operation_name }}</h2>
+            <div class="person-nip">UUID: {{ sprin.id_sprin }}</div>
+        </div>
+    </div>
+
+    {% if sprin.status == 'Ditolak' and sprin.rejection_notes %}
+    <div class="detail-actions" style="background: #FEF2F2; border-top: 2px solid #FECACA;">
+        <h4 style="margin:0 0 8px; color:#991B1B;">Alasan Penolakan</h4>
+        <p style="margin:0; color:#7F1D1D;">{{ sprin.rejection_notes }}</p>
+    </div>
+    {% endif %}
+
+    <div class="detail-body">
+        <div class="info-grid">
+            <div class="info-group">
+                <div class="info-label"><i class="fa-solid fa-circle-info"></i> Status</div>
+                <div class="info-value">
+                    <span class="badge {% if sprin.status == 'Disetujui' %}badge-success{% endif %}">{{ sprin.status }}</span>
+                </div>
+            </div>
+            <div class="info-group">
+                <div class="info-label"><i class="fa-solid fa-location-dot"></i> Lokasi Tugas</div>
+                <div class="info-value">{{ sprin.location_name }}</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label"><i class="fa-solid fa-list"></i> Deskripsi SPRIN</div>
+                <div class="info-value" style="font-weight:400;">{{ sprin.description }}</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label"><i class="fa-solid fa-calendar"></i> Masa Berlaku</div>
+                <div class="info-value">{{ sprin.start_date|date:"d M Y" }} - {{ sprin.end_date|date:"d M Y" }}</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label"><i class="fa-solid fa-file-pdf"></i> Dokumen Resmi</div>
+                <div class="info-value">
+                    {% if sprin.file_surat %}
+                        <a href="{{ sprin.file_surat.url }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" target="_blank">
+                            <i class="fa-solid fa-file-arrow-down"></i> Unduh PDF
+                        </a>
+                    {% else %}
+                        <span style="color: var(--text-muted); font-style: italic;">Belum ada file</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <h3 class="mt-4 mb-2" style="font-size: 16px; color: var(--primary-dark);">Personel Terlibat</h3>
+        <div class="table-container">
+            <table class="table" style="width: 100%;">
+                <tbody style="background: #F8FAFC;">
+                    {% for p in personel_tugas %}
+                    <tr>
+                        <td style="padding: 10px;">{{ p.personel.nama }}</td>
+                        <td style="padding: 10px; font-family: monospace;">{{ p.personel.nip }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if user_role == 'Pimpinan' and sprin.status == 'Menunggu Persetujuan' %}
+    <div class="detail-actions" style="background: #FFFBEB; border-top: 2px solid var(--warning);">
+        <form method="POST" action="{% url 'sprin:aksi_sprin' sprin.id_sprin %}" style="width: 100%;">
+            {% csrf_token %}
+            <p style="font-weight: 700; color: #92400E; margin-bottom: 15px;">Panel Persetujuan Pimpinan</p>
+            <div style="margin-bottom: 12px;">
+                <label for="reject_notes" style="font-size:13px;color:#92400E;font-weight:600;">Alasan Penolakan (wajib jika menolak)</label>
+                <textarea id="reject_notes" name="reject_notes" rows="3" class="input-field" placeholder="Jelaskan alasan menolak SPRIN...">{% if sprin.rejection_notes %}{{ sprin.rejection_notes }}{% endif %}</textarea>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="submit" name="action" value="tolak" class="btn btn-danger" style="flex: 1; min-width: 120px;">Tolak</button>
+                <button type="submit" name="action" value="setujui" class="btn btn-primary" style="flex: 2; min-width: 160px; background: var(--success); border: 1px solid #34D399;">Setujui Sprin</button>
+            </div>
+        </form>
+    </div>
+
+    {% elif user_role == 'SDM' and sprin.status == 'Disetujui' %}
+    <div class="detail-actions" style="background: #ECFDF5; border-top: 2px solid var(--success);">
+        <p style="font-weight: 700; color: #065F46; margin-bottom: 10px;">Upload Dokumen Hasil Scan (SDM)</p>
+        {% if sprin.file_surat %}
+            <div style="background:#ffffff; border:1px solid #D1FAE5; border-radius:8px; padding:12px; margin-bottom:12px;">
+                <strong>File sudah tersedia:</strong> <a href="{{ sprin.file_surat.url }}" target="_blank">Unduh PDF</a>
+            </div>
+        {% endif %}
+        <form method="POST" action="{% url 'sprin:upload_file_sprin' sprin.id_sprin %}" enctype="multipart/form-data" style="width: 100%;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="file" name="file_surat" class="input-field" accept=".pdf" required style="flex: 1; min-width: 200px;">
+                <button type="submit" class="btn btn-primary" style="min-width: 130px;">Unggah PDF</button>
+            </div>
+        </form>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
