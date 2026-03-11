@@ -1,0 +1,26 @@
+app = "siraga-fullstack"
+primary_region = "sin"
+
+[build]
+  # Using the default Paketo builder for Python is easy,
+  # or we can use our own Dockerfile
+  dockerfile = "Dockerfile"
+
+[deploy]
+  release_command = "python manage.py migrate && python manage.py seed_data"
+
+[env]
+  PORT = "8080"
+  ALLOWED_HOSTS = "*" 
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[statics]
+  guest_path = "/app/staticfiles"
+  url_prefix = "/static"
