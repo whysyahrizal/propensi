@@ -251,10 +251,20 @@
                 </div>
             </a>
             <div class="nav-menu">
-                <a href="{% url 'personel_list' %}" class="nav-item active">Personel</a>
+                <a href="{% url 'personel_list' %}" class="nav-item {% if active_nav == 'personel' %}active{% endif %}">Personel</a>
+                <a href="{% url 'sprin:all_sprin' %}" class="nav-item {% if active_nav == 'sprin' %}active{% endif %}">Sprin</a>
                 <!-- Future menus can go here -->
             </div>
             <div class="nav-user" style="display: flex; align-items: center; gap: 12px;">
+                <form method="get" action="{% url 'sprin:set_role' %}" style="display: flex; gap: 8px; align-items: center;">
+                    <select name="role" class="input-field" style="padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border);">
+                        <option value="Operator" {% if user_role == 'Operator' %}selected{% endif %}>Operator</option>
+                        <option value="SDM" {% if user_role == 'SDM' %}selected{% endif %}>SDM</option>
+                        <option value="Pimpinan" {% if user_role == 'Pimpinan' %}selected{% endif %}>Pimpinan</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 10px; min-width: 90px;">Pilih</button>
+                </form>
+                <div style="font-size:12px; color:var(--text-muted);">Role: {{ user_role }}</div>
                 <div style="text-align: right; line-height: 1.2;">
                     <div style="font-weight: 600; font-size: 14px;">Admin Portal</div>
                     <div style="font-size: 12px; color: var(--text-muted);">Sistem Informasi</div>
