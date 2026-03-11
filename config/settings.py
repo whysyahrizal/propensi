@@ -29,14 +29,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'personel',
-    # SIRAGA apps
+    # SIRAGA apps — Sprint 1 only
     'accounts',
     'sprin',
     'absensi',
-    'cuti',
-    'pengumuman',
-    'notifikasi',
     'dashboard',
 ]
 
@@ -63,7 +59,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'notifikasi.context_processors.notifikasi_count',
             ],
         },
     },

@@ -6,14 +6,7 @@ from .models import RekorAbsensi
 from sprin.models import Sprin
 
 
-@login_required
-def rekap_absensi(request):
-    role = request.user.role
-    if role == 'personel':
-        rekap = RekorAbsensi.objects.filter(personel=request.user).order_by('-tanggal')
-    else:
-        rekap = RekorAbsensi.objects.select_related('personel', 'sprin').order_by('-tanggal')
-    return render(request, 'absensi/rekap.html', {'rekap': rekap})
+
 
 
 @login_required
