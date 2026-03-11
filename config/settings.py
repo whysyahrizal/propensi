@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'pengumuman',
     'notifikasi',
     'dashboard',
+    'locations',
 ]
 
 MIDDLEWARE = [
