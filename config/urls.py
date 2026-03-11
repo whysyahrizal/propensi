@@ -7,6 +7,7 @@ urlpatterns = [
     path('', lambda request: redirect('/personel/')),
     path('personel/', include('personel.urls')),
     path('sprin/', include('sprin.urls')),
+    path('presensi/', include('presensi.urls')),
 ]
 
 if settings.DEBUG:
