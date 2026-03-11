@@ -1,14 +1,14 @@
+from django.contrib import admin
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path, include
-from django.shortcuts import redirect
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('', lambda request: redirect('/personel/')),
-    path('personel/', include('personel.urls')),
+    path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
+    path('dashboard/', include('dashboard.urls')),
     path('sprin/', include('sprin.urls')),
-    path('presensi/', include('presensi.urls')),
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('absensi/', include('absensi.urls')),
+    path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

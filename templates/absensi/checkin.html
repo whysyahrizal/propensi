@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Check-In — SIRAGA{% endblock %}
+{% block page_title %}Check-In Absensi{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 max-w-lg">
+  <div class="card overflow-hidden">
+    <div class="h-1 bg-green-500"></div>
+    <div class="px-8 py-7">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">Check-In Absensi</h1>
+          <p class="text-sm text-gray-500" id="jam_sekarang">Memuat waktu...</p>
+        </div>
+      </div>
+
+      {% if sudah_checkin %}
+      <div class="flex flex-col items-center gap-3 py-4 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center">
+          <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <p class="text-base font-bold text-gray-900">Anda sudah check-in hari ini</p>
+        <p class="text-sm text-gray-500">Pukul {{ absensi.waktu_masuk|time:"H:i" }} WIB</p>
+        {% if not absensi.waktu_keluar %}
+        <a href="{% url 'absensi:checkout' %}" class="mt-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors">Check-Out Sekarang</a>
+        {% else %}
+        <p class="text-sm text-green-600 font-semibold">Check-out: {{ absensi.waktu_keluar|time:"H:i" }} WIB ✓</p>
+        {% endif %}
+      </div>
+      {% else %}
+      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-5">
+        {% csrf_token %}
+        <div id="lokasi_info" class="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3.5">
+          <p class="text-xs font-semibold text-blue-700">📍 Mendeteksi lokasi GPS...</p>
+          <input type="hidden" name="latitude" id="lat"/>
+          <input type="hidden" name="longitude" id="lon"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Foto Selfie</label>
+          <input name="selfie_masuk" type="file" accept="image/*" capture="user" class="text-sm text-gray-600"/>
+          <p class="text-[11px] text-gray-400">Ambil foto untuk verifikasi kehadiran.</p>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Catatan (opsional)</label>
+          <input name="catatan" type="text" placeholder="Keterangan tambahan..." class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"/>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition-colors shadow-sm">
+          ✓ Konfirmasi Check-In
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  // Update jam
+  function updateJam() {
+    const el = document.getElementById('jam_sekarang');
+    if (el) el.textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' WIB';
+  }
+  setInterval(updateJam, 1000); updateJam();
+
+  // Geolocation
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        document.getElementById('lat').value = pos.coords.latitude;
+        document.getElementById('lon').value = pos.coords.longitude;
+        document.getElementById('lokasi_info').innerHTML = '<p class="text-xs font-semibold text-green-700">📍 Lokasi terdeteksi: ' + pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5) + '</p>';
+      },
+      () => {
+        document.getElementById('lokasi_info').innerHTML = '<p class="text-xs text-amber-700">⚠ Gagal mendeteksi lokasi. Aktifkan GPS dan izinkan akses lokasi.</p>';
+      }
+    );
+  }
+</script>
+{% endblock %}
