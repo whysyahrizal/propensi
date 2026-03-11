@@ -1,0 +1,339 @@
+{% extends "personel/base.html" %}
+
+{% block content %}
+<style>
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .filter-section {
+        background-color: var(--surface);
+        padding: 20px;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 24px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+    .form-group label {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-main);
+    }
+    .input-field {
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: var(--background);
+        color: var(--text-main);
+    }
+    .input-field:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(26, 91, 146, 0.1);
+        background-color: var(--surface);
+    }
+    .btn-search {
+        padding: 10px 24px;
+        height: 44px;
+    }
+    
+    /* Table Styling */
+    .table-container {
+        overflow-x: auto;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        background: var(--surface);
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .table th {
+        background-color: #F8FAFC;
+        padding: 16px 20px;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border);
+    }
+    .table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-main);
+        font-size: 15px;
+    }
+    .table tbody tr {
+        transition: background-color 0.15s;
+    }
+    .table tbody tr:hover {
+        background-color: #F8FAFC;
+    }
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+        background-color: #E2E8F0;
+        color: var(--text-muted);
+    }
+    .badge-primary {
+        background-color: #DBEAFE;
+        color: #1E40AF;
+    }
+    .action-links {
+        display: flex;
+        gap: 8px;
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-md);
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .action-btn:hover {
+        background-color: var(--background);
+        color: var(--primary);
+        border-color: var(--border);
+    }
+    .action-btn.delete:hover {
+        color: var(--danger);
+        background-color: #FEF2F2;
+        border-color: #FECACA;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+    .empty-state i {
+        font-size: 48px;
+        color: #CBD5E1;
+        margin-bottom: 16px;
+    }
+    .empty-state h3 {
+        margin-bottom: 8px;
+        color: var(--text-main);
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background-color: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+    .page-info {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+    .page-numbers {
+        display: flex;
+        gap: 4px;
+    }
+    .page-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-md);
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: 1px solid var(--border);
+    }
+    .page-link:hover {
+        background-color: var(--background);
+    }
+    .page-link.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Metrics Block */
+    .metrics {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .metric-card {
+        flex: 1;
+        background: white;
+        padding: 24px;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--primary);
+        display: flex;
+        flex-direction: column;
+    }
+    .metric-title {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+</style>
+
+<div class="list-header">
+    <div>
+        <h1 class="page-title">Profil Personel</h1>
+        <p class="page-subtitle">Kelola dan lihat informasi personel Korlantas Polri.</p>
+    </div>
+    <a href="{% url 'personel_create' %}" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Tambah Personel
+    </a>
+</div>
+
+<div class="metrics">
+    <div class="metric-card">
+        <span class="metric-title">Total Personel Aktif</span>
+        <span class="metric-value">{{ total_data }}</span>
+    </div>
+</div>
+
+<form method="get" class="filter-section">
+    <div class="form-group">
+        <label for="search">Cari Personel</label>
+        <div style="position: relative;">
+            <i class="fa-solid fa-search" style="position: absolute; left: 14px; top: 14px; color: var(--text-muted);"></i>
+            <input type="text" id="search" name="q" value="{{ q }}" placeholder="Ketik nama atau NIP..." class="input-field" style="padding-left: 40px; width: 100%;">
+        </div>
+    </div>
+    <div class="form-group" style="max-width: 300px;">
+        <label for="unit">Pilih Satker / Unit</label>
+        <select name="unit" id="unit" class="input-field">
+            <option value="">-- Semua Unit --</option>
+            {% for unit in units %}
+                <option value="{{ unit.id }}" {% if selected_unit == unit.id|stringformat:"s" %}selected{% endif %}>
+                    {{ unit.nama }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary btn-search">
+        Terapkan Filter
+    </button>
+    {% if q or selected_unit %}
+    <a href="{% url 'personel_list' %}" class="btn btn-secondary btn-search" style="padding: 10px 16px;">
+        Reset
+    </a>
+    {% endif %}
+</form>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama Personel</th>
+                <th>NIP</th>
+                <th>Unit / Satker</th>
+                <th>Status</th>
+                <th style="text-align: right;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for personel in personels %}
+            <tr>
+                <td style="color: var(--text-muted); font-family: monospace;">{{ personel.id|stringformat:"05d" }}</td>
+                <td style="font-weight: 500; color: var(--primary-dark);">{{ personel.nama }}</td>
+                <td><span style="font-family: monospace; font-size: 14px; background: var(--background); padding: 2px 6px; border-radius: 4px;">{{ personel.nip }}</span></td>
+                <td>
+                    <span class="badge badge-primary"><i class="fa-solid fa-building" style="margin-right: 4px;"></i> {{ personel.unit.nama }}</span>
+                </td>
+                <td>
+                    <span class="badge" style="background-color: #ECFDF5; color: #065F46;">Aktif</span>
+                </td>
+                <td>
+                    <div class="action-links" style="justify-content: flex-end;">
+                        <a href="{% url 'personel_detail' personel.pk %}" class="action-btn" title="Lihat Detail">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a href="{% url 'personel_update' personel.pk %}" class="action-btn" title="Edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-users-slash"></i>
+                        <h3>Tidak Ada Data Ditemukan</h3>
+                        <p>Coba ubah kriteria pencarian atau tambahkan personel baru.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_paginated %}
+    <div class="pagination">
+        <div class="page-info">
+            Menampilkan {{ page_obj.start_index }}-{{ page_obj.end_index }} dari {{ paginator.count }} data
+        </div>
+        <div class="page-numbers">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}" class="page-link"><i class="fa-solid fa-angles-left"></i></a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}" class="page-link"><i class="fa-solid fa-angle-left"></i></a>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <span class="page-link active">{{ i }}</span>
+                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                    <a href="?page={{ i }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}" class="page-link">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}" class="page-link"><i class="fa-solid fa-angle-right"></i></a>
+                <a href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}" class="page-link"><i class="fa-solid fa-angles-right"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
