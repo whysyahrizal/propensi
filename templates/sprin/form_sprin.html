@@ -1,62 +1,189 @@
 {% extends 'base.html' %}
-{% block title %}{% if sprin %}Edit{% else %}Buat{% endif %} Sprin — SIRAGA{% endblock %}
-{% block page_title %}{% if sprin %}Edit Sprin{% else %}Buat Sprin Baru{% endif %}{% endblock %}
+{% block title %}{% if action == 'edit' %}Edit Sprin{% else %}Buat Sprin Baru{% endif %} — SIRAGA{% endblock %}
+{% block page_title %}{% if action == 'edit' %}Edit Sprin{% else %}Buat Sprin Baru{% endif %}{% endblock %}
+
 {% block content %}
-<div class="flex flex-col gap-6 max-w-2xl">
-  <a href="{% url 'sprin:daftar' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+<div class="flex flex-col gap-6 max-w-3xl">
+  <a href="{% if sprin %}{% url 'sprin:detail' sprin.pk %}{% else %}{% url 'sprin:daftar' %}{% endif %}"
+     class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-    Kembali
+    {% if action == 'edit' %}Kembali ke Detail{% else %}Kembali ke Daftar{% endif %}
   </a>
-  <div class="card overflow-hidden">
-    <div class="h-1 {% if sprin %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
+
+  <div class="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+    <div class="h-1 w-full {% if action == 'edit' %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
     <div class="px-8 py-7">
-      <h1 class="text-lg font-bold text-gray-900 mb-6">{% if sprin %}Edit Sprin: {{ sprin.nomor }}{% else %}Buat Surat Perintah Baru{% endif %}</h1>
-      <form method="POST" class="flex flex-col gap-5">
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 {% if action == 'edit' %}bg-amber-50{% else %}bg-[#1a3a6b]/10{% endif %}">
+          {% if action == 'edit' %}
+          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          {% else %}
+          <svg class="w-6 h-6 text-[#1a3a6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          {% endif %}
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">
+            {% if action == 'edit' %}Edit Sprin: <span class="font-mono text-base text-gray-600">{{ sprin.nomor }}</span>{% else %}Buat Surat Perintah Baru{% endif %}
+          </h1>
+          <p class="text-sm text-gray-500 mt-0.5">{% if action == 'edit' %}Perbarui data sprin sebelum diajukan{% else %}Sprin akan tersimpan dengan status Draft{% endif %}</p>
+        </div>
+      </div>
+
+      {# PBI-021: form dengan semua field mandatory #}
+      <form method="POST" enctype="multipart/form-data" id="sprin-form" novalidate class="flex flex-col gap-6">
         {% csrf_token %}
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nomor Sprin <span class="text-red-500">*</span></label>
-            <input name="nomor" type="text" required value="{{ sprin.nomor|default:'' }}" placeholder="cth. SP/123/III/2026/Korlantas" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Tanggal <span class="text-red-500">*</span></label>
-            <input name="tanggal" type="date" required value="{{ sprin.tanggal|date:'Y-m-d'|default:'' }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
-          </div>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Perihal <span class="text-red-500">*</span></label>
-          <input name="perihal" type="text" required value="{{ sprin.perihal|default:'' }}" placeholder="Ringkasan isi perintah" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Dasar</label>
-          <input name="dasar" type="text" value="{{ sprin.dasar|default:'' }}" placeholder="Dasar hukum / peraturan" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Isi Perintah</label>
-          <textarea name="isi_perintah" rows="4" placeholder="Detail tugas dan perintah yang diberikan..." class="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">{{ sprin.isi_perintah|default:'' }}</textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Mulai</label>
-            <input name="waktu_mulai" type="date" value="{{ sprin.waktu_mulai|date:'Y-m-d'|default:'' }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Selesai</label>
-            <input name="waktu_selesai" type="date" value="{{ sprin.waktu_selesai|date:'Y-m-d'|default:'' }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+
+        {# Identitas Sprin #}
+        <div>
+          <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Identitas Sprin</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="id_nomor" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nomor Sprin <span class="text-red-500">*</span></label>
+              <input id="id_nomor" name="nomor" type="text" required
+                     value="{% if form_data %}{{ form_data.nomor }}{% elif sprin %}{{ sprin.nomor }}{% endif %}"
+                     placeholder="cth. Sprin/123/III/2026/Korlantas"
+                     class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
+              <p class="text-[11px] text-gray-400">Nomor harus unik. Format baku: Sprin/xxx/bulan/tahun/satker</p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="id_tanggal" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Tanggal <span class="text-red-500">*</span></label>
+              <input id="id_tanggal" name="tanggal" type="date" required
+                     value="{% if form_data %}{{ form_data.tanggal }}{% elif sprin %}{{ sprin.tanggal|date:'Y-m-d' }}{% endif %}"
+                     class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
+            </div>
           </div>
         </div>
+
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pejabat Penandatangan</label>
-          <input name="pejabat_penandatangan" type="text" value="{{ sprin.pejabat_penandatangan|default:'' }}" placeholder="Nama dan pangkat pejabat" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          <label for="id_perihal" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Perihal / Nama Operasi <span class="text-red-500">*</span></label>
+          <input id="id_perihal" name="perihal" type="text" required
+                 value="{% if form_data %}{{ form_data.perihal }}{% elif sprin %}{{ sprin.perihal }}{% endif %}"
+                 placeholder="cth. Ops Zebra 2026, Pengamanan Hari Raya"
+                 class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
         </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="id_lokasi" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Lokasi Penugasan</label>
+          <input id="id_lokasi" name="lokasi_penugasan" type="text"
+                 value="{% if form_data %}{{ form_data.lokasi_penugasan }}{% elif sprin %}{{ sprin.lokasi_penugasan }}{% endif %}"
+                 placeholder="cth. Jl. Gatot Subroto, Jakarta Selatan"
+                 class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
+        </div>
+
+        {# Isi & Dasar #}
+        <div class="grid grid-cols-1 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="id_dasar" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Dasar</label>
+            <input id="id_dasar" name="dasar" type="text"
+                   value="{% if form_data %}{{ form_data.dasar }}{% elif sprin %}{{ sprin.dasar }}{% endif %}"
+                   placeholder="Dasar hukum / peraturan / perintah atasan"
+                   class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="id_isi" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Isi Perintah</label>
+            <textarea id="id_isi" name="isi_perintah" rows="4"
+                      placeholder="Detail tugas, target, dan instruksi operasi..."
+                      class="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all">{% if form_data %}{{ form_data.isi_perintah }}{% elif sprin %}{{ sprin.isi_perintah }}{% endif %}</textarea>
+          </div>
+        </div>
+
+        {# Periode #}
+        <div>
+          <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Periode Penugasan</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Waktu Mulai</label>
+              <input name="waktu_mulai" type="datetime-local"
+                     value="{% if sprin and sprin.waktu_mulai %}{{ sprin.waktu_mulai|date:'Y-m-d\TH:i' }}{% endif %}"
+                     class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Waktu Selesai</label>
+              <input name="waktu_selesai" type="datetime-local"
+                     value="{% if sprin and sprin.waktu_selesai %}{{ sprin.waktu_selesai|date:'Y-m-d\TH:i' }}{% endif %}"
+                     class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] transition-all"/>
+            </div>
+          </div>
+        </div>
+
+        {# File Lampiran (PBI-021) #}
+        <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5">
+          <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">File Lampiran</p>
+          {% if sprin and sprin.file_sprin %}
+          <div class="flex items-center gap-2 mb-3 p-2.5 rounded-lg bg-white border border-gray-200">
+            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+            <a href="{{ sprin.file_sprin.url }}" target="_blank" class="text-xs font-semibold text-[#1a3a6b] hover:underline flex-1 truncate">{{ sprin.file_sprin.name }}</a>
+          </div>
+          {% endif %}
+          <label class="flex flex-col items-center gap-2 cursor-pointer" for="id_file">
+            <div id="file-upload-state" class="flex flex-col items-center gap-1.5">
+              <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <p class="text-sm font-semibold text-gray-600">Klik untuk upload file</p>
+              <p class="text-xs text-gray-400">PDF, JPG, atau PNG — maks. 10MB</p>
+            </div>
+            <input id="id_file" name="file_sprin" type="file" accept=".pdf,.jpg,.jpeg,.png" class="sr-only" onchange="updateFileLabel(this)"/>
+          </label>
+          <div id="file-preview" class="hidden mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-blue-200">
+            <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span id="file-name" class="text-xs font-semibold text-[#1a3a6b] truncate flex-1"></span>
+            <button type="button" onclick="clearFile()" class="text-gray-400 hover:text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        {# Footer actions #}
         <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <a href="{% url 'sprin:daftar' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
-          <button type="submit" class="px-5 py-2.5 rounded-xl {% if sprin %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
-            {% if sprin %}Simpan Perubahan{% else %}Buat Sprin{% endif %}
+          <a href="{% if sprin %}{% url 'sprin:detail' sprin.pk %}{% else %}{% url 'sprin:daftar' %}{% endif %}"
+             class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Batal</a>
+          <button type="submit"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl {% if action == 'edit' %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {% if action == 'edit' %}Simpan Perubahan{% else %}Buat Sprin{% endif %}
           </button>
         </div>
       </form>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  {# PBI-021: Validasi input sebelum submit #}
+  document.getElementById('sprin-form').addEventListener('submit', function(e) {
+    let valid = true;
+    ['id_nomor','id_tanggal','id_perihal'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        el.classList.add('border-red-500','ring-2','ring-red-200');
+        valid = false;
+      } else {
+        el.classList.remove('border-red-500','ring-2','ring-red-200');
+      }
+    });
+    if (!valid) {
+      e.preventDefault();
+      document.querySelector('.border-red-500')?.focus();
+    }
+  });
+
+  function updateFileLabel(input) {
+    const preview = document.getElementById('file-preview');
+    const nameEl = document.getElementById('file-name');
+    const uploadState = document.getElementById('file-upload-state');
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      nameEl.textContent = file.name + ' (' + (file.size/1024/1024).toFixed(2) + ' MB)';
+      preview.classList.remove('hidden');
+      uploadState.style.opacity = '0.5';
+    }
+  }
+
+  function clearFile() {
+    document.getElementById('id_file').value = '';
+    document.getElementById('file-preview').classList.add('hidden');
+    document.getElementById('file-upload-state').style.opacity = '1';
+  }
+</script>
 {% endblock %}

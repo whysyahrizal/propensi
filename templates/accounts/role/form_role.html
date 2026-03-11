@@ -68,7 +68,7 @@
               required
               maxlength="100"
               placeholder="cth. Operator, Pimpinan, Kepala Satker..."
-              value="{{ form_data.nama|default:role.nama|default:'' }}"
+              value="{{ form_data.nama|default:'' }}{% if role and not form_data.nama %}{{ role.nama }}{% endif %}"
               class="h-11 w-full px-4 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
             />
             <p class="text-[11px] text-gray-400">Nama role harus unik. Gunakan nama yang deskriptif.</p>
@@ -85,7 +85,7 @@
               rows="4"
               placeholder="Jelaskan cakupan dan tanggung jawab role ini..."
               class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
-            >{{ form_data.deskripsi|default:role.deskripsi|default:'' }}</textarea>
+            >{% if form_data.deskripsi %}{{ form_data.deskripsi }}{% elif role %}{{ role.deskripsi }}{% endif %}</textarea>
           </div>
 
           {# Actions — PBI-013: notifikasi sukses/gagal + PBI-014: notifikasi sukses/gagal #}
