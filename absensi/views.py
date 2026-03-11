@@ -8,6 +8,7 @@ from sprin.models import Sprin
 
 
 
+
 @login_required
 def checkin_view(request):
     today = timezone.localdate()

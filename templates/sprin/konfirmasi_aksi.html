@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}{% if aksi == 'setujui' %}Setujui{% else %}Tolak{% endif %} Sprin — SIRAGA{% endblock %}
+{% block page_title %}Konfirmasi {% if aksi == 'setujui' %}Persetujuan{% else %}Penolakan{% endif %} Sprin{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 max-w-lg">
+  <a href="{% url 'sprin:detail' sprin.pk %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali ke Detail Sprin
+  </a>
+
+  <div class="rounded-2xl bg-white border {% if aksi == 'setujui' %}border-green-200{% else %}border-red-200{% endif %} shadow-sm overflow-hidden">
+    <div class="h-1 {% if aksi == 'setujui' %}bg-green-500{% else %}bg-red-500{% endif %}"></div>
+    <div class="px-8 py-7">
+
+      <div class="flex items-start gap-4 mb-6">
+        <div class="w-12 h-12 rounded-2xl {% if aksi == 'setujui' %}bg-green-50{% else %}bg-red-50{% endif %} flex items-center justify-center shrink-0">
+          {% if aksi == 'setujui' %}
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {% else %}
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {% endif %}
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">
+            {% if aksi == 'setujui' %}Setujui Sprin Ini?{% else %}Tolak Sprin Ini?{% endif %}
+          </h1>
+          <p class="text-sm {% if aksi == 'setujui' %}text-green-600{% else %}text-red-600{% endif %} font-semibold mt-0.5">
+            {% if aksi == 'setujui' %}Status akan berubah menjadi "Disetujui"{% else %}Status akan berubah menjadi "Ditolak"{% endif %}
+          </p>
+        </div>
+      </div>
+
+      {# Ringkasan sprin #}
+      <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 mb-6">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Nomor Sprin</p>
+            <p class="text-xs font-mono font-bold text-gray-900">{{ sprin.nomor }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Perihal</p>
+            <p class="text-sm font-semibold text-gray-900 truncate">{{ sprin.perihal }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Dibuat Oleh</p>
+            <p class="text-sm text-gray-700">{{ sprin.dibuat_oleh.nama_lengkap|default:"—" }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Tanggal</p>
+            <p class="text-sm text-gray-700">{{ sprin.tanggal|date:"d M Y" }}</p>
+          </div>
+        </div>
+      </div>
+
+      {# PBI-028: Form konfirmasi #}
+      <form method="POST" class="flex flex-col gap-5">
+        {% csrf_token %}
+        <input type="hidden" name="aksi" value="{{ aksi }}"/>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="id_catatan" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+            Catatan {% if aksi == 'tolak' %}<span class="text-red-500">*</span> (wajib diisi jika menolak){% endif %}
+          </label>
+          <textarea id="id_catatan" name="catatan" rows="3"
+                    {% if aksi == 'tolak' %}required{% endif %}
+                    placeholder="{% if aksi == 'setujui' %}Catatan opsional untuk operator...{% else %}Jelaskan alasan penolakan sprin ini...{% endif %}"
+                    class="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 {% if aksi == 'setujui' %}focus:ring-green-400{% else %}focus:ring-red-400{% endif %} transition-all"></textarea>
+          {% if aksi == 'tolak' %}
+          <p class="text-[11px] text-red-500">Catatan wajib diisi saat menolak sprin.</p>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <a href="{% url 'sprin:detail' sprin.pk %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Batal</a>
+          <button type="submit"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl {% if aksi == 'setujui' %}bg-green-600 hover:bg-green-700{% else %}bg-red-600 hover:bg-red-700{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
+            {% if aksi == 'setujui' %}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Konfirmasi Setujui
+            {% else %}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            Konfirmasi Tolak
+            {% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

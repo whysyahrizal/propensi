@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # SIRAGA apps
+    # SIRAGA apps — Sprint 1 only
     'accounts',
     'sprin',
     'absensi',

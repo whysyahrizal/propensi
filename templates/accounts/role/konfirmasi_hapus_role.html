@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Hapus Role {{ role.nama }} — SIRAGA{% endblock %}
+{% block page_title %}Konfirmasi Hapus Role{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 max-w-lg">
+
+  {# Back nav #}
+  <div>
+    <a href="{% url 'accounts:detail_role' role.pk %}"
+       class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Kembali ke Detail Role
+    </a>
+  </div>
+
+  {# Warning Card #}
+  <div class="rounded-2xl bg-white border border-red-200 shadow-sm overflow-hidden">
+    <div class="h-1 w-full bg-red-500"></div>
+    <div class="px-8 py-7">
+
+      <div class="flex items-start gap-4 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">Hapus Role "{{ role.nama }}"?</h1>
+          <p class="text-sm text-gray-500 mt-1">Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+      </div>
+
+      {# Info role #}
+      <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 mb-6">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Nama Role</p>
+            <p class="text-sm font-bold text-gray-900">{{ role.nama }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Pengguna Aktif</p>
+            <p class="text-sm font-bold {% if jumlah_pengguna > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
+              {{ jumlah_pengguna }} personel
+            </p>
+          </div>
+          {% if role.deskripsi %}
+          <div class="col-span-2">
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Deskripsi</p>
+            <p class="text-sm text-gray-600">{{ role.deskripsi }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# PBI-015: Tampilkan peringatan jika masih dipakai #}
+      {% if jumlah_pengguna > 0 %}
+      <div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-red-50 border border-red-200 mb-6">
+        <svg class="w-4 h-4 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-red-700">Role tidak dapat dihapus</p>
+          <p class="text-xs text-red-600 mt-0.5">
+            Role ini masih digunakan oleh <strong>{{ jumlah_pengguna }} pengguna aktif</strong>.
+            Ubah role pengguna tersebut terlebih dahulu sebelum menghapus role ini.
+          </p>
+        </div>
+      </div>
+      {% else %}
+      <div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-amber-50 border border-amber-200 mb-6">
+        <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-xs text-amber-700">
+          Role ini tidak sedang digunakan oleh pengguna manapun dan aman untuk dihapus.
+        </p>
+      </div>
+      {% endif %}
+
+      {# Action Buttons — PBI-015: aksi hapus dengan konfirmasi #}
+      <div class="flex items-center justify-end gap-3">
+        <a href="{% url 'accounts:detail_role' role.pk %}"
+           class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+          Batal
+        </a>
+        {% if jumlah_pengguna == 0 %}
+        <form method="POST" action="{% url 'accounts:hapus_role' role.pk %}">
+          {% csrf_token %}
+          <button type="submit"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Ya, Hapus Role
+          </button>
+        </form>
+        {% else %}
+        <button disabled
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-200 text-gray-400 text-sm font-bold cursor-not-allowed">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+          </svg>
+          Tidak Dapat Dihapus
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
