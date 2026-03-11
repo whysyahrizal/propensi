@@ -6,6 +6,7 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('personel/', include('personel.urls')),
     path('accounts/', include('accounts.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('sprin/', include('sprin.urls')),
@@ -15,4 +16,3 @@ urlpatterns = [
     path('notifikasi/', include('notifikasi.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
