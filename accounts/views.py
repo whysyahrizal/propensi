@@ -35,6 +35,45 @@ def logout_view(request):
     return redirect('accounts:login')
 
 
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard:index')
+
+    if request.method == 'POST':
+        nrp = request.POST.get('nrp', '').strip()
+        nama = request.POST.get('nama_lengkap', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        satker_id = request.POST.get('satker')
+        pangkat = request.POST.get('pangkat', '')
+
+        if not nrp or not nama:
+            messages.error(request, 'NRP dan Nama Lengkap wajib diisi.')
+        elif Personel.objects.filter(nrp=nrp).exists():
+            messages.error(request, 'NRP sudah terdaftar di sistem.')
+        elif password1 != password2:
+            messages.error(request, 'Konfirmasi password tidak cocok.')
+        elif len(password1) < 8:
+            messages.error(request, 'Password minimal 8 karakter.')
+        else:
+            satker = Satker.objects.filter(pk=satker_id).first() if satker_id else None
+            user = Personel.objects.create_user(
+                nrp=nrp,
+                password=password1,
+                nama_lengkap=nama,
+                pangkat=pangkat,
+                satker=satker,
+            )
+            login(request, user)
+            messages.success(request, f'Selamat datang, {user.nama_lengkap}!')
+            return redirect('dashboard:index')
+
+    satker_list = Satker.objects.all()
+    pangkat_choices = Personel.PANGKAT_CHOICES
+    return render(request, 'accounts/register.html', {
+        'satker_list': satker_list,
+        'pangkat_choices': pangkat_choices,
+    })
 
 
 
