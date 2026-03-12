@@ -11,5 +11,10 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('sprin/', include('sprin.urls')),
     path('absensi/', include('absensi.urls')),
+    path('presensi/', include('presensi.urls')),
+    path('cuti/', include('cuti.urls')),
+    path('pengumuman/', include('pengumuman.urls')),
+    path('notifikasi/', include('notifikasi.urls')),
+    path('locations/', include('locations.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
