@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Peta Wilayah Penugasan — SIRAGA{% endblock %}
+{% block page_title %}Peta Wilayah{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-[#1a3a6b]/10">
+        <svg class="w-5 h-5 text-[#1a3a6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">Peta Wilayah Penugasan</h1>
+        <p class="text-sm text-gray-500">{{ total }} lokasi aktif ditampilkan</p>
+      </div>
+    </div>
+    <a href="{% url 'locations:daftar' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Kembali ke Daftar
+    </a>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div id="fullmap" class="w-full" style="height:calc(100vh - 16rem);min-height:400px;"></div>
+  </div>
+</div>
+
+{{ locations_data|json_script:"locations-data" }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var map = L.map('fullmap').setView([-2.5, 118.0], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
+  }).addTo(map);
+
+  var locations = JSON.parse(document.getElementById('locations-data').textContent);
+  var group = L.featureGroup();
+
+  locations.forEach(function(loc) {
+    L.marker([loc.lat, loc.lng])
+      .bindTooltip(
+        '<strong>' + loc.name + '</strong><br>Tipe: ' + loc.type + '<br>Radius: ' + loc.radius + 'm',
+        { direction: 'top', offset: [0, -10] }
+      )
+      .addTo(group);
+
+    L.circle([loc.lat, loc.lng], {
+      radius: loc.radius,
+      color: '#1a3a6b',
+      fillColor: '#1a3a6b',
+      fillOpacity: 0.1,
+      weight: 2,
+    }).addTo(group);
+  });
+
+  group.addTo(map);
+
+  if (locations.length > 0) {
+    map.fitBounds(group.getBounds().pad(0.15));
+  }
+
+  setTimeout(function() { map.invalidateSize(); }, 200);
+});
+</script>
+{% endblock %}

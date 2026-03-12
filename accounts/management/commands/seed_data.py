@@ -10,6 +10,7 @@ Jalankan dengan:
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from accounts.models import Personel, Satker, Role
+from locations.models import Location
 
 
 SATKER_DATA = [
@@ -87,6 +88,85 @@ PERSONEL_DATA = [
 ]
 
 
+LOCATION_DATA = [
+    # Pos-pos pengamanan lalu lintas
+    {
+        "name": "Pos Lantas Cikampek KM 42",
+        "type": "pos",
+        "latitude": -6.4200000,
+        "longitude": 107.4530000,
+        "radius": 150,
+    },
+    {
+        "name": "Pos Lantas Cawang",
+        "type": "pos",
+        "latitude": -6.2475000,
+        "longitude": 106.8705000,
+        "radius": 100,
+    },
+    {
+        "name": "Pos Lantas Tomang",
+        "type": "pos",
+        "latitude": -6.1802000,
+        "longitude": 106.7975000,
+        "radius": 100,
+    },
+    {
+        "name": "Pos Lantas Gadog Puncak",
+        "type": "pos",
+        "latitude": -6.6670000,
+        "longitude": 106.8490000,
+        "radius": 200,
+    },
+    {
+        "name": "Pos Lantas Brebes Timur",
+        "type": "pos",
+        "latitude": -6.8713000,
+        "longitude": 109.0380000,
+        "radius": 150,
+    },
+    # Mako (Markas Komando)
+    {
+        "name": "Mako Korlantas Polri",
+        "type": "mako",
+        "latitude": -6.1862000,
+        "longitude": 106.8230000,
+        "radius": 250,
+    },
+    {
+        "name": "Mako NTMC Korlantas",
+        "type": "mako",
+        "latitude": -6.1870000,
+        "longitude": 106.8240000,
+        "radius": 200,
+    },
+    {
+        "name": "Mako Ditlantas Polda Metro Jaya",
+        "type": "mako",
+        "latitude": -6.2115000,
+        "longitude": 106.8450000,
+        "radius": 200,
+    },
+    # Pos non-aktif (untuk testing filter)
+    {
+        "name": "Pos Lantas Cikarang Barat (Nonaktif)",
+        "type": "pos",
+        "latitude": -6.3100000,
+        "longitude": 107.1480000,
+        "radius": 100,
+        "is_active": False,
+    },
+    {
+        "name": "Pos Lantas Karawaci (Nonaktif)",
+        "type": "pos",
+        "latitude": -6.2570000,
+        "longitude": 106.6190000,
+        "radius": 100,
+        "is_active": False,
+    },
+]
+
+
 class Command(BaseCommand):
     help = 'Seed database dengan data dummy untuk testing (akun per role, satker, role object)'
 
@@ -103,6 +183,7 @@ class Command(BaseCommand):
             Personel.objects.all().delete()
             Satker.objects.all().delete()
             Role.objects.all().delete()
+            Location.objects.all().delete()
             self.stdout.write('   Data dihapus.\n')
 
         # 1. Buat Satker
@@ -161,6 +242,23 @@ class Command(BaseCommand):
                 f'   [{self.style.SUCCESS("baru")}] '
                 f'{personel.nrp} — {personel.nama_lengkap} ({personel.get_role_display()})'
             )
+
+        # 4. Buat Location (Wilayah Penugasan)
+        self.stdout.write(self.style.HTTP_INFO('\n📍 Menyiapkan Wilayah Penugasan...'))
+        for loc in LOCATION_DATA:
+            obj, created = Location.objects.get_or_create(
+                name=loc['name'],
+                defaults={
+                    'type': loc['type'],
+                    'latitude': loc['latitude'],
+                    'longitude': loc['longitude'],
+                    'radius': loc['radius'],
+                    'is_active': loc.get('is_active', True),
+                },
+            )
+            status = self.style.SUCCESS('baru') if created else 'sudah ada'
+            aktif = 'aktif' if obj.is_active else 'nonaktif'
+            self.stdout.write(f'   [{status}] {obj.name} ({obj.get_type_display()}, {aktif})')
 
         # Summary
         self.stdout.write('\n' + '─' * 55)
