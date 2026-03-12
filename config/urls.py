@@ -11,5 +11,6 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('sprin/', include('sprin.urls')),
     path('absensi/', include('absensi.urls')),
+    path('presensi/', include('presensi.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

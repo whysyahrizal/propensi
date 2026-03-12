@@ -36,6 +36,7 @@ class PersonelListView(ListView):
         context['q'] = self.request.GET.get('q', '').strip()
         context['selected_unit'] = self.request.GET.get('unit', '').strip()
         context['total_data'] = self.get_queryset().count()
+        context['active_nav'] = 'personel'
         return context
 
 
@@ -46,6 +47,11 @@ class PersonelDetailView(DetailView):
 
     def get_queryset(self):
         return Personel.objects.select_related('unit').filter(is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_nav'] = 'personel'
+        return context
 
 
 class PersonelCreateView(CreateView):
@@ -61,6 +67,11 @@ class PersonelCreateView(CreateView):
     def form_invalid(self, form):
         messages.error(self.request, 'Gagal menambahkan personel. Cek kembali input.')
         return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_nav'] = 'personel'
+        return context
 
 
 class PersonelUpdateView(UpdateView):

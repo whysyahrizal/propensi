@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
+    'presensi',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'sprin.context_processors.user_role',
             ],
         },
     },
@@ -81,7 +83,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get(
-            'DATABASE_URL', 
+            'DATABASE_URL',
             f"postgresql://{os.environ.get('POSTGRES_USER', 'siraga_user')}:{os.environ.get('POSTGRES_PASSWORD', 'siraga_password')}@{os.environ.get('POSTGRES_HOST', 'localhost')}:{os.environ.get('POSTGRES_PORT', '5432')}/{os.environ.get('POSTGRES_DB', 'siraga_db')}"
         ),
         conn_max_age=600
@@ -123,3 +125,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Presensi settings (kontrol radius / lokasi kantor)
+PRESENSI_OFFICE_LATITUDE = -6.200000
+PRESENSI_OFFICE_LONGITUDE = 106.816666
+PRESENSI_OFFICE_RADIUS_METER = 500  # 500m dari kantor
