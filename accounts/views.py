@@ -36,6 +36,9 @@ def logout_view(request):
 
 
 def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard:index')
+
     if request.method == 'POST':
         nrp = request.POST.get('nrp', '').strip()
         nama = request.POST.get('nama_lengkap', '').strip()
@@ -44,7 +47,9 @@ def register_view(request):
         satker_id = request.POST.get('satker')
         pangkat = request.POST.get('pangkat', '')
 
-        if Personel.objects.filter(nrp=nrp).exists():
+        if not nrp or not nama:
+            messages.error(request, 'NRP dan Nama Lengkap wajib diisi.')
+        elif Personel.objects.filter(nrp=nrp).exists():
             messages.error(request, 'NRP sudah terdaftar di sistem.')
         elif password1 != password2:
             messages.error(request, 'Konfirmasi password tidak cocok.')
@@ -69,6 +74,8 @@ def register_view(request):
         'satker_list': satker_list,
         'pangkat_choices': pangkat_choices,
     })
+
+
 
 
 @login_required

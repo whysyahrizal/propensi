@@ -1,84 +1,178 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
 from .models import Sprin, PersonelSprin
-from accounts.models import Personel
+from personel.models import Personel
 
 
-@login_required
-def daftar_sprin(request):
-    role = request.user.role
-    if role == 'personel':
-        # Personel hanya lihat sprin aktif miliknya
-        sprin_list = Sprin.objects.filter(
-            personel_list__personel=request.user
-        ).distinct().order_by('-tanggal')
-    else:
-        sprin_list = Sprin.objects.all().select_related('dibuat_oleh')
-    return render(request, 'sprin/daftar_sprin.html', {'sprin_list': sprin_list})
+def get_user_role(request):
+    role = request.session.get('user_role', 'Operator')
+    if role not in ['Operator', 'SDM', 'Pimpinan']:
+        role = 'Operator'
+    return role
 
 
-@login_required
+def create_sprin(request):
+    personel_all = Personel.objects.filter(is_active=True)
+
+    if request.method == 'POST':
+        # Simpan data utama
+        sprin = Sprin.objects.create(
+            operation_name=request.POST.get('operation_name'),
+            description=request.POST.get('description'),
+            location_name=request.POST.get('location_name'),
+            # latitude=request.POST.get('latitude'),
+            # longitude=request.POST.get('longitude'),
+            # radius_meter=request.POST.get('radius_meter', 100),
+            created_by_id=request.POST.get('created_by'),
+            approved_by_id=request.POST.get('approved_by'),
+            start_date=request.POST.get('start_date'),
+            end_date=request.POST.get('end_date'),
+        )
+
+        # Simpan list personel yang ditugaskan
+        personel_ids = request.POST.getlist('personel_ids[]')
+        for p_id in personel_ids:
+            if p_id: 
+                PersonelSprin.objects.create(sprin=sprin, personel_id=p_id)
+        
+        messages.success(request, "Sprin baru berhasil diterbitkan otomatis!")
+        return redirect('sprin:all_sprin')
+
+    return render(request, 'sprin/create_sprin.html', {'personel_all': personel_all})
+
+def all_sprin(request):
+    q = request.GET.get('q', '').strip()
+    status = request.GET.get('status', 'all')
+
+    list_sprin = Sprin.objects.all().order_by('-created_at')
+    if status == 'pending':
+        list_sprin = list_sprin.filter(status='Menunggu Persetujuan')
+    elif status == 'disetujui':
+        list_sprin = list_sprin.filter(status='Disetujui')
+
+    if q:
+        list_sprin = list_sprin.filter(
+            Q(operation_name__icontains=q) |
+            Q(description__icontains=q) |
+            Q(location_name__icontains=q)
+        )
+
+    return render(request, 'sprin/all_sprin.html', {
+        'list_sprin': list_sprin,
+        'page_type': status,
+        'q': q,
+        'status': status,
+        'active_nav': 'sprin'
+    })
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Sprin, PersonelSprin
+
+# 1. List Khusus Pimpinan (Hanya yang belum disetujui)
+def pimpinan_list(request):
+    q = request.GET.get('q', '').strip()
+    list_pending = Sprin.objects.filter(status='Menunggu Persetujuan').order_by('-created_at')
+    if q:
+        list_pending = list_pending.filter(
+            Q(operation_name__icontains=q) |
+            Q(description__icontains=q) |
+            Q(location_name__icontains=q)
+        )
+    return render(request, 'sprin/all_sprin.html', {
+        'list_sprin': list_pending,
+        'page_type': 'pending',
+        'q': q,
+        'status': 'pending',
+        'active_nav': 'sprin'
+    })
+
+# 2. Detail Sprin (Bisa dipakai Umum & Pimpinan)
 def detail_sprin(request, pk):
     sprin = get_object_or_404(Sprin, pk=pk)
-    personel_sprin = sprin.personel_list.select_related('personel').all()
+    personel_tugas = PersonelSprin.objects.filter(sprin=sprin)
+    role = get_user_role(request)
+
     return render(request, 'sprin/detail_sprin.html', {
         'sprin': sprin,
-        'personel_sprin': personel_sprin,
+        'personel_tugas': personel_tugas,
+        'user_role': role,
+        'active_nav': 'sprin'
     })
 
 
-@login_required
-def tambah_sprin(request):
-    if request.user.role not in ('operator', 'pimpinan', 'superadmin'):
-        messages.error(request, 'Anda tidak memiliki akses.')
-        return redirect('sprin:daftar')
+def aksi_sprin(request, pk):
+    sprin = get_object_or_404(Sprin, pk=pk)
+    role = get_user_role(request)
+    if role != 'Pimpinan':
+        messages.error(request, "Hanya user Pimpinan yang boleh melakukan aksi ini.")
+        return redirect('sprin:detail_sprin', pk=pk)
 
     if request.method == 'POST':
-        sprin = Sprin.objects.create(
-            nomor=request.POST['nomor'],
-            tanggal=request.POST['tanggal'],
-            perihal=request.POST['perihal'],
-            dasar=request.POST.get('dasar', ''),
-            isi_perintah=request.POST.get('isi_perintah', ''),
-            dibuat_oleh=request.user,
-            status='draft',
+        action = request.POST.get('action')
+        if action == 'setujui':
+            sprin.status = 'Disetujui'
+            sprin.rejection_notes = None
+            sprin.save()
+            messages.success(request, "Sprin disetujui. Admin SDM sekarang dapat mengunggah file.")
+            return redirect('sprin:detail_sprin', pk=pk)
+
+        if action == 'tolak':
+            reject_notes = request.POST.get('reject_notes', '').strip()
+            if not reject_notes:
+                messages.error(request, "Alasan penolakan wajib diisi.")
+                return redirect('sprin:detail_sprin', pk=pk)
+            sprin.status = 'Ditolak'
+            sprin.rejection_notes = reject_notes
+            sprin.file_surat = None
+            sprin.save()
+            messages.success(request, "Sprin ditolak dengan catatan.")
+            return redirect('sprin:detail_sprin', pk=pk)
+
+    return redirect('sprin:detail_sprin', pk=pk)
+
+
+def disetujui_list(request):
+    q = request.GET.get('q', '').strip()
+    list_sprin = Sprin.objects.filter(status='Disetujui').order_by('-created_at')
+    if q:
+        list_sprin = list_sprin.filter(
+            Q(operation_name__icontains=q) |
+            Q(description__icontains=q) |
+            Q(location_name__icontains=q)
         )
-        messages.success(request, f'Sprin {sprin.nomor} berhasil dibuat.')
-        return redirect('sprin:detail', pk=sprin.pk)
+    return render(request, 'sprin/all_sprin.html', {
+        'list_sprin': list_sprin,
+        'page_type': 'disetujui',
+        'q': q,
+        'status': 'disetujui',
+        'active_nav': 'sprin'
+    })
 
-    return render(request, 'sprin/form_sprin.html', {'action': 'tambah'})
+
+def set_role(request):
+    role = request.GET.get('role', 'Operator')
+    if role not in ['Operator', 'SDM', 'Pimpinan']:
+        role = 'Operator'
+    request.session['user_role'] = role
+    messages.success(request, f"Role sekarang: {role}")
+    return redirect(request.META.get('HTTP_REFERER', '/sprin/'))
 
 
-@login_required
-def edit_sprin(request, pk):
+def upload_file_sprin(request, pk):
     sprin = get_object_or_404(Sprin, pk=pk)
-    if sprin.status != 'draft':
-        messages.error(request, 'Sprin yang sudah diajukan tidak dapat diedit.')
-        return redirect('sprin:detail', pk=pk)
+    role = get_user_role(request)
+    if role != 'SDM':
+        messages.error(request, "Hanya user SDM yang boleh mengunggah file.")
+        return redirect('sprin:detail_sprin', pk=pk)
 
     if request.method == 'POST':
-        sprin.nomor = request.POST.get('nomor', sprin.nomor)
-        sprin.tanggal = request.POST.get('tanggal', sprin.tanggal)
-        sprin.perihal = request.POST.get('perihal', sprin.perihal)
-        sprin.dasar = request.POST.get('dasar', sprin.dasar)
-        sprin.isi_perintah = request.POST.get('isi_perintah', sprin.isi_perintah)
-        sprin.save()
-        messages.success(request, 'Sprin berhasil diperbarui.')
-        return redirect('sprin:detail', pk=pk)
-
-    return render(request, 'sprin/form_sprin.html', {'sprin': sprin, 'action': 'edit'})
-
-
-@login_required
-def hapus_sprin(request, pk):
-    sprin = get_object_or_404(Sprin, pk=pk)
-    if sprin.status != 'draft':
-        messages.error(request, 'Hanya Sprin draft yang bisa dihapus.')
-        return redirect('sprin:detail', pk=pk)
-    if request.method == 'POST':
-        nomor = sprin.nomor
-        sprin.delete()
-        messages.success(request, f'Sprin {nomor} berhasil dihapus.')
-        return redirect('sprin:daftar')
-    return render(request, 'sprin/konfirmasi_hapus.html', {'sprin': sprin})
+        if sprin.status != 'Disetujui':
+            messages.error(request, "Hanya sprin yang disetujui dapat mengunggah file.")
+        elif 'file_surat' not in request.FILES:
+            messages.error(request, "Tidak ada file yang dipilih untuk diunggah.")
+        else:
+            sprin.file_surat = request.FILES['file_surat']
+            sprin.save()
+            messages.success(request, "File PDF berhasil diunggah.")
+    return redirect('sprin:detail_sprin', pk=pk)
