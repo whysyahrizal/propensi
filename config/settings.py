@@ -44,10 +44,17 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
+<<<<<<< HEAD
     'manajemen_cuti',
     'locations',
     'presensi',
     # 'notifikasi',
+=======
+    'cuti',
+    'locations',
+    'presensi',
+    'notifikasi',
+>>>>>>> bc50de1 (fix conflict deploy lg)
     'pengumuman',
 ]
 
