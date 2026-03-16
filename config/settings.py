@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
+    'cuti'
 ]
 
 MIDDLEWARE = [
