@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}{% if location %}Edit{% else %}Tambah{% endif %} Lokasi — SIRAGA{% endblock %}
+{% block page_title %}{% if location %}Edit Lokasi{% else %}Tambah Lokasi Baru{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 max-w-4xl">
+  <a href="{% url 'locations:daftar' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali
+  </a>
+
+  {% if location and sprin_linked %}
+  <div class="px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium flex items-center gap-2">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+    Lokasi ini terkait dengan Sprin yang sedang aktif. Perubahan dapat memengaruhi penugasan berjalan.
+  </div>
+  {% endif %}
+
+  <div class="card overflow-hidden">
+    <div class="h-1 {% if location %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
+    <div class="px-8 py-7">
+      <h1 class="text-lg font-bold text-gray-900 mb-6">{% if location %}Edit Lokasi: {{ location.name }}{% else %}Tambah Lokasi Baru{% endif %}</h1>
+
+      {% if form.non_field_errors %}
+      <div class="mb-4 px-4 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST" class="flex flex-col gap-5">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="id_name" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lokasi <span class="text-red-500">*</span></label>
+            <input type="text" name="name" id="id_name" required value="{{ form.name.value|default:'' }}"
+                   placeholder="cth. Pos Cikampek KM 42"
+                   class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]" />
+            {% if form.name.errors %}<p class="text-xs text-red-500 mt-0.5">{{ form.name.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="id_type" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Tipe <span class="text-red-500">*</span></label>
+            <select name="type" id="id_type" required
+                    class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+              <option value="">— Pilih Tipe —</option>
+              <option value="pos" {% if form.type.value == 'pos' %}selected{% endif %}>Pos</option>
+              <option value="mako" {% if form.type.value == 'mako' %}selected{% endif %}>Mako</option>
+            </select>
+            {% if form.type.errors %}<p class="text-xs text-red-500 mt-0.5">{{ form.type.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <!-- Map Picker -->
+        <div class="flex flex-col gap-2">
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Lokasi pada Peta <span class="text-red-500">*</span></label>
+          <p class="text-xs text-gray-400">Klik pada peta untuk menentukan titik lokasi. Radius akan ditampilkan sebagai lingkaran.</p>
+          <div id="map" class="w-full h-96 rounded-lg border border-gray-300"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="id_latitude" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Latitude <span class="text-red-500">*</span></label>
+            <input type="text" name="latitude" id="id_latitude" required value="{{ form.latitude.value|default:'' }}"
+                   placeholder="-6.2088000" readonly
+                   class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] cursor-not-allowed" />
+            {% if form.latitude.errors %}<p class="text-xs text-red-500 mt-0.5">{{ form.latitude.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="id_longitude" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Longitude <span class="text-red-500">*</span></label>
+            <input type="text" name="longitude" id="id_longitude" required value="{{ form.longitude.value|default:'' }}"
+                   placeholder="106.8456000" readonly
+                   class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] cursor-not-allowed" />
+            {% if form.longitude.errors %}<p class="text-xs text-red-500 mt-0.5">{{ form.longitude.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="id_radius" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Radius (meter) <span class="text-red-500">*</span></label>
+            <input type="number" name="radius" id="id_radius" required min="1" value="{{ form.radius.value|default:'100' }}"
+                   placeholder="100"
+                   class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]" />
+            {% if form.radius.errors %}<p class="text-xs text-red-500 mt-0.5">{{ form.radius.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 py-1">
+          <input type="checkbox" name="is_active" id="id_is_active"
+                 {% if form.is_active.value %}checked{% endif %}
+                 class="h-4 w-4 rounded cursor-pointer accent-[#1a3a6b]" />
+          <label for="id_is_active" class="text-sm text-gray-700 font-medium cursor-pointer">Lokasi Aktif</label>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <a href="{% url 'locations:daftar' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
+          <button type="submit" class="px-5 py-2.5 rounded-xl {% if location %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
+            {% if location %}Simpan Perubahan{% else %}Tambah Lokasi{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var latInput = document.getElementById('id_latitude');
+  var lngInput = document.getElementById('id_longitude');
+  var radiusInput = document.getElementById('id_radius');
+
+  var existingLat = parseFloat(latInput.value);
+  var existingLng = parseFloat(lngInput.value);
+  var hasExisting = !isNaN(existingLat) && !isNaN(existingLng);
+
+  var initLat = hasExisting ? existingLat : -6.2088;
+  var initLng = hasExisting ? existingLng : 106.8456;
+
+  var map = L.map('map').setView([initLat, initLng], hasExisting ? 15 : 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
+  }).addTo(map);
+
+  var marker = null;
+  var circle = null;
+
+  function updateCircle(lat, lng) {
+    if (circle) map.removeLayer(circle);
+    var r = parseInt(radiusInput.value) || 100;
+    circle = L.circle([lat, lng], {
+      radius: r,
+      color: '#1a3a6b',
+      fillColor: '#1a3a6b',
+      fillOpacity: 0.12,
+      weight: 2,
+    }).addTo(map);
+  }
+
+  function placeMarker(lat, lng) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map);
+    latInput.value = lat.toFixed(7);
+    lngInput.value = lng.toFixed(7);
+    updateCircle(lat, lng);
+  }
+
+  if (hasExisting) {
+    placeMarker(existingLat, existingLng);
+  }
+
+  map.on('click', function(e) {
+    placeMarker(e.latlng.lat, e.latlng.lng);
+  });
+
+  radiusInput.addEventListener('input', function() {
+    var lat = parseFloat(latInput.value);
+    var lng = parseFloat(lngInput.value);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      updateCircle(lat, lng);
+    }
+  });
+
+  setTimeout(function() { map.invalidateSize(); }, 200);
+});
+</script>
+{% endblock %}

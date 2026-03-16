@@ -4,6 +4,7 @@ Django settings for SIRAGA Korlantas.
 
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 # Load .env file
@@ -19,6 +20,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-insecure-key-change-this')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+FLY_APP_NAME = os.environ.get('FLY_APP_NAME')
+if FLY_APP_NAME:
+    ALLOWED_HOSTS.append(f"{FLY_APP_NAME}.fly.dev")
 
 
 # Application definition
@@ -61,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'sprin.context_processors.user_role',
             ],
         },
     },
@@ -71,14 +81,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database — PostgreSQL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'siraga_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'siraga_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'siraga_password'),
-        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get(
+            'DATABASE_URL',
+            f"postgresql://{os.environ.get('POSTGRES_USER', 'siraga_user')}:{os.environ.get('POSTGRES_PASSWORD', 'siraga_password')}@{os.environ.get('POSTGRES_HOST', 'localhost')}:{os.environ.get('POSTGRES_PORT', '5432')}/{os.environ.get('POSTGRES_DB', 'siraga_db')}"
+        ),
+        conn_max_age=600
+    )
 }
 
 
@@ -116,3 +125,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Presensi settings (kontrol radius / lokasi kantor)
+PRESENSI_OFFICE_LATITUDE = -6.200000
+PRESENSI_OFFICE_LONGITUDE = 106.816666
+PRESENSI_OFFICE_RADIUS_METER = 500  # 500m dari kantor

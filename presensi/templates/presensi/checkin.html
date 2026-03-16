@@ -1,0 +1,139 @@
+{% extends 'personel/base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; padding: 20px; color: #334155;">
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 24px; font-weight: 800; color: #0F3460; margin: 0;">Check-in Presensi</h1>
+        <p style="font-size: 14px; color: #64748B; margin-top: 5px;">Mulai tugas Anda hari ini</p>
+    </div>
+
+    <div style="background: #F8FAFC; border-radius: 20px; padding: 20px; border: 1px solid #E2E8F0; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+        <div style="width: 50px; height: 50px; background: #1A5B92; color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div>
+            <p style="margin: 0; font-size: 11px; color: #94A3B8; font-weight: 800; text-transform: uppercase;">Personel Terdeteksi</p>
+            <h2 style="margin: 0; font-size: 16px; font-weight: 700; color: #1E293B;">{{ selected_personel.nama }}</h2>
+            <p style="margin: 0; font-size: 12px; color: #64748B;">NIP: {{ selected_personel.nip }}</p>
+        </div>
+    </div>
+
+    <div style="background: #fff; border-radius: 25px; padding: 30px; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <input type="hidden" name="personel_id" value="{{ selected_personel.id }}" />
+            <input type="hidden" name="is_within_radius" id="is_within_radius" value="false" />
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase;">Jenis Presensi</label>
+                <select name="type" id="presensi_type" required 
+                        style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #CBD5E1; background: #F8FAFC; outline: none; cursor: pointer;">
+                    <option value="Office Hour">Office Hour (Kantor)</option>
+                    <option value="Dinas">Dinas (Luar Kantor)</option>
+                    <option value="Izin">Izin (Sakit/Cuti)</option>
+                </select>
+            </div>
+
+            <div id="photo-block" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase;">Foto Kehadiran</label>
+                <input type="file" name="checkin_photo" id="checkin_photo" required 
+                       style="width: 100%; font-size: 13px; color: #64748B;" />
+            </div>
+
+            <div id="geo-block" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 5px;">Latitude</label>
+                    <input type="text" name="latitude" id="latitude" readonly 
+                           style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #E2E8F0; background: #F1F5F9; font-size: 12px; font-family: monospace;" />
+                </div>
+                <div>
+                    <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 5px;">Longitude</label>
+                    <input type="text" name="longitude" id="longitude" readonly 
+                           style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #E2E8F0; background: #F1F5F9; font-size: 12px; font-family: monospace;" />
+                </div>
+            </div>
+
+            <div id="izin-detail" style="display:none; margin-bottom: 20px; padding: 15px; background: #FFFBEB; border-radius: 15px; border: 1px solid #FEF3C7;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 8px; text-transform: uppercase;">Keterangan Izin</label>
+                <select name="izin_detail" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #FDE68A;">
+                    <option value="">-- Pilih Alasan --</option>
+                    <option value="SAKIT">SAKIT</option>
+                    <option value="CUTI">CUTI</option>
+                </select>
+            </div>
+
+            <div id="supporting-doc" style="display:none; margin-bottom: 25px; padding: 15px; background: #F0F9FF; border-radius: 15px; border: 1px solid #E0F2FE;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #0369A1; margin-bottom: 8px; text-transform: uppercase;">Unggah Dokumen (PDF/Scan)</label>
+                <input type="file" name="supporting_document" style="width: 100%; font-size: 13px;" />
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 16px; background: #1A5B92; color: #fff; border: none; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(26, 91, 146, 0.3);">
+                Submit Check-in
+            </button>
+
+            <a href="{% url 'presensi:dashboard' %}?personel_id={{ selected_personel.id }}" 
+               style="display: block; text-align: center; margin-top: 15px; font-size: 13px; font-weight: 700; color: #94A3B8; text-decoration: none;">
+                Batal
+            </a>
+        </form>
+    </div>
+
+    <div id="gps-loader" style="margin-top: 20px; text-align: center; font-size: 12px; font-weight: 700; color: #94A3B8;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Sedang mengunci lokasi GPS...
+    </div>
+</div>
+
+<script>
+    // Logic Tampilan Dinamis
+    const presensiType = document.getElementById('presensi_type');
+    const photoBlock = document.getElementById('photo-block');
+    const geoBlock = document.getElementById('geo-block');
+    const checkinPhoto = document.getElementById('checkin_photo');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+
+    function adjustFormByType() {
+        const val = presensiType.value;
+        const isIzin = val === 'Izin';
+
+        document.getElementById('izin-detail').style.display = isIzin ? 'block' : 'none';
+        document.getElementById('supporting-doc').style.display = (val === 'Izin' || val === 'Dinas') ? 'block' : 'none';
+
+        if (isIzin) {
+            photoBlock.style.display = 'none';
+            geoBlock.style.display = 'none';
+            checkinPhoto.required = false;
+            latitudeInput.required = false;
+            longitudeInput.required = false;
+        } else {
+            photoBlock.style.display = 'block';
+            geoBlock.style.display = 'grid';
+            checkinPhoto.required = true;
+            latitudeInput.required = true;
+            longitudeInput.required = true;
+        }
+    }
+
+    presensiType.addEventListener('change', adjustFormByType);
+    adjustFormByType();
+
+    // Geolocation
+    function fillLocation() {
+        if (!navigator.geolocation) {
+            document.getElementById('gps-loader').innerHTML = "Geolocation tidak didukung.";
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(pos => {
+            document.getElementById('latitude').value = pos.coords.latitude;
+            document.getElementById('longitude').value = pos.coords.longitude;
+            document.getElementById('is_within_radius').value = 'true';
+            document.getElementById('gps-loader').innerHTML = '<span style="color: #10B981;"><i class="fa-solid fa-location-crosshairs"></i> Lokasi Berhasil Dikunci</span>';
+        }, err => {
+            document.getElementById('gps-loader').innerHTML = '<span style="color: #EF4444;"><i class="fa-solid fa-circle-exclamation"></i> Gagal Mengambil Lokasi</span>';
+        });
+    }
+    fillLocation();
+</script>
+{% endblock %}

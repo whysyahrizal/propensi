@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.redirect_root, name='root'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('register/', views.register_view, name='register'),
     path('profil/', views.profile_view, name='profil'),
     # Manajemen Personel
     path('personel/', views.daftar_personel_view, name='daftar_personel'),
