@@ -44,7 +44,11 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
-    'cuti'
+    'cuti',
+    'locations',
+    'presensi',
+    'notifikasi',
+    'pengumuman',
 ]
 
 MIDDLEWARE = [

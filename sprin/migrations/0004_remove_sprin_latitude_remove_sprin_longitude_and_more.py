@@ -10,16 +10,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='sprin',
-            name='latitude',
+        # Use RunSQL to safely drop columns if they exist.
+        # This prevents the "UndefinedColumn" error when the database state
+        # is out of sync with migration history.
+        migrations.RunSQL(
+            "ALTER TABLE sprin_sprin DROP COLUMN IF EXISTS latitude;",
+            reverse_sql="ALTER TABLE sprin_sprin ADD COLUMN IF NOT EXISTS latitude DECIMAL(12, 9) NULL;"
         ),
-        migrations.RemoveField(
-            model_name='sprin',
-            name='longitude',
+        migrations.RunSQL(
+            "ALTER TABLE sprin_sprin DROP COLUMN IF EXISTS longitude;",
+            reverse_sql="ALTER TABLE sprin_sprin ADD COLUMN IF NOT EXISTS longitude DECIMAL(12, 9) NULL;"
         ),
-        migrations.RemoveField(
-            model_name='sprin',
-            name='radius_meter',
+        migrations.RunSQL(
+            "ALTER TABLE sprin_sprin DROP COLUMN IF EXISTS radius_meter;",
+            reverse_sql="ALTER TABLE sprin_sprin ADD COLUMN IF NOT EXISTS radius_meter INTEGER DEFAULT 100;"
         ),
     ]
