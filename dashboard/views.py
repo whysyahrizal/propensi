@@ -28,7 +28,7 @@ def dashboard_view(request):
             personel=request.user, tanggal=today
         ).first()
         sprin_aktif_saya = Sprin.objects.filter(
-            personel_list__personel=request.user, status='aktif'
+            daftar_personel__personel=request.user, status='aktif'
         ).first()
 
         return render(request, 'dashboard/index.html', {

@@ -39,7 +39,7 @@ def checkin_view(request):
 
     # Ambil sprin aktif untuk personel ini
     sprin_aktif = Sprin.objects.filter(
-        personel_list__personel=request.user, status='aktif'
+        daftar_personel__personel=request.user, status='aktif'
     ).first()
     return render(request, 'absensi/checkin.html', {'sprin_aktif': sprin_aktif})
 
