@@ -63,7 +63,7 @@
             </a>
           </li>
           {% if user.role in 'superadmin,operator' %}
-          <li>
+          <!-- <li>
             <a href="{% url 'accounts:daftar_personel' %}"
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
                     {% if 'accounts/personel' in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
@@ -73,7 +73,7 @@
               </svg>
               Akun Personel
             </a>
-          </li>
+          </li> -->
           {% endif %}
           {% if user.role == 'superadmin' %}
           <li>
@@ -96,16 +96,24 @@
           <!-- 
           <li><a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Cuti / Izin</a></li>
           -->
-          <li>
-            <a href="{% url 'sprin:daftar' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'sprin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Sprin / Gas
-          </a>
-        </li>
-        {% if user.role in 'superadmin,operator' %}
         <li>
+          <a href="{% url 'sprin:daftar' %}"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'sprin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Sprin / Gas
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'presensi:dashboard' %}"
+          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                {% if request.resolver_match.app_name == 'presensi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Presensi
+        </a>
+      </li>
+      {% if user.role in 'superadmin,operator' %}
+        <!-- <li>
           <a href="{% url 'locations:daftar' %}"
              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
                     {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
@@ -115,7 +123,7 @@
             </svg>
             Wilayah Penugasan
           </a>
-        </li>
+        </li> -->
         {% endif %}
         <!-- Pengumuman menu dinonaktifkan sementara: app belum tersedia di deploy ini -->
       </ul>
