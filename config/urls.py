@@ -21,6 +21,7 @@ urlpatterns = [
 
 # Optional modules: include only when app URL module exists.
 for prefix, module in [
+    ('pengumuman/', 'pengumuman.urls'),
     ('notifikasi/', 'notifikasi.urls'),
 ]:
     app_label = module.split('.', 1)[0]

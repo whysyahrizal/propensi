@@ -1,8 +1,29 @@
 {% extends "base.html" %}
 
 {% block page_title %}Profil Personel{% endblock %}
+{% extends "base.html" %}
+
+{% block page_title %}Profil Personel{% endblock %}
 
 {% block content %}
+<div class="flex flex-col gap-6">
+
+    {# Action Header & Metrics #}
+    <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row items-stretch gap-4 w-full lg:w-auto">
+            {# Active Metrics Card #}
+            <div class="card p-5 flex items-center gap-4 min-w-[200px] flex-1 sm:flex-none">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Personel Aktif</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_aktif }}</p>
+                </div>
+            </div>
 <div class="flex flex-col gap-6">
 
     {# Action Header & Metrics #}
@@ -35,6 +56,19 @@
                     <p class="text-2xl font-bold text-gray-900">{{ total_nonaktif }}</p>
                 </div>
             </div>
+            {# Non-active Metrics Card #}
+            <div class="card p-5 flex items-center gap-4 min-w-[200px] flex-1 sm:flex-none">
+                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Personel Nonaktif</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_nonaktif }}</p>
+                </div>
+            </div>
         </div>
 
         {# Action Button #}
@@ -47,7 +81,191 @@
             Tambah Personel
         </a>
         {% endif %}
+
+        {# Action Button #}
+        {% if user.role != 'personel' %}
+        <a href="{% url 'personel_create' %}"
+            class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#1a3a6b] text-white text-sm font-bold hover:bg-[#2d5da6] transition-colors shadow-lg shadow-blue-900/10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Personel
+        </a>
+        {% endif %}
     </div>
+
+    {# Filter Section #}
+    <div class="card p-6 border-t-4 border-t-[#1a3a6b]">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-end">
+            <!-- Search -->
+            <div class="lg:col-span-4 space-y-2">
+                <label for="search" class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block">
+                    Cari Personel
+                </label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400 group-focus-within:text-[#1a3a6b] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="search" name="q" value="{{ q }}" placeholder="Ketik nama atau NIP..."
+                        class="block w-full h-[42px] pl-10 pr-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#1a3a6b]/5 focus:border-[#1a3a6b] transition-all">
+                </div>
+            </div>
+
+            <!-- Satker -->
+            <div class="lg:col-span-3 space-y-2">
+                <label for="unit" class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block">
+                    Pilih Satker / Unit
+                </label>
+                <select name="unit" id="unit"
+                    class="block w-full h-[42px] px-3 py-2 text-sm border-gray-200 border rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#1a3a6b]/5 focus:border-[#1a3a6b] transition-all cursor-pointer">
+                    <option value="">Semua Unit</option>
+                    {% for unit in units %}
+                    <option value="{{ unit.id }}" {% if selected_unit == unit.id|stringformat:"i" %}selected{% endif %}>
+                        {{ unit.nama }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Status -->
+            <div class="lg:col-span-2 space-y-2">
+                <label for="status" class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block">
+                    Status
+                </label>
+                <select name="status" id="status"
+                    class="block w-full h-[42px] px-3 py-2 text-sm border-gray-200 border rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#1a3a6b]/5 focus:border-[#1a3a6b] transition-all cursor-pointer">
+                    <option value="">Semua Status</option>
+                    <option value="aktif" {% if selected_status == 'aktif' %}selected{% endif %}>Aktif</option>
+                    <option value="nonaktif" {% if selected_status == 'nonaktif' %}selected{% endif %}>Nonaktif</option>
+                </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="lg:col-span-3 flex gap-2 h-[42px]">
+                <button type="submit"
+                    class="flex-1 px-5 h-full rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200 transition-colors border border-gray-200 shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Apply
+                </button>
+
+                {% if q or selected_unit or selected_status %}
+                <a href="{% url 'personel_list' %}"
+                    class="w-[42px] h-full flex items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors border border-red-100 shadow-sm"
+                    title="Reset Filter">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {# Table #}
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">ID</th>
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Nama
+                            Personel</th>
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">NIP</th>
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Unit /
+                            Satker</th>
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                        {% if user.role != 'personel' %}
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">
+                            Aksi</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    {% for personel in personels %}
+                    <tr class="transition-colors group {% if not personel.is_active %}bg-red-50/20 text-gray-400{% else %}hover:bg-gray-50/80{% endif %}">
+                        <td class="px-5 py-3.5 whitespace-nowrap text-xs {% if personel.is_active %}text-gray-400{% else %}text-gray-300{% endif %} font-mono">
+                            #{{ personel.id|stringformat:"05d" }}
+                        </td>
+                        <td
+                            class="px-5 py-3.5 text-sm font-bold {% if personel.is_active %}text-gray-900 group-hover:text-[#1a3a6b]{% else %}text-gray-400{% endif %} transition-colors">
+                            {{ personel.nama }}
+                            {% if not personel.is_active %}
+                            <span class="ml-2 px-1.5 py-0.5 rounded bg-red-100 text-[10px] text-red-600 font-bold uppercase tracking-tighter">Nonaktif</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap text-xs text-gray-600 font-mono">{{ personel.nip }}
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap text-sm text-gray-700">
+                            <span
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#1a3a6b]/5 text-[#1a3a6b] border border-[#1a3a6b]/10">
+                                <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                {{ personel.unit.nama }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap text-sm text-gray-500">
+                            {% if personel.is_active %}
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                Aktif
+                            </span>
+                            {% else %}
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-600 text-white border border-red-700 shadow-sm shadow-red-200">
+                                Nonaktif
+                            </span>
+                            {% endif %}
+                        </td>
+                        {% if user.role != 'personel' %}
+                        <td class="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'personel_detail' personel.pk %}"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-[#1a3a6b] text-xs font-bold hover:bg-[#1a3a6b] hover:text-white transition-all border border-blue-100"
+                                    title="Lihat Detail">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Detail
+                                </a>
+                                <a href="{% url 'personel_update' personel.pk %}"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 text-xs font-bold hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
+                                    title="Edit">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    Edit
+                                </a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center border-b border-gray-100">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-3">
+                                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold text-gray-900">Tidak Ada Data Ditemukan</p>
+                            <p class="text-xs text-gray-500 mt-1">Coba ubah kriteria pencarian atau tambahkan personel
+                                baru.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
     {# Filter Section #}
     <div class="card p-6 border-t-4 border-t-[#1a3a6b]">
@@ -248,6 +466,32 @@
                 </a>
                 {% endif %}
 
+        {# Pagination #}
+        {% if is_paginated %}
+        <div class="px-5 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                Menampilkan <span class="text-gray-900">{{ page_obj.start_index }}</span> - <span
+                    class="text-gray-900">{{ page_obj.end_index }}</span> dari <span class="text-gray-900">{{
+                    paginator.count }}</span>
+            </p>
+            <div class="flex items-center gap-1">
+                {% if page_obj.has_previous %}
+                <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+                    class="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+                    class="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                {% endif %}
+
+                {% for i in paginator.page_range %}
                 {% for i in paginator.page_range %}
                 {% if page_obj.number == i %}
                 <span
@@ -261,7 +505,40 @@
                     </a>
                     {% endif %}
                     {% endfor %}
+                <span
+                    class="w-7 h-7 flex items-center justify-center rounded bg-[#1a3a6b] text-white font-bold text-xs shadow-sm">
+                    {{ i }}
+                </span>
+                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %} <a
+                    href="?page={{ i }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+                    class="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-600 hover:border-gray-300 transition-colors text-xs font-semibold shadow-sm">
+                    {{ i }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
 
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+                        class="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    <a href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+                        class="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
                     {% if page_obj.has_next %}
                     <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_unit %}&unit={{ selected_unit }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}"
                         class="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors shadow-sm">

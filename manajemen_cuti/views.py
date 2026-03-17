@@ -61,7 +61,6 @@ class LeaveRequestCreateView(LoginRequiredMixin, CreateView):
             Q(tanggal_selesai__range=(form.cleaned_data['tanggal_mulai'], form.cleaned_data['tanggal_selesai'])) |
             Q(tanggal_mulai__lte=form.cleaned_data['tanggal_mulai'], tanggal_selesai__gte=form.cleaned_data['tanggal_selesai'])
         ).exists()
-
         if overlap:
             messages.error(self.request, "Anda sudah memiliki pengajuan cuti aktif pada periode tersebut.")
             return self.form_invalid(form)
@@ -168,7 +167,6 @@ class LeaveDetailView(LoginRequiredMixin, DetailView):
             if action == 'reject' and not catatan:
                 messages.error(request, "Catatan penolakan wajib diisi.")
                 return redirect('manajemen_cuti:detail', pk=cuti.pk)
-
             cuti.status = 'approved' if action == 'approve' else 'rejected'
             cuti.catatan_pimpinan = catatan
             cuti.disetujui_oleh = request.user
