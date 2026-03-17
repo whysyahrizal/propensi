@@ -12,6 +12,7 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('sprin/', include('sprin.urls')),
     path('absensi/', include('absensi.urls')),
+    path('cuti/', include('manajemen_cuti.urls')),
     path('presensi/', include('presensi.urls')),
     path('locations/', include('locations.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root'),
@@ -19,7 +20,6 @@ urlpatterns = [
 
 # Optional modules: include only when app URL module exists.
 for prefix, module in [
-    ('cuti/', 'cuti.urls'),
     ('pengumuman/', 'pengumuman.urls'),
     ('notifikasi/', 'notifikasi.urls'),
 ]:

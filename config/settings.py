@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
-    'cuti',
+    'manajemen_cuti',
     'locations',
     'presensi',
     'notifikasi',
