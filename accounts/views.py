@@ -78,6 +78,7 @@ def register_view(request):
 
 
 
+
 @login_required
 def profile_view(request):
     if request.method == 'POST':
