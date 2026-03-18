@@ -11,8 +11,7 @@ def dashboard_view(request):
     role = request.user.role
 
     if role in ('pimpinan', 'superadmin', 'operator'):
-        # Dashboard Monitoring — Sprint 2 (placeholder)
-        sprin_aktif = Sprin.objects.filter(status='aktif').select_related('dibuat_oleh')
+        sprin_aktif = Sprin.objects.filter(status='aktif')
         total_personel = request.user.__class__.objects.filter(is_active=True, role='personel').count()
         hadir_hari_ini = RekorAbsensi.objects.filter(tanggal=today).count()
 
@@ -23,13 +22,22 @@ def dashboard_view(request):
             'today': today,
         })
     else:
-        # Dashboard Personel — Sprint 3 (placeholder)
+        # Cari profil Personel (personel.Personel) berdasarkan NRP user yang login
+        from personel.models import Personel as PersonelProfile
+        try:
+            personel_profile = PersonelProfile.objects.get(nip=request.user.nrp)
+        except PersonelProfile.DoesNotExist:
+            personel_profile = None
+
         absensi_hari_ini = RekorAbsensi.objects.filter(
             personel=request.user, tanggal=today
         ).first()
-        sprin_aktif_saya = Sprin.objects.filter(
-            daftar_personel__personel=request.user, status='aktif'
-        ).first()
+
+        sprin_aktif_saya = None
+        if personel_profile:
+            sprin_aktif_saya = Sprin.objects.filter(
+                daftar_personel__personel=personel_profile, status='aktif'
+            ).first()
 
         return render(request, 'dashboard/index.html', {
             'absensi_hari_ini': absensi_hari_ini,

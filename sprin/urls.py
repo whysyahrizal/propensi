@@ -4,7 +4,7 @@ from . import views
 app_name = 'sprin'
 
 urlpatterns = [
-    path('', views.all_sprin, name='all_sprin'),
+    path('', views.all_sprin, name='daftar'),
     path('pimpinan/', views.pimpinan_list, name='pimpinan_list'), # Halaman pimpinan
     path('create/', views.create_sprin, name='create_sprin'),
     path('pimpinan/', views.pimpinan_list, name='pimpinan_list'),

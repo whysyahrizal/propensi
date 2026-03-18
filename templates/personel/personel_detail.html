@@ -1,219 +1,221 @@
-{% extends "personel/base.html" %}
+{% extends "base.html" %}
+
+{% block page_title %}Detail Personel{% endblock %}
 
 {% block content %}
-<style>
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-    }
-    .detail-card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-        border: 1px solid var(--border);
-    }
-    .detail-header {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        padding: 32px 24px;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-    .avatar-circle {
-        width: 80px;
-        height: 80px;
-        background-color: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 36px;
-        color: white;
-        border: 2px solid rgba(255, 255, 255, 0.5);
-    }
-    .person-name {
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 4px;
-        color: white;
-    }
-    .person-nip {
-        font-size: 16px;
-        color: rgba(255, 255, 255, 0.8);
-        font-family: monospace;
-    }
-    .detail-body {
-        padding: 32px 24px;
-    }
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 24px;
-    }
-    .info-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .info-label {
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--text-muted);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .info-value {
-        font-size: 16px;
-        color: var(--text-main);
-        font-weight: 500;
-        background: #F8FAFC;
-        padding: 12px 16px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
-    }
-    .detail-actions {
-        padding: 24px;
-        background: #F8FAFC;
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
 
-    /* Modal Styling */
-    .modal-overlay {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-    }
-    .modal-overlay.active {
-        display: flex;
-        animation: fadeIn 0.2s ease-out;
-    }
-    .modal-content {
-        background: white;
-        border-radius: var(--radius-lg);
-        width: 100%;
-        max-width: 400px;
-        padding: 24px;
-        box-shadow: var(--shadow-lg);
-        animation: slideUp 0.3s ease-out;
-    }
-    .modal-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: var(--danger);
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 16px;
-    }
-    .modal-body {
-        color: var(--text-main);
-        margin-bottom: 24px;
-        line-height: 1.6;
-    }
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-</style>
-
-<div class="page-header">
-    <a href="{% url 'personel_list' %}" class="btn btn-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
-    </a>
-</div>
-
-<div class="detail-card">
-    <div class="detail-header">
-        <div class="avatar-circle">
-            <i class="fa-solid fa-user-tie"></i>
-        </div>
+    {# Action Header #}
+    <div class="flex items-center justify-between pb-4 border-b border-gray-200">
         <div>
-            <h2 class="person-name">{{ personel.nama }}</h2>
-            <div class="person-nip">ID. {{ personel.id|stringformat:"05d" }} &bull; NIP. {{ personel.nip }}</div>
+            <h1 class="text-xl font-bold text-gray-900">Detail Personel</h1>
         </div>
+        <a href="{% url 'personel_list' %}"
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors text-sm font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Kembali ke Daftar
+        </a>
     </div>
-    <div class="detail-body">
-        <div class="info-grid">
-            <div class="info-group">
-                <div class="info-label"><i class="fa-solid fa-building"></i> Unit / Satker</div>
-                <div class="info-value">{{ personel.unit.nama }}</div>
+
+    {# Detail Card #}
+    <div class="card overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+
+        {# Header Area #}
+        <div
+            class="bg-gradient-to-br from-[#1a3a6b] to-[#2d5da6] px-8 py-8 md:py-10 text-white flex flex-col md:flex-row items-center gap-6 md:gap-8">
+            <div
+                class="w-24 h-24 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                <svg class="w-10 h-10 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
             </div>
-            <div class="info-group">
-                <div class="info-label"><i class="fa-solid fa-calendar-plus"></i> Tanggal Terdaftar</div>
-                <div class="info-value">{{ personel.created_at|date:"d M Y, H:i" }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label"><i class="fa-solid fa-pen-to-square"></i> Terakhir Diperbarui</div>
-                <div class="info-value">{{ personel.updated_at|date:"d M Y, H:i" }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label"><i class="fa-solid fa-circle-check"></i> Status</div>
-                <div class="info-value" style="color: #065F46; font-weight: 600;">Aktif</div>
+            <div class="text-center md:text-left">
+                <h2 class="text-2xl font-extrabold tracking-tight mb-1.5">{{ personel.nama }}</h2>
+                <div class="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-white/80 font-mono text-sm">
+                    <span class="bg-black/20 px-2.5 py-1 rounded backdrop-blur-sm shadow-sm border border-white/10">ID.
+                        #{{ personel.id|stringformat:"05d" }}</span>
+                    <span class="hidden md:inline">&bull;</span>
+                    <span class="bg-black/20 px-2.5 py-1 rounded backdrop-blur-sm shadow-sm border border-white/10">NIP.
+                        {{ personel.nip }}</span>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="detail-actions">
-        <div>
-            <button type="button" class="btn btn-danger" onclick="openDeleteModal()">
-                <i class="fa-solid fa-trash-can"></i> Nonaktifkan (Hapus)
+
+        {# Information Area #}
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="flex flex-col gap-1.5 border-l-2 pl-4 py-1 border-blue-100">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Unit / Satker
+                    </p>
+                    <p class="text-[15px] font-semibold text-gray-900">{{ personel.unit.nama }}</p>
+                </div>
+
+                <div class="flex flex-col gap-1.5 border-l-2 pl-4 py-1 border-emerald-100">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Status
+                    </p>
+                    <div>
+                        {% if personel.is_active %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                            Aktif
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-50 text-gray-700 border border-gray-100 shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
+                            Nonaktif
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1.5 border-l-2 pl-4 py-1 border-gray-200">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Tanggal Terdaftar
+                    </p>
+                    <p class="text-[15px] font-medium text-gray-800">{{ personel.created_at|date:"d M Y, H:i" }}</p>
+                </div>
+
+                <div class="flex flex-col gap-1.5 border-l-2 pl-4 py-1 border-gray-200">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Terakhir Diperbarui
+                    </p>
+                    <p class="text-[15px] font-medium text-gray-800">{{ personel.updated_at|date:"d M Y, H:i" }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# Action Buttons Bottom #}
+        <div
+            class="px-8 py-5 bg-gray-50/80 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {% if personel.is_active %}
+            <button type="button" onclick="openDeleteModal()"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-red-600 bg-white hover:bg-red-50 border border-red-200 shadow-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Nonaktifkan (Hapus)
             </button>
-        </div>
-        <div>
-            <a href="{% url 'personel_update' personel.pk %}" class="btn btn-primary">
-                <i class="fa-solid fa-pen"></i> Edit Detail
+            {% else %}
+            <button type="button" onclick="openDeleteModal()"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-emerald-600 bg-white hover:bg-emerald-50 border border-emerald-200 shadow-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Aktifkan Kembali
+            </button>
+            {% endif %}
+
+            <a href="{% url 'personel_update' personel.pk %}"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-[#1a3a6b] hover:bg-[#2d5da6] transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Edit Detail
             </a>
         </div>
     </div>
 </div>
 
-<!-- Modal Konfirmasi Hapus -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <i class="fa-solid fa-triangle-exclamation"></i> Konfirmasi Hapus
+{# Delete Confirmation Modal #}
+<div id="deleteModal"
+    class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity"
+    aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all">
+        <div class="px-6 py-6 sm:p-6 pb-4">
+            <div class="sm:flex sm:items-start">
+                <div
+                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full {% if personel.is_active %}bg-red-100 ring-red-50{% else %}bg-emerald-100 ring-emerald-50{% endif %} sm:mx-0 sm:h-10 sm:w-10 ring-4">
+                    <svg class="h-6 w-6 {% if personel.is_active %}text-red-600{% else %}text-emerald-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" aria-hidden="true">
+                        {% if personel.is_active %}
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        {% else %}
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        {% endif %}
+                    </svg>
+                </div>
+                <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                    <h3 class="text-base font-bold leading-6 text-gray-900" id="modal-title">
+                        {% if personel.is_active %}Konfirmasi Hapus{% else %}Konfirmasi Aktifkan{% endif %}
+                    </h3>
+                    <div class="mt-2 text-sm text-gray-600">
+                        <p>Apakah Anda yakin ingin {% if personel.is_active %}menonaktifkan{% else %}mengaktifkan kembali{% endif %} <strong>{{ personel.nama }}</strong> (NIP: <span
+                                class="font-mono">{{ personel.nip }}</span>)?</p>
+                        <p class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                            {% if personel.is_active %}
+                            Data ini tidak akan muncul lagi di daftar personel aktif.
+                            {% else %}
+                            Personel ini akan kembali muncul di daftar personel aktif.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-            Apakah Anda yakin ingin menonaktifkan <strong>{{ personel.nama }}</strong> (NIP: {{ personel.nip }})? <br><br>
-            <span style="font-size: 13px; color: var(--text-muted);">Data ini tidak akan muncul lagi di daftar personel aktif.</span>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
-            <form method="post" action="{% url 'personel_delete' personel.pk %}" style="margin: 0;">
+        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2 border-t border-gray-100">
+            <form method="post" action="{% url 'personel_delete' personel.pk %}" class="w-full sm:w-auto m-0">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Ya, Nonaktifkan</button>
+                <button type="submit"
+                    class="inline-flex w-full justify-center rounded-lg {% if personel.is_active %}bg-red-600 hover:bg-red-500{% else %}bg-emerald-600 hover:bg-emerald-500{% endif %} px-4 py-2 text-sm font-semibold text-white shadow-sm sm:w-auto">
+                    Ya, {% if personel.is_active %}Nonaktifkan{% else %}Aktifkan Kembali{% endif %}
+                </button>
             </form>
+            <button type="button" onclick="closeDeleteModal()"
+                class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                Batal
+            </button>
         </div>
     </div>
 </div>
 
 <script>
     function openDeleteModal() {
-        document.getElementById('deleteModal').classList.add('active');
+        const modal = document.getElementById('deleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
     function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.remove('active');
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
-    // Tutup bila click di luar modal
-    document.getElementById('deleteModal').addEventListener('click', function(e) {
+
+    // Close modal on outside click
+    document.getElementById('deleteModal').addEventListener('click', function (e) {
         if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function (event) {
+        if (event.key === "Escape") {
             closeDeleteModal();
         }
     });
