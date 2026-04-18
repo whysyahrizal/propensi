@@ -47,8 +47,8 @@ INSTALLED_APPS = [
     'manajemen_cuti',
     'locations',
     'presensi',
-    'notifikasi',
-    'pengumuman',
+    # 'notifikasi',
+    # 'pengumuman',
 ]
 
 MIDDLEWARE = [
