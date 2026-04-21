@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Role(models.Model):
-    """Role yang dapat dikelola secara dinamis oleh Superadmin (EPIC03)."""
+
     nama = models.CharField(max_length=100, unique=True, verbose_name='Nama Role')
     deskripsi = models.TextField(blank=True, verbose_name='Deskripsi')
     dibuat_pada = models.DateTimeField(default=timezone.now, verbose_name='Dibuat Pada')
@@ -20,7 +20,6 @@ class Role(models.Model):
     def jumlah_pengguna(self):
         return self.personel_set.filter(is_active=True).count()
 
-
 class Satker(models.Model):
     nama = models.CharField(max_length=200)
     kode = models.CharField(max_length=20, unique=True)
@@ -33,7 +32,6 @@ class Satker(models.Model):
 
     def __str__(self):
         return f"{self.kode} - {self.nama}"
-
 
 class PersonelManager(BaseUserManager):
     def create_user(self, nrp, password=None, **extra_fields):
@@ -49,7 +47,6 @@ class PersonelManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', 'superadmin')
         return self.create_user(nrp, password, **extra_fields)
-
 
 class Personel(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [
@@ -99,6 +96,9 @@ class Personel(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     tanggal_bergabung = models.DateTimeField(auto_now_add=True)
+
+    tanggal_nonaktif = models.DateTimeField(null=True, blank=True, verbose_name='Tanggal Dinonaktifkan')
+    alasan_nonaktif = models.TextField(blank=True, verbose_name='Alasan Dinonaktifkan')
 
     objects = PersonelManager()
 
