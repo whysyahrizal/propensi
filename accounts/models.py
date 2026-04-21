@@ -1,13 +1,39 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 
+class MenuItem(models.Model):
+    label = models.CharField(max_length=100, verbose_name='Label')
+    path = models.CharField(max_length=200, blank=True, verbose_name='Path / URL Name')
+    icon = models.CharField(max_length=100, blank=True, verbose_name='Icon')
+    parent = models.ForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True, 
+        related_name='submenus', verbose_name='Parent Menu'
+    )
+    sort_order = models.IntegerField(default=0, verbose_name='Sort Order')
+    is_active = models.BooleanField(default=True, verbose_name='Active')
 
+    class Meta:
+        verbose_name = 'Menu Item'
+        verbose_name_plural = 'Menu Items'
+        ordering = ['sort_order', 'label']
+
+    def __str__(self):
+        return f"{self.label} ({self.path})"
+    
+    def get_url(self):
+        try:
+            return reverse(self.path)
+        except NoReverseMatch:
+            return self.path
+    
 class Role(models.Model):
-
     nama = models.CharField(max_length=100, unique=True, verbose_name='Nama Role')
     deskripsi = models.TextField(blank=True, verbose_name='Deskripsi')
     dibuat_pada = models.DateTimeField(default=timezone.now, verbose_name='Dibuat Pada')
+    menus = models.ManyToManyField(MenuItem, blank=True, related_name='roles', verbose_name='Menu Access')
+    display_label = models.CharField(max_length=100, blank=True, verbose_name='Display Label')
 
     class Meta:
         verbose_name = 'Role'
@@ -114,17 +140,25 @@ class Personel(AbstractBaseUser, PermissionsMixin):
         return f"{self.pangkat} {self.nama_lengkap} ({self.nrp})"
 
     @property
-    def nama_pangkat(self):
-        return f"{self.pangkat} {self.nama_lengkap}".strip()
-
-    @property
     def is_pimpinan(self):
+        if self.role_obj:
+            return self.role_obj.nama.lower() == 'pimpinan'
         return self.role == 'pimpinan'
 
     @property
     def is_operator(self):
+        if self.role_obj:
+            return self.role_obj.nama.lower() == 'operator'
         return self.role == 'operator'
 
     @property
     def is_superadmin(self):
+        if self.role_obj:
+            return self.role_obj.nama.lower() == 'superadmin'
         return self.role == 'superadmin'
+    
+    def save(self, *args, **kwargs):
+        if self.role_obj:
+            self.role = self.role_obj.nama.lower()
+        
+        super(Personel, self).save(*args, **kwargs)
