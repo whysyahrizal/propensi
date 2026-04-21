@@ -3,14 +3,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Personel, Satker, Role
-
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.utils import timezone
 
 def redirect_root(request):
     if request.user.is_authenticated:
         return redirect('dashboard:index')
     return redirect('accounts:login')
 
-
+# Autentikasi
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard:index')
@@ -28,12 +30,10 @@ def login_view(request):
 
     return render(request, 'accounts/login.html')
 
-
 def logout_view(request):
     logout(request)
     messages.success(request, 'Anda berhasil keluar dari sistem.')
     return redirect('accounts:login')
-
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -75,10 +75,7 @@ def register_view(request):
         'pangkat_choices': pangkat_choices,
     })
 
-
-
-
-
+# Manajemen Personel
 @login_required
 def profile_view(request):
     if request.method == 'POST':
@@ -95,7 +92,6 @@ def profile_view(request):
 
     return render(request, 'accounts/profil.html', {'user': request.user})
 
-
 @login_required
 def daftar_personel_view(request):
     if request.user.role not in ('superadmin', 'operator'):
@@ -103,107 +99,188 @@ def daftar_personel_view(request):
         return redirect('dashboard:index')
 
     q = request.GET.get('q', '').strip()
+    role_filter = request.GET.get('role', '').strip()
+    satker_filter = request.GET.get('satker', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
     personel_list = Personel.objects.select_related('satker').order_by('nama_lengkap')
+
     if q:
-        personel_list = personel_list.filter(
-            nama_lengkap__icontains=q
-        ) | personel_list.filter(nrp__icontains=q)
+        personel_list = personel_list.filter(Q(nama_lengkap__icontains=q) | Q(nrp__icontains=q))
+    if role_filter:
+        personel_list = personel_list.filter(role_obj_id=role_filter) # Gunakan ID role
+    if satker_filter:
+        personel_list = personel_list.filter(satker_id=satker_filter)
+    if status_filter == 'aktif':
+        personel_list = personel_list.filter(is_active=True)
+    elif status_filter == 'nonaktif':
+        personel_list = personel_list.filter(is_active=False)
+
+    paginator = Paginator(personel_list, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    role_list = Role.objects.all()
+    satker_list = Satker.objects.all()
+
+    base_queryset = Personel.objects.all()
+    total_keseluruhan = base_queryset.count()
+    total_aktif = base_queryset.filter(is_active=True).count()
+    total_nonaktif = base_queryset.filter(is_active=False).count()
 
     return render(request, 'accounts/daftar_personel.html', {
-        'personel_list': personel_list,
+        'page_obj': page_obj,
+        'total_data_filter': paginator.count,
+        'total_keseluruhan': total_keseluruhan,
+        'total_aktif': total_aktif,
+        'total_nonaktif': total_nonaktif,
         'q': q,
+        'role_list': role_list,
+        'satker_list': satker_list,
     })
-
 
 @login_required
 def tambah_personel_view(request):
-    if request.user.role != 'superadmin':
-        messages.error(request, 'Hanya Superadmin yang dapat menambah personel.')
+    if not request.user.is_superadmin:
+        messages.error(request, 'Akses ditolak.')
         return redirect('accounts:daftar_personel')
 
     if request.method == 'POST':
         nrp = request.POST.get('nrp', '').strip()
         nama = request.POST.get('nama_lengkap', '').strip()
+        email = request.POST.get('email', '').strip()
         pangkat = request.POST.get('pangkat', '')
-        jabatan = request.POST.get('jabatan', '')
-        role = request.POST.get('role', 'personel')
+        jabatan = request.POST.get('jabatan', '').strip()
+        role_id = request.POST.get('role')
         satker_id = request.POST.get('satker')
-        email = request.POST.get('email', '')
-        no_hp = request.POST.get('no_hp', '')
+        no_hp = request.POST.get('no_hp', '').strip()
+        password = request.POST.get('password', '')
 
-        if Personel.objects.filter(nrp=nrp).exists():
+        if not nrp.isdigit() or len(nrp) != 8:
+            messages.error(request, 'NRP harus berupa 8 digit angka.')
+        elif Personel.objects.filter(nrp=nrp).exists():
             messages.error(request, 'NRP sudah terdaftar.')
+        elif len(password) < 8:
+            messages.error(request, 'Password minimal 8 karakter.')
         else:
-            satker = Satker.objects.filter(pk=satker_id).first() if satker_id else None
+            satker = Satker.objects.filter(pk=satker_id).first()
+            role_obj = Role.objects.filter(pk=role_id).first()
+            
             Personel.objects.create_user(
-                nrp=nrp, password='siraga2026',  # default password, wajib diganti
-                nama_lengkap=nama, pangkat=pangkat, jabatan=jabatan,
-                role=role, satker=satker, email=email, no_hp=no_hp,
+                nrp=nrp, password=password, nama_lengkap=nama,
+                email=email, pangkat=pangkat, jabatan=jabatan,
+                role_obj=role_obj, satker=satker, no_hp=no_hp
             )
-            messages.success(request, f'Personel {nama} berhasil ditambahkan. Password default: siraga2026')
+            messages.success(request, f'Personel {nama} berhasil ditambahkan.')
             return redirect('accounts:daftar_personel')
 
     satker_list = Satker.objects.all()
+    role_list = Role.objects.all()
     return render(request, 'accounts/form_personel.html', {
         'satker_list': satker_list,
+        'role_list': role_list,
         'pangkat_choices': Personel.PANGKAT_CHOICES,
-        'role_choices': Personel.ROLE_CHOICES,
         'action': 'tambah',
+        'form_data': request.POST if request.method == 'POST' else {}
     })
-
 
 @login_required
 def edit_personel_view(request, pk):
-    if request.user.role != 'superadmin':
-        messages.error(request, 'Hanya Superadmin yang dapat mengedit personel.')
+    if not request.user.is_superadmin:
+        messages.error(request, 'Akses ditolak.')
         return redirect('accounts:daftar_personel')
 
     personel = get_object_or_404(Personel, pk=pk)
+    
     if request.method == 'POST':
-        personel.nama_lengkap = request.POST.get('nama_lengkap', personel.nama_lengkap)
-        personel.pangkat = request.POST.get('pangkat', personel.pangkat)
-        personel.jabatan = request.POST.get('jabatan', personel.jabatan)
-        personel.role = request.POST.get('role', personel.role)
-        personel.email = request.POST.get('email', personel.email)
-        personel.no_hp = request.POST.get('no_hp', personel.no_hp)
+        personel.nama_lengkap = request.POST.get('nama_lengkap', '').strip()
+        personel.email = request.POST.get('email', '').strip()
+        personel.pangkat = request.POST.get('pangkat', '')
+        personel.jabatan = request.POST.get('jabatan', '').strip()
+        personel.no_hp = request.POST.get('no_hp', '').strip()
+        
         satker_id = request.POST.get('satker')
-        personel.satker = Satker.objects.filter(pk=satker_id).first() if satker_id else None
+        role_id = request.POST.get('role')
+        personel.satker = Satker.objects.filter(pk=satker_id).first()
+        if role_id:
+            personel.role_obj = Role.objects.filter(pk=role_id).first()
+        
+        new_password = request.POST.get('password', '').strip()
+        if new_password:
+            if len(new_password) < 8:
+                messages.error(request, 'Password baru minimal 8 karakter.')
+                return render(request, 'accounts/form_personel.html', {
+                    'personel': personel, 'action': 'edit', 
+                    'satker_list': Satker.objects.all(), 'role_list': Role.objects.all()
+                })
+            personel.set_password(new_password)
+            
         personel.save()
-        messages.success(request, 'Data personel berhasil diperbarui.')
+        messages.success(request, f'Data {personel.nama_lengkap} berhasil diperbarui.')
         return redirect('accounts:daftar_personel')
 
-    satker_list = Satker.objects.all()
     return render(request, 'accounts/form_personel.html', {
         'personel': personel,
-        'satker_list': satker_list,
+        'satker_list': Satker.objects.all(),
+        'role_list': Role.objects.all(),
         'pangkat_choices': Personel.PANGKAT_CHOICES,
-        'role_choices': Personel.ROLE_CHOICES,
         'action': 'edit',
     })
 
-
 @login_required
 def hapus_personel_view(request, pk):
-    if request.user.role != 'superadmin':
-        messages.error(request, 'Hanya Superadmin yang dapat menghapus personel.')
+    if not request.user.is_superadmin:
+        messages.error(request, 'Akses ditolak.')
+        return redirect('accounts:daftar_personel')
+
+    personel = get_object_or_404(Personel, pk=pk)
+    
+    if request.method == 'POST':
+        # Ambil alasan dari form (kita akan buat inputnya di template konfirmasi)
+        alasan = request.POST.get('alasan', 'Tidak ada alasan spesifik')
+        
+        personel.is_active = False
+        personel.tanggal_nonaktif = timezone.now()
+        personel.alasan_nonaktif = alasan
+        personel.save()
+        
+        messages.success(request, f'Akun {personel.nama_lengkap} telah dinonaktifkan.')
+        return redirect('accounts:detail_personel', pk=personel.pk)
+
+    return render(request, 'accounts/konfirmasi_hapus.html', {'personel': personel})
+
+@login_required
+def detail_personel_view(request, pk):
+    if request.user.role not in ('superadmin', 'operator') and request.user.pk != pk:
+        messages.error(request, 'Anda tidak memiliki akses untuk melihat profil ini.')
+        return redirect('dashboard:index')
+
+    personel = get_object_or_404(Personel, pk=pk)
+    
+    return render(request, 'accounts/detail_personel.html', {
+        'personel': personel,
+    })
+
+@login_required
+def reaktivasi_personel_view(request, pk):
+    if request.user.role != 'superadmin' and not request.user.is_superadmin:
+        messages.error(request, 'Hanya Superadmin yang dapat mereaktivasi personel.')
         return redirect('accounts:daftar_personel')
 
     personel = get_object_or_404(Personel, pk=pk)
     if request.method == 'POST':
         nama = personel.nama_lengkap
-        personel.delete()
-        messages.success(request, f'Personel {nama} berhasil dihapus.')
+        personel.is_active = True # REAKTIVASI
+        personel.save()
+        messages.success(request, f'Personel {nama} berhasil direaktivasi.')
         return redirect('accounts:daftar_personel')
 
-    return render(request, 'accounts/konfirmasi_hapus.html', {'personel': personel})
+    return render(request, 'accounts/konfirmasi_reaktivasi.html', {'personel': personel})
 
-
-# ─── EPIC03 — Manajemen Role (PBI-011 to PBI-015) ────────────────────────────
-
+# Manajemen Role 
 def _superadmin_required(request):
     """Cek apakah user adalah superadmin; kembalikan True jika boleh akses."""
     return request.user.is_authenticated and request.user.role == 'superadmin'
-
 
 @login_required
 def daftar_role(request):
@@ -229,7 +306,6 @@ def daftar_role(request):
         'q': q,
     })
 
-
 @login_required
 def detail_role(request, pk):
     """PBI-012 — Tampilkan detail role; 404 jika tidak ditemukan."""
@@ -243,7 +319,6 @@ def detail_role(request, pk):
         'role': role,
         'pengguna_list': pengguna_list,
     })
-
 
 @login_required
 def tambah_role(request):
@@ -269,7 +344,6 @@ def tambah_role(request):
         'action': 'tambah',
         'form_data': request.POST if request.method == 'POST' else {},
     })
-
 
 @login_required
 def edit_role(request, pk):
@@ -300,7 +374,6 @@ def edit_role(request, pk):
         'role': role,
         'form_data': request.POST if request.method == 'POST' else {},
     })
-
 
 @login_required
 def hapus_role(request, pk):
