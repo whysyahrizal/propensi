@@ -72,10 +72,10 @@
 
           {# PBI-028: Approve/Reject buttons #}
           {% if can_approve and sprin.dapat_disetujui %}
-          <a href="{% url 'sprin:aksi' sprin.pk %}?aksi=setujui" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700 transition-colors shadow-sm">
+          <a href="{% url 'sprin:aksi_sprin' sprin.pk %}?aksi=setujui" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700 transition-colors shadow-sm">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Setujui
           </a>
-          <a href="{% url 'sprin:aksi' sprin.pk %}?aksi=tolak" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg border border-red-200 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
+          <a href="{% url 'sprin:aksi_sprin' sprin.pk %}?aksi=tolak" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg border border-red-200 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Tolak
           </a>
           {% endif %}
