@@ -1,92 +1,141 @@
 {% extends 'base.html' %}
-{% block title %}{% if action == 'edit' %}Edit{% else %}Tambah{% endif %} Personel — SIRAGA{% endblock %}
-{% block page_title %}{% if action == 'edit' %}Edit Personel{% else %}Tambah Personel Baru{% endif %}{% endblock %}
+
+{% block extra_head %}
+<style>
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="flex flex-col gap-6 max-w-2xl">
-  <a href="{% url 'accounts:daftar_personel' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
+<div class="max-w-2xl mx-auto flex flex-col gap-6">
+  
+  <a href="{% url 'accounts:daftar_personel' %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 font-medium">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-    Kembali ke Daftar Personel
+    Kembali
   </a>
-  <div class="card overflow-hidden">
-    <div class="h-1 w-full {% if action == 'edit' %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
-    <div class="px-8 py-7">
-      <h1 class="text-lg font-bold text-gray-900 mb-6">{% if action == 'edit' %}Edit Data: {{ personel.nama_lengkap }}{% else %}Tambah Personel Baru{% endif %}</h1>
-      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-5">
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+      <h1 class="text-xl font-bold text-gray-900">
+        {% if action == 'edit' %}Edit Personel{% else %}Tambah Personel Baru{% endif %}
+      </h1>
+    </div>
+
+    <div class="px-8 py-8">
+      <form method="POST" class="flex flex-col gap-6">
         {% csrf_token %}
-        {% if action == 'tambah' %}
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">NRP <span class="text-red-500">*</span></label>
-            <input name="nrp" type="text" required placeholder="cth. 123456789" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">NRP <span class="text-red-500">*</span></label>
+            <input name="nrp" type="text" required maxlength="8" pattern="\d{8}" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   placeholder="8 Digit Angka" 
+                   {% if action == 'edit' %}value="{{ personel.nrp }}" readonly class="bg-gray-50 cursor-not-allowed"{% else %}value="{{ form_data.nrp }}"{% endif %}
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"/>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lengkap <span class="text-red-500">*</span></label>
-            <input name="nama_lengkap" type="text" required placeholder="Nama sesuai identitas" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">Email <span class="text-red-500">*</span></label>
+            <input name="email" type="email" required placeholder="email@polri.go.id" 
+                   value="{% if action == 'edit' %}{{ personel.email }}{% else %}{{ form_data.email }}{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
           </div>
         </div>
-        {% else %}
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lengkap <span class="text-red-500">*</span></label>
-          <input name="nama_lengkap" type="text" required value="{{ personel.nama_lengkap }}" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-gray-700 uppercase">Nama Lengkap <span class="text-red-500">*</span></label>
+          <input name="nama_lengkap" type="text" required placeholder="Masukkan Nama Lengkap Sesuai Dokumen" 
+                 value="{% if action == 'edit' %}{{ personel.nama_lengkap }}{% else %}{{ form_data.nama_lengkap }}{% endif %}"
+                 class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
         </div>
-        {% endif %}
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pangkat</label>
-            <select name="pangkat" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">Pangkat/Gol <span class="text-red-500">*</span></label>
+            <select name="pangkat" required class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none cursor-pointer">
               <option value="">Pilih Pangkat</option>
               {% for val, label in pangkat_choices %}
-              <option value="{{ val }}" {% if personel.pangkat == val %}selected{% endif %}>{{ label }}</option>
+                <option value="{{ val }}" {% if personel.pangkat == val or form_data.pangkat == val %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Jabatan</label>
-            <input name="jabatan" type="text" value="{{ personel.jabatan|default:'' }}" placeholder="Jabatan saat ini" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">Jabatan <span class="text-red-500">*</span></label>
+            <input name="jabatan" type="text" required placeholder="Contoh: Banit Subditregident" 
+                   value="{% if action == 'edit' %}{{ personel.jabatan }}{% else %}{{ form_data.jabatan }}{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Satuan Kerja</label>
-            <select name="satker" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">Satuan Kerja <span class="text-red-500">*</span></label>
+            <select name="satker" required class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none cursor-pointer">
               <option value="">Pilih Satker</option>
               {% for s in satker_list %}
-              <option value="{{ s.pk }}" {% if personel.satker_id == s.pk %}selected{% endif %}>{{ s.kode }} — {{ s.nama }}</option>
+                <option value="{{ s.id }}" {% if personel.satker_id == s.id or form_data.satker == s.id|stringformat:"s" %}selected{% endif %}>{{ s.kode }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Role</label>
-            <select name="role" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
-              {% for val, label in role_choices %}
-              <option value="{{ val }}" {% if personel.role == val %}selected{% endif %}>{{ label }}</option>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">Role Akses <span class="text-red-500">*</span></label>
+            <select name="role" required class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none cursor-pointer">
+              <option value="">Pilih Role</option>
+              {% for r in role_list %}
+                <option value="{{ r.id }}" {% if personel.role_obj_id == r.id or form_data.role == r.id|stringformat:"s" %}selected{% endif %}>{{ r.nama|title }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Email</label>
-            <input name="email" type="email" value="{{ personel.email|default:'' }}" placeholder="email@example.com" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
+
+        <div class="flex flex-col gap-2 relative">
+          <label class="text-xs font-bold text-gray-700 uppercase">
+            {% if action == 'edit' %}Ganti Password (Kosongkan jika tidak ganti){% else %}Password <span class="text-red-500">*</span>{% endif %}
+          </label>
+          <div class="relative">
+            <input id="passwordInput" name="password" type="password" {% if action == 'tambah' %}required{% endif %} minlength="8"
+                   placeholder="Minimal 8 karakter"
+                   class="w-full h-11 pl-4 pr-12 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="eyePath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path id="eyePathOuter" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">No. HP</label>
-            <input name="no_hp" type="tel" value="{{ personel.no_hp|default:'' }}" placeholder="08xxxxxxxxxx" class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]"/>
-          </div>
         </div>
-        {% if action == 'tambah' %}
-        <div class="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-700">
-          Password default: <strong>siraga2026</strong> — personel wajib menggantinya setelah login pertama.
+
+        <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+          <a href="{% url 'accounts:daftar_personel' %}" class="px-6 py-2.5 rounded-lg border border-gray-300 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Batal</a>
+          <button type="submit" class="px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-light shadow-md transition-all">Simpan Data</button>
         </div>
-        {% endif %}
-        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <a href="{% url 'accounts:daftar_personel' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
-          <button type="submit" class="px-5 py-2.5 rounded-xl {% if action == 'edit' %}bg-amber-500 hover:bg-amber-600{% else %}bg-[#1a3a6b] hover:bg-[#2d5da6]{% endif %} text-white text-sm font-bold transition-colors shadow-sm">
-            {% if action == 'edit' %}Simpan Perubahan{% else %}Tambah Personel{% endif %}
-          </button>
-        </div>
+        
       </form>
     </div>
   </div>
 </div>
+
+<script>
+  function togglePasswordVisibility() {
+    const pwdInput = document.getElementById('passwordInput');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (pwdInput.type === 'password') {
+      pwdInput.type = 'text';
+      eyeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+      `;
+    } else {
+      pwdInput.type = 'password';
+      eyeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      `;
+    }
+  }
+</script>
 {% endblock %}
+

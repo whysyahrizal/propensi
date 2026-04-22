@@ -3,6 +3,27 @@
 from django.db import migrations
 
 
+def drop_legacy_location_columns(apps, schema_editor):
+    Sprin = apps.get_model('sprin', 'Sprin')
+    table_name = Sprin._meta.db_table
+
+    with schema_editor.connection.cursor() as cursor:
+        columns = {
+            col.name
+            for col in schema_editor.connection.introspection.get_table_description(
+                cursor, table_name
+            )
+        }
+
+    for field_name in ('latitude', 'longitude', 'radius_meter'):
+        if field_name in columns:
+            schema_editor.remove_field(Sprin, Sprin._meta.get_field(field_name))
+
+
+def noop_reverse(apps, schema_editor):
+    return
+
+
 class Migration(migrations.Migration):
 
     dependencies = [

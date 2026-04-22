@@ -38,9 +38,19 @@ def checkin_view(request):
         return redirect('dashboard:index')
 
     # Ambil sprin aktif untuk personel ini
-    sprin_aktif = Sprin.objects.filter(
-        daftar_personel__personel=request.user, status='aktif'
-    ).first()
+    from personel.models import Personel as PersonelLama
+    personel_lama = PersonelLama.objects.filter(nip=request.user.nrp).first()
+    
+    sprin_aktif = None
+    if personel_lama:
+        now = timezone.now()
+        sprin_aktif = Sprin.objects.filter(
+            daftar_personel__personel=personel_lama, 
+            status='Disetujui',
+            start_date__lte=now,
+            end_date__gte=now
+        ).first()
+
     return render(request, 'absensi/checkin.html', {'sprin_aktif': sprin_aktif})
 
 

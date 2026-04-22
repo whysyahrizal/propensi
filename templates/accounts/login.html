@@ -42,17 +42,16 @@
         <!-- Login Form -->
         <form method="POST" action="{% url 'accounts:login' %}" class="flex flex-col gap-5">
           {% csrf_token %}
-
-          <!-- NRP -->
+          
           <div class="flex flex-col gap-1.5">
             <label for="nrp" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-              NRP / Username
+              NRP
             </label>
             <input
               id="nrp"
               name="nrp"
               type="text"
-              placeholder="Masukkan NRP atau Username"
+              placeholder="Masukkan NRP"
               required
               autocomplete="username"
               class="h-11 w-full px-4 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
@@ -83,7 +82,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
             </svg>
-            Masuk (Login)
+            Masuk
           </button>
         </form>
 
@@ -92,11 +91,7 @@
           <div class="h-px w-full bg-gray-200"></div>
           <p class="text-xs text-gray-500">
             Belum punya akun?
-<<<<<<< HEAD
             <a href="{% url 'accounts:register' %}" class="text-[#1a3a6b] hover:underline font-semibold">Daftar di sini</a>
-=======
-            <a href="{% url 'accounts:register' %}" class="text-[#d4a017] hover:underline font-semibold">Daftar di sini</a>
->>>>>>> main
           </p>
           <p class="text-xs text-gray-500">Korlantas Polri &copy; 2026</p>
         </div>

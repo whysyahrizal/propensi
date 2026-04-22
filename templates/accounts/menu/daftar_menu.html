@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Manajemen Menu — SIRAGA{% endblock %}
+{% block page_title %}Manajemen Menu{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+  
+  <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50 text-primary">
+        <iconify-icon icon="heroicons:list-bullet" class="text-xl"></iconify-icon>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">Daftar Menu Navigasi</h1>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+        <div class="flex bg-gray-100 p-1 rounded-lg mr-2">
+            <a href="{% url 'accounts:daftar_role' %}" class="px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">Role</a>
+            <a href="{% url 'accounts:daftar_menu' %}" class="px-4 py-1.5 text-xs font-bold rounded-md bg-white text-primary shadow-sm">Menu</a>
+        </div>
+        <a href="{% url 'accounts:tambah_menu' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a3a6b] text-white text-sm font-semibold hover:bg-[#11274a] transition-colors shadow-sm mt-4 sm:mt-0">
+            <iconify-icon icon="heroicons:plus-circle" class="text-lg"></iconify-icon>
+            Tambah Menu
+        </a>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-gray-500">
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Label Menu</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Path</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-center">Status</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for menu in menus %}
+          <tr class="hover:bg-gray-50/70 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100">
+                  <iconify-icon icon="{{ menu.icon|default:'heroicons:stop' }}" class="text-lg"></iconify-icon>
+                </div>
+                <span class="text-sm font-bold text-gray-900">{{ menu.label }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <code class="text-[11px] font-mono bg-gray-50 px-2.5 py-1 rounded border border-gray-200 text-gray-600">{{ menu.path }}</code>
+            </td>
+
+            <td class="px-6 py-4">
+              <div class="flex justify-center">
+                <form action="{% url 'accounts:toggle_status_menu' menu.pk %}" method="POST" class="inline-flex">
+                  {% csrf_token %}
+                  <button type="submit" 
+                          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 {% if menu.is_active %}bg-green-500{% else %}bg-gray-300{% endif %}" 
+                          title="Klik untuk {% if menu.is_active %}nonaktifkan{% else %}aktifkan{% endif %}">
+                    <span class="sr-only">Ubah Status</span>
+                    <span aria-hidden="true" 
+                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {% if menu.is_active %}translate-x-5{% else %}translate-x-0{% endif %}">
+                    </span>
+                  </button>
+                </form>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              <a href="{% url 'accounts:edit_menu' menu.pk %}" 
+                 class="inline-flex items-center px-4 py-1.5 rounded-lg border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                Edit
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="px-6 py-16 text-center text-gray-500">
+                <div class="flex flex-col items-center gap-3">
+                    <iconify-icon icon="heroicons:magnifying-glass" class="text-4xl text-gray-300"></iconify-icon>
+                    <p class="text-sm font-medium">Belum ada data menu navigasi.</p>
+                </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+    <iconify-icon icon="heroicons:information-circle" class="text-blue-600 text-xl shrink-0 mt-0.5"></iconify-icon>
+    <p class="text-xs text-blue-700 leading-relaxed">
+      <strong>Catatan:</strong> Status menu yang dinonaktifkan melalui <em>toggle</em> di atas akan langsung menyembunyikan menu dari sidebar seluruh pengguna yang terkait, tanpa menghapus data hak akses pada Role.
+    </p>
+  </div>
+</div>
+{% endblock %}

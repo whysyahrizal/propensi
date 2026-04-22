@@ -19,6 +19,83 @@
         </a>
     </div>
 
+    {# Quota Cards #}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {# Total Kuota #}
+        <div class="card p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#1a3a6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Kuota Tahunan {{ tahun }}</p>
+                <p class="text-2xl font-bold text-[#1a3a6b]">{{ total_kuota }} <span class="text-sm font-medium text-gray-400">hari</span></p>
+            </div>
+        </div>
+
+        {# Sudah Terpakai #}
+        <div class="card p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Sudah Digunakan</p>
+                <p class="text-2xl font-bold text-amber-600">{{ hari_terpakai }} <span class="text-sm font-medium text-gray-400">hari</span></p>
+            </div>
+        </div>
+
+        {# Sisa Cuti #}
+        {% if sisa_hari <= 3 %}
+            {% with card_color="bg-red-100" num_color="text-red-600" %}
+            <div class="card p-5 flex items-center gap-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-xl {{ card_color }} flex items-center justify-center">
+                    <svg class="w-6 h-6 {{ num_color }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Sisa Cuti</p>
+                    <p class="text-2xl font-bold {{ num_color }}">{{ sisa_hari }} <span class="text-sm font-medium text-gray-400">hari</span></p>
+                </div>
+            </div>
+            {% endwith %}
+        {% elif sisa_hari <= 6 %}
+            {% with card_color="bg-yellow-100" num_color="text-yellow-600" %}
+            <div class="card p-5 flex items-center gap-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-xl {{ card_color }} flex items-center justify-center">
+                    <svg class="w-6 h-6 {{ num_color }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Sisa Cuti</p>
+                    <p class="text-2xl font-bold {{ num_color }}">{{ sisa_hari }} <span class="text-sm font-medium text-gray-400">hari</span></p>
+                </div>
+            </div>
+            {% endwith %}
+        {% else %}
+            <div class="card p-5 flex items-center gap-4">
+                <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Sisa Cuti</p>
+                    <p class="text-2xl font-bold text-emerald-600">{{ sisa_hari }} <span class="text-sm font-medium text-gray-400">hari</span></p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
     {# Table #}
     <div class="card overflow-hidden">
         <div class="overflow-x-auto">

@@ -20,6 +20,23 @@
         </ol>
     </nav>
 
+    {# Quota info banner #}
+    <div class="mb-4 flex flex-col sm:flex-row gap-3">
+        <div class="flex-1 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 flex items-center gap-3">
+            <svg class="w-5 h-5 text-[#1a3a6b] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div class="text-sm text-[#1a3a6b]">
+                <span class="font-bold">Kuota Cuti Tahunan {{ tahun }}:</span>
+                Terpakai <strong>{{ hari_terpakai }}</strong> hari —
+                Sisa <strong
+                    {% if sisa_hari <= 3 %}class="text-red-600"{% elif sisa_hari <= 6 %}class="text-yellow-600"{% else %}class="text-emerald-600"{% endif %}>
+                    {{ sisa_hari }}
+                </strong> hari dari {{ total_kuota }} hari.
+            </div>
+        </div>
+    </div>
+
     <div class="card overflow-hidden">
         <div class="bg-gradient-to-r from-[#1a3a6b] to-[#2d5da6] px-8 py-6">
             <h1 class="text-xl font-bold text-white mb-1">Form Pengajuan Cuti / Izin</h1>
@@ -27,8 +44,9 @@
         </div>
 
         <div class="p-8">
-            <form method="post" enctype="multipart/form-data" class="space-y-6">
+            <form id="cuti-form" method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
+                <input type="hidden" name="confirm_exceed" id="confirm_exceed" value="">
 
                 {% if messages %}
                 <div class="mb-4 space-y-2">
@@ -68,6 +86,7 @@
                         {% if form.tanggal_selesai.errors %}
                             <p class="text-red-500 text-xs italic mt-1">{{ form.tanggal_selesai.errors.0 }}</p>
                         {% endif %}
+                        <p id="date-error" class="text-red-500 text-xs italic mt-1 hidden">Tanggal selesai tidak boleh sebelum tanggal mulai.</p>
                     </div>
                 </div>
 
@@ -93,7 +112,7 @@
                 </div>
 
                 <div class="pt-4 flex flex-col sm:flex-row gap-3 border-t border-gray-100">
-                    <button type="submit" class="flex-1 btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <button type="button" id="submit-btn" onclick="checkKuota()" class="flex-1 btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -104,6 +123,30 @@
                     </a>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{# Modal Konfirmasi Melebihi Kuota #}
+<div id="modal-kuota" style="display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="tutupModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Jatah Cuti Melebihi Batas</h2>
+        </div>
+        <p id="modal-pesan" class="text-sm text-gray-600 mb-6 leading-relaxed"></p>
+        <div class="flex gap-3">
+            <button onclick="tutupModal()" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-bold hover:bg-gray-50 transition-colors">
+                Batal
+            </button>
+            <button onclick="tetapAjukan()" class="flex-1 py-2.5 rounded-xl bg-[#1a3a6b] text-white text-sm font-bold hover:bg-[#2d5da6] transition-colors">
+                Tetap Ajukan
+            </button>
         </div>
     </div>
 </div>
@@ -135,4 +178,74 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 </style>
+
+<script>
+    const SISA_HARI = parseInt("{{ sisa_hari }}", 10);
+    const TOTAL_KUOTA = parseInt("{{ total_kuota }}", 10);
+    const HARI_TERPAKAI = parseInt("{{ hari_terpakai }}", 10);
+
+    function validateDates() {
+        const mulaiEl = document.querySelector('input[name="tanggal_mulai"]');
+        const selesaiEl = document.querySelector('input[name="tanggal_selesai"]');
+        const errEl = document.getElementById('date-error');
+        if (!mulaiEl.value || !selesaiEl.value) { errEl.style.display = 'none'; return true; }
+        const valid = new Date(selesaiEl.value) >= new Date(mulaiEl.value);
+        errEl.style.display = valid ? 'none' : 'block';
+        selesaiEl.style.borderColor = valid ? '' : '#ef4444';
+        return valid;
+    }
+
+    document.querySelector('input[name="tanggal_mulai"]').addEventListener('change', validateDates);
+    document.querySelector('input[name="tanggal_selesai"]').addEventListener('change', validateDates);
+
+    function hitungDurasi() {
+        const mulai = document.querySelector('input[name="tanggal_mulai"]').value;
+        const selesai = document.querySelector('input[name="tanggal_selesai"]').value;
+        if (!mulai || !selesai) return 0;
+        const diff = (new Date(selesai) - new Date(mulai)) / (1000 * 60 * 60 * 24) + 1;
+        return diff > 0 ? diff : 0;
+    }
+
+    function checkKuota() {
+        // Validasi tanggal dulu
+        if (!validateDates()) return;
+
+        // Baca dari native <select> (bukan custom dropdown button)
+        const jenisCutiEl = document.querySelector('select[name="jenis_cuti"]');
+        const jenis = jenisCutiEl ? jenisCutiEl.value : '';
+
+        // Hanya cek kuota untuk cuti tahunan
+        if (jenis !== 'tahunan') {
+            document.getElementById('cuti-form').submit();
+            return;
+        }
+
+        const durasi = hitungDurasi();
+        if (durasi <= 0) {
+            document.getElementById('cuti-form').submit();
+            return;
+        }
+
+        const totalNanti = HARI_TERPAKAI + durasi;
+        if (totalNanti > TOTAL_KUOTA) {
+            document.getElementById('modal-pesan').innerHTML =
+                `Sisa cuti tahunan Anda hanya <strong>${SISA_HARI} hari</strong>. ` +
+                `Pengajuan ini sebesar <strong>${durasi} hari</strong> akan melebihi jatah cuti tahunan <strong>${TOTAL_KUOTA} hari</strong>.<br><br>` +
+                `Tetap ingin melanjutkan?`;
+            document.getElementById('modal-kuota').style.display = 'flex';
+        } else {
+            document.getElementById('cuti-form').submit();
+        }
+    }
+
+    function tutupModal() {
+        document.getElementById('modal-kuota').style.display = 'none';
+    }
+
+    function tetapAjukan() {
+        document.getElementById('confirm_exceed').value = 'true';
+        tutupModal();
+        document.getElementById('cuti-form').submit();
+    }
+</script>
 {% endblock %}
