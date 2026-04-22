@@ -119,7 +119,12 @@ class Personel(AbstractBaseUser, PermissionsMixin):
         related_name='personel_set', verbose_name='Role (Object)'
     )
     foto = models.ImageField(upload_to='foto_personel/', blank=True, null=True, verbose_name='Foto')
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
+    status_verifikasi = models.CharField(
+        max_length=20, 
+        choices=[('pending', 'Pending'), ('approved', 'Approved')],
+        default='pending'
+    )
     is_staff = models.BooleanField(default=False)
     tanggal_bergabung = models.DateTimeField(auto_now_add=True)
 
