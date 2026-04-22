@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kelola Pengajuan Cuti — SIRAGA{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-8 px-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Kelola Pengajuan Cuti</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Daftar seluruh pengajuan cuti dan izin personel.</p>
+        </div>
+    </div>
+
+    <!-- filter bar -->
+    <div class="card p-4 mb-6 bg-gray-50/50">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-2 relative">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Cari Nama atau NRP..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b]">
+                <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div>
+                <select name="status" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b]">
+                    <option value="">Semua Status</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Disetujui</option>
+                    <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Ditolak</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="date" name="dari" value="{{ request.GET.dari }}" class="w-full px-2 py-2 rounded-xl border border-gray-200 text-[11px] focus:ring-[#1a3a6b] focus:border-[#1a3a6b]">
+                <input type="date" name="sampai" value="{{ request.GET.sampai }}" class="w-full px-2 py-2 rounded-xl border border-gray-200 text-[11px] focus:ring-[#1a3a6b] focus:border-[#1a3a6b]">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-[#1a3a6b] text-white font-bold py-2 rounded-xl hover:bg-[#2d5da6] transition-colors text-sm">
+                    Filter
+                </button>
+                <a href="{% url 'manajemen_cuti:kelola' %}" class="px-4 py-2 bg-white border border-gray-200 text-gray-500 rounded-xl hover:bg-gray-50 transition-colors text-center text-sm font-bold">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {# Table #}
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Personel</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Jenis</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Periode</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for cuti in pengajuan_list %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[#1a3a6b] font-bold text-xs uppercase">
+                                    {{ cuti.personel.nama_lengkap|slice:":1" }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-700">{{ cuti.personel.nama_lengkap }}</p>
+                                    <p class="text-[10px] text-gray-400">nrp: {{ cuti.personel.nrp }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm font-medium text-gray-600">{{ cuti.get_jenis_cuti_display }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-2 text-[11px] font-bold text-[#1a3a6b]">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-[#1a3a6b]"></div>
+                                        <span>{{ cuti.tanggal_mulai|date:"d M Y" }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[11px] font-bold text-gray-400">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                                        <span>{{ cuti.tanggal_selesai|date:"d M Y" }}</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 ml-auto">{{ cuti.durasi_hari }}h</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if cuti.status == 'pending' %}
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-200">Pending</span>
+                            {% elif cuti.status == 'approved' %}
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-200">Disetujui</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-200">Ditolak</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'manajemen_cuti:detail' cuti.pk %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-[#1a3a6b] text-xs font-bold hover:bg-[#1a3a6b] hover:text-white transition-all border border-blue-100">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Detail & Aksi
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm italic">
+                            Tidak ada pengajuan cuti yang ditemukan.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

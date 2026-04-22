@@ -1,36 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}Hapus Personel — SIRAGA{% endblock %}
-{% block page_title %}Konfirmasi Hapus Personel{% endblock %}
+{% block title %}Konfirmasi Nonaktifkan — SIRAGA{% endblock %}
+
 {% block content %}
-<div class="flex flex-col gap-6 max-w-lg">
-  <a href="{% url 'accounts:daftar_personel' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 font-medium">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-    Kembali
-  </a>
-  <div class="rounded-2xl bg-white border border-red-200 shadow-sm overflow-hidden">
-    <div class="h-1 bg-red-500"></div>
-    <div class="px-8 py-7">
-      <div class="flex items-start gap-4 mb-6">
-        <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center shrink-0">
-          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold text-gray-900">Hapus Personel "{{ personel.nama_lengkap }}"?</h1>
-          <p class="text-sm text-gray-500 mt-1">NRP: {{ personel.nrp }} · {{ personel.get_role_display }}</p>
-        </div>
-      </div>
-      <div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-amber-50 border border-amber-200 mb-6">
-        <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <p class="text-xs text-amber-700">Tindakan ini tidak dapat dibatalkan. Seluruh data absensi, cuti, dan penugasan terkait personel ini akan tetap tersimpan.</p>
-      </div>
-      <div class="flex items-center justify-end gap-3">
-        <a href="{% url 'accounts:daftar_personel' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Batal</a>
-        <form method="POST">
-          {% csrf_token %}
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">Ya, Hapus</button>
-        </form>
-      </div>
+<div class="max-w-lg mx-auto mt-10">
+  <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
+    
+    <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-100">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
     </div>
+    
+    <h2 class="text-xl font-bold text-gray-900 mb-2">Nonaktifkan Akun Personel?</h2>
+    <p class="text-gray-500 text-sm mb-6">
+      Anda akan menonaktifkan akun <b>{{ personel.nama_lengkap }}</b> ({{ personel.nrp }}). Personel ini tidak akan dapat login atau mengakses sistem hingga akun direaktivasi kembali.
+    </p>
+
+    <form method="post" class="flex flex-col gap-6 text-left">
+      {% csrf_token %}
+      
+      <div>
+        <label for="alasan" class="block text-sm font-bold text-gray-700 mb-2">
+          Alasan Dinonaktifkan <span class="text-red-500">*</span>
+        </label>
+        <textarea id="alasan" name="alasan" rows="3" required placeholder="Contoh: Pensiun, Mutasi tugas, Cuti di luar tanggungan negara, dll..." class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all resize-none shadow-sm"></textarea>
+      </div>
+
+      <div class="flex gap-3 justify-center pt-2 border-t border-gray-100">
+        <a href="{% url 'accounts:detail_personel' personel.pk %}" class="flex-1 text-center px-5 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Batal
+        </a>
+        
+        <button type="submit" class="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 shadow-sm transition-colors">
+          Ya, Nonaktifkan Akun
+        </button>
+      </div>
+    </form>
+
   </div>
 </div>
 {% endblock %}
