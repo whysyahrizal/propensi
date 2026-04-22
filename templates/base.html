@@ -108,6 +108,42 @@
               Cuti / Izin Saya
             </a>
           </li>
+          <li>
+            <a href="{% url 'presensi:dashboard' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'presensi' and request.resolver_match.url_name != 'rekap_admin' and request.resolver_match.url_name != 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Presensi Harian
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'presensi:rekap_pribadi' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'presensi' and request.resolver_match.url_name == 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
+              </svg>
+              Rekap Presensi Saya
+            </a>
+          </li>
+
+          {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
+          <li>
+            <a href="{% url 'presensi:rekap_admin' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'presensi' and request.resolver_match.url_name == 'rekap_admin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 20h5V4H2v16h5m10 0v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4m10 0H7m2-8h6m-6-4h6" />
+              </svg>
+              Rekap Presensi Admin
+            </a>
+          </li>
+          {% endif %}
 
           {% if user.role in 'superadmin,operator,pimpinan' %}
           <li>

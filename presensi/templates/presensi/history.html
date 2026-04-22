@@ -1,4 +1,7 @@
-{% extends 'personel/base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Presensi — SIRAGA{% endblock %}
+{% block page_title %}Riwayat Presensi{% endblock %}
 
 {% block content %}
 <div style="max-width: 1000px; margin: 0 auto; font-family: 'Inter', sans-serif; padding: 20px; color: #334155;">
@@ -11,7 +14,7 @@
 
         <form method="get" style="display: flex; gap: 10px; background: #fff; padding: 10px 15px; border-radius: 15px; border: 1px solid #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <label style="font-size: 12px; font-weight: 700; color: #94A3B8; align-self: center; text-transform: uppercase;">Personel:</label>
-            <select name="personel_id" style="border: none; outline: none; background: transparent; font-size: 14px; color: #334155; cursor: pointer; font-weight: 600;">
+            <select name="personel_id" class="no-custom" style="border: none; outline: none; background: transparent; font-size: 14px; color: #334155; cursor: pointer; font-weight: 600;">
                 <option value="">-- Semua Personel --</option>
                 {% for p in personel_list %}
                     <option value="{{ p.id }}" {% if selected_personel and selected_personel.id == p.id %}selected{% endif %}>
@@ -79,10 +82,18 @@
         </table>
     </div>
 
-    <div style="margin-top: 30px; text-align: left;">
-        <a href="{% url 'presensi:dashboard' %}" style="text-decoration: none; font-size: 14px; font-weight: 700; color: #1A5B92; display: inline-flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+    <div style="margin-top: 30px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{% url 'presensi:dashboard' %}{% if selected_personel %}?personel_id={{ selected_personel.id }}{% endif %}" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 14px; font-weight: 700; color: #1A5B92;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Presensi Harian
         </a>
+        <a href="{% url 'presensi:rekap_pribadi' %}" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 13px; font-weight: 700; color: #1A5B92; background: #EFF6FF; border: 1px solid #BFDBFE;">
+            Rekap Presensi Saya
+        </a>
+        {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
+        <a href="{% url 'presensi:rekap_admin' %}" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-size: 13px; font-weight: 700; color: #065F46; background: #ECFDF5; border: 1px solid #A7F3D0;">
+            Rekap Presensi Admin
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
