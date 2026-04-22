@@ -98,16 +98,30 @@
             </a>
           </li>
           <li>
-            <a href="{% if user.role == 'personel' %}{% url 'manajemen_cuti:riwayat' %}{% else %}{% url 'manajemen_cuti:kelola' %}{% endif %}"
+            <a href="{% url 'manajemen_cuti:riwayat' %}"
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'manajemen_cuti' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              Cuti / Izin
+              Cuti / Izin Saya
             </a>
           </li>
+
+          {% if user.role in 'superadmin,operator,pimpinan' %}
+          <li>
+            <a href="{% url 'manajemen_cuti:kelola' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Kelola Cuti / Izin
+            </a>
+          </li>
+          {% endif %}
 
           {% if user.role in 'superadmin,operator' %}
           <li>
