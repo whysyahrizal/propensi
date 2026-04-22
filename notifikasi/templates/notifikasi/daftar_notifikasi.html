@@ -18,18 +18,33 @@
       <p class="text-sm text-gray-500 mt-0.5">Semua notifikasi sudah dibaca</p>
       {% endif %}
     </div>
-    {% if total_unread > 0 %}
-    <form method="post" action="{% url 'notifikasi:tandai_semua' %}">
-      {% csrf_token %}
-      <button type="submit"
-        class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        Tandai Semua Dibaca
-      </button>
-    </form>
-    {% endif %}
+    <div class="flex gap-2">
+      {% if total_unread > 0 %}
+      <form method="post" action="{% url 'notifikasi:tandai_semua' %}">
+        {% csrf_token %}
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Tandai Semua
+        </button>
+      </form>
+      {% endif %}
+      
+      {% if page_obj %}
+      <form method="post" action="{% url 'notifikasi:hapus_semua' %}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus seluruh notifikasi? Tindakan ini tidak dapat dibatalkan.');">
+        {% csrf_token %}
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Hapus Semua
+        </button>
+      </form>
+      {% endif %}
+    </div>
   </div>
 
   <!-- Filter Tabs -->
@@ -55,12 +70,13 @@
   <!-- Notification List -->
   <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
     {% for notif in page_obj %}
-    <a href="{% url 'notifikasi:detail' notif.pk %}"
-      class="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group
+    <div class="relative flex items-start gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group
              {% if not notif.is_read %}bg-blue-50/40{% endif %}">
+      <!-- Main Clickable Area -->
+      <a href="{% url 'notifikasi:detail' notif.pk %}" class="absolute inset-0 z-0"></a>
 
       <!-- Tipe icon badge -->
-      <div class="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base mt-0.5
+      <div class="relative z-10 pointer-events-none shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base mt-0.5
                   {% if notif.tipe == 'cuti' %}bg-blue-100 text-blue-600
                   {% elif notif.tipe == 'sprin' %}bg-purple-100 text-purple-600
                   {% elif notif.tipe == 'presensi' %}bg-green-100 text-green-600
@@ -70,7 +86,7 @@
       </div>
 
       <!-- Content -->
-      <div class="flex-1 min-w-0">
+      <div class="relative z-10 pointer-events-none flex-1 min-w-0 pr-2">
         <div class="flex items-center gap-2">
           <p class="text-sm font-semibold text-gray-900 truncate
                     {% if not notif.is_read %}text-[#1a3a6b]{% endif %}">
@@ -84,11 +100,18 @@
         <p class="text-[10px] text-gray-400 mt-1">{{ notif.dibuat_pada|date:"d M Y, H:i" }}</p>
       </div>
 
-      <!-- Arrow -->
-      <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 mt-1 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
-    </a>
+      <!-- Delete Action -->
+      <div class="relative z-10 shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <form method="post" action="{% url 'notifikasi:hapus' notif.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Hapus Notifikasi">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
     {% empty %}
     <div class="flex flex-col items-center justify-center py-16 text-center">
       <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl mb-3">🔔</div>
