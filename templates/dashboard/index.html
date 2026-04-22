@@ -5,6 +5,24 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
+
+  {% if jumlah_pending_verifikasi > 0 and request.user.is_operator or request.user.is_superadmin %}
+  <div class="flex items-center justify-between rounded-xl border border-orange-100 bg-orange-50 p-4 shadow-sm mb-6">
+    <div class="flex items-center gap-3">
+      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600">
+        <iconify-icon icon="heroicons:user-plus" class="text-xl"></iconify-icon>
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-orange-800">Antrean Verifikasi</h4>
+        <p class="text-xs text-orange-600">Ada {{ jumlah_pending_verifikasi }} akun baru yang perlu Anda tinjau.</p>
+      </div>
+    </div>
+    <a href="{% url 'accounts:daftar_verifikasi' %}" class="bg-orange-600 px-4 py-2 text-xs font-bold text-white rounded-lg hover:bg-orange-700 transition-all">
+      Tinjau Sekarang
+    </a>
+  </div>
+  {% endif %}
+
   <!-- Statistik hari ini -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-xl border border-gray-200 p-5">
