@@ -1,4 +1,7 @@
-{% extends 'personel/base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}Check-in Presensi — SIRAGA{% endblock %}
+{% block page_title %}Check-in Presensi{% endblock %}
 
 {% block content %}
 <div style="max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; padding: 20px; color: #334155;">
@@ -28,7 +31,7 @@
 
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase;">Jenis Presensi</label>
-                <select name="type" id="presensi_type" required 
+                <select name="type" id="presensi_type" class="no-custom" required 
                         style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #CBD5E1; background: #F8FAFC; outline: none; cursor: pointer;">
                     <option value="Office Hour">Office Hour (Kantor)</option>
                     <option value="Dinas">Dinas (Luar Kantor)</option>
@@ -57,7 +60,7 @@
 
             <div id="izin-detail" style="display:none; margin-bottom: 20px; padding: 15px; background: #FFFBEB; border-radius: 15px; border: 1px solid #FEF3C7;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 8px; text-transform: uppercase;">Keterangan Izin</label>
-                <select name="izin_detail" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #FDE68A;">
+                <select name="izin_detail" class="no-custom" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #FDE68A;">
                     <option value="">-- Pilih Alasan --</option>
                     <option value="SAKIT">SAKIT</option>
                     <option value="CUTI">CUTI</option>

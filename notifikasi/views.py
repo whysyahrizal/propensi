@@ -63,3 +63,24 @@ def tandai_semua_dibaca(request):
         )
         messages.success(request, 'Semua notifikasi telah ditandai sebagai dibaca.')
     return redirect('notifikasi:daftar')
+
+@login_required
+def hapus_notifikasi(request, pk):
+    """Hapus satu notifikasi."""
+    if request.method == 'POST':
+        notif = get_object_or_404(Notifikasi, pk=pk)
+        if notif.user == request.user:
+            notif.delete()
+            messages.success(request, 'Notifikasi berhasil dihapus.')
+        else:
+            messages.error(request, 'Anda tidak berhak menghapus notifikasi ini.')
+    return redirect('notifikasi:daftar')
+
+
+@login_required
+def hapus_semua_notifikasi(request):
+    """Hapus seluruh notifikasi milik user."""
+    if request.method == 'POST':
+        Notifikasi.objects.filter(user=request.user).delete()
+        messages.success(request, 'Seluruh notifikasi berhasil dihapus.')
+    return redirect('notifikasi:daftar')

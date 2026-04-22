@@ -1,4 +1,7 @@
-{% extends 'personel/base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}Presensi Harian — SIRAGA{% endblock %}
+{% block page_title %}Presensi Harian{% endblock %}
 
 {% block content %}
 <div style="max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; padding: 20px; color: #334155;">
@@ -10,7 +13,7 @@
         </div>
         
         <form method="get" style="display: flex; gap: 10px; background: #fff; padding: 10px 15px; border-radius: 15px; border: 1px solid #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <select name="personel_id" style="border: none; outline: none; background: transparent; font-size: 14px; color: #334155; cursor: pointer;">
+            <select name="personel_id" class="no-custom" style="border: none; outline: none; background: transparent; font-size: 14px; color: #334155; cursor: pointer;">
                 {% for p in personel_list %}
                     <option value="{{ p.id }}" {% if selected_personel and selected_personel.id == p.id %}selected{% endif %}>
                         {{ p.nama }}
@@ -86,10 +89,18 @@
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="{% url 'presensi:history' %}" style="font-size: 13px; font-weight: 700; color: #94A3B8; text-decoration: none;">
-            <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Presensi
+    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 30px;">
+        <a href="{% url 'presensi:history' %}?personel_id={{ selected_personel.id }}" style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px; border-radius: 12px; text-decoration: none; font-size: 13px; font-weight: 700; color: #475569; background: #fff; border: 1px solid #E2E8F0;">
+            <i class="fa-solid fa-clock-rotate-left"></i>&nbsp;Lihat Riwayat Presensi
         </a>
+        <a href="{% url 'presensi:rekap_pribadi' %}" style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px; border-radius: 12px; text-decoration: none; font-size: 13px; font-weight: 700; color: #1A5B92; background: #EFF6FF; border: 1px solid #BFDBFE;">
+            Rekap Presensi Saya
+        </a>
+        {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
+        <a href="{% url 'presensi:rekap_admin' %}" style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px; border-radius: 12px; text-decoration: none; font-size: 13px; font-weight: 700; color: #065F46; background: #ECFDF5; border: 1px solid #A7F3D0;">
+            Rekap Presensi Admin
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

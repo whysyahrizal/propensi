@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
 from .models import Presensi
 from personel.models import Personel, Unit
-from datetime import time, datetime, timedelta
+from datetime import time, timedelta
 import csv
 from django.http import HttpResponse
 from django.db.models import Count, Q
@@ -132,25 +132,49 @@ def history(request):
         'personel_list': Personel.objects.filter(is_active=True)
     })
 
-def _export_csv(request, queryset, filename, is_admin=False):
+def _build_rekap_admin_stats(queryset):
+    return queryset.values(
+        'personel__id',
+        'personel__nip',
+        'personel__nama',
+        'personel__unit__nama',
+    ).annotate(
+        total_hadir=Count('id', filter=Q(status='Hadir')),
+        total_terlambat=Count('id', filter=Q(status='Terlambat')),
+        total_izin=Count('id', filter=Q(type='Izin')),
+        total_dinas=Count('id', filter=Q(status='Dinas')),
+    ).order_by('personel__nama')
+
+def _export_csv(queryset, filename):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
     writer = csv.writer(response)
 
-    if is_admin:
-        writer.writerow(['Tanggal', 'NRP', 'Nama Lengkap', 'Unit', 'Status', 'Check-In', 'Check-Out', 'Tipe'])
-        for r in queryset:
-            checkin = r.checkin_time.strftime('%H:%M') if r.checkin_time else '-'
-            checkout = r.checkout_time.strftime('%H:%M') if r.checkout_time else '-'
-            unit = r.personel.unit.nama_unit if r.personel.unit else '-'
-            writer.writerow([r.date, r.personel.nip, r.personel.nama_lengkap, unit, r.status, checkin, checkout, r.type])
-    else:
-        writer.writerow(['Tanggal', 'Status', 'Check-In', 'Check-Out', 'Tipe', 'Detail Izin'])
-        for r in queryset:
-            checkin = r.checkin_time.strftime('%H:%M') if r.checkin_time else '-'
-            checkout = r.checkout_time.strftime('%H:%M') if r.checkout_time else '-'
-            writer.writerow([r.date, r.status, checkin, checkout, r.type, r.izin_detail or '-'])
+    writer.writerow(['Tanggal', 'Status', 'Check-In', 'Check-Out', 'Tipe', 'Detail Izin'])
+    for r in queryset:
+        checkin = r.checkin_time.strftime('%H:%M') if r.checkin_time else '-'
+        checkout = r.checkout_time.strftime('%H:%M') if r.checkout_time else '-'
+        writer.writerow([r.date, r.status, checkin, checkout, r.type, r.izin_detail or '-'])
             
+    return response
+
+def _export_admin_summary_csv(stats, filename):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+    writer = csv.writer(response)
+
+    writer.writerow(['NRP', 'Nama', 'Unit', 'Total Hadir', 'Total Terlambat', 'Total Izin / Cuti', 'Total Dinas'])
+    for row in stats:
+        writer.writerow([
+            row['personel__nip'],
+            row['personel__nama'],
+            row['personel__unit__nama'] or '-',
+            row['total_hadir'],
+            row['total_terlambat'],
+            row['total_izin'],
+            row['total_dinas'],
+        ])
+
     return response
 
 # PBI-031
@@ -170,20 +194,12 @@ def rekap_admin(request):
     if unit_id:
         qs = qs.filter(personel__unit_id=unit_id)
     if search:
-        qs = qs.filter(Q(personel__nama_lengkap__icontains=search) | Q(personel__nip__icontains=search))
+        qs = qs.filter(Q(personel__nama__icontains=search) | Q(personel__nip__icontains=search))
+
+    personel_stats = _build_rekap_admin_stats(qs)
 
     if request.GET.get('export') == 'csv':
-        return _export_csv(request, qs.order_by('date', 'personel__nama_lengkap'), f"Rekap_Presensi_{date_from}_to_{date_to}", True)
-
-    # Aggregate by personel
-    personel_stats = qs.values(
-        'personel__id', 'personel__nip', 'personel__nama_lengkap', 'personel__unit__nama_unit'
-    ).annotate(
-        total_hadir=Count('id', filter=Q(status='Hadir')),
-        total_terlambat=Count('id', filter=Q(status='Terlambat')),
-        total_izin=Count('id', filter=Q(type='Izin')),
-        total_dinas=Count('id', filter=Q(status='Dinas')),
-    ).order_by('personel__nama_lengkap')
+        return _export_admin_summary_csv(personel_stats, f"Rekap_Presensi_{date_from}_to_{date_to}")
 
     context = {
         'stats': personel_stats,
@@ -213,7 +229,7 @@ def rekap_pribadi(request):
     qs = Presensi.objects.filter(personel=personel, date__range=[date_from, date_to]).order_by('-date')
 
     if request.GET.get('export') == 'csv':
-        return _export_csv(request, qs, f"Rekap_Pribadi_{personel.nip}_{date_from}_to_{date_to}", False)
+        return _export_csv(qs, f"Rekap_Pribadi_{personel.nip}_{date_from}_to_{date_to}")
 
     # Summary stats
     stats = qs.aggregate(
