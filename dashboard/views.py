@@ -32,9 +32,11 @@ def dashboard_view(request):
         absensi_hari_ini = RekorAbsensi.objects.filter(
             personel=request.user, tanggal=today
         ).first()
-        sprin_aktif_saya = Sprin.objects.filter(
-            daftar_personel__personel=request.user, status='aktif'
-        ).first()
+        sprin_aktif_saya = None
+        if personel_profile:
+            sprin_aktif_saya = Sprin.objects.filter(
+                daftar_personel__personel=personel_profile, status='aktif'
+            ).first()
 
         return render(request, 'dashboard/index.html', {
             'absensi_hari_ini': absensi_hari_ini,
