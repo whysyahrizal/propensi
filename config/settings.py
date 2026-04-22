@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sprin.context_processors.user_role',
+                'accounts.context_processor.jumlah_verifikasi',
             ],
         },
     },

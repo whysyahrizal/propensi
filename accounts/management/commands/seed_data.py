@@ -24,10 +24,10 @@ SATKER_DATA = [
 ]
 
 ROLE_DATA = [
-    {"nama": "superadmin", "display_label": "Super Administrator", "deskripsi": "Akses penuh ke seluruh sistem dan pengaturan."},
-    {"nama": "pimpinan", "display_label": "Pimpinan / Komandan", "deskripsi": "Akses pemantauan dashboard dan persetujuan."},
-    {"nama": "operator", "display_label": "Operator SDM", "deskripsi": "Akses kelola data personel dan absensi harian."},
-    {"nama": "personel", "display_label": "Personel Biasa", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
+    {"nama": "superadmin", "display_label": "Superadmin", "deskripsi": "Akses penuh ke seluruh sistem dan pengaturan."},
+    {"nama": "pimpinan", "display_label": "Pimpinan", "deskripsi": "Akses pemantauan dashboard dan persetujuan."},
+    {"nama": "operator", "display_label": "Operator", "deskripsi": "Akses kelola data personel dan absensi harian."},
+    {"nama": "personel", "display_label": "Personel", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
 ]
 
 PERSONEL_DATA = [
@@ -225,8 +225,10 @@ class Command(BaseCommand):
                 jabatan=p['jabatan'],
                 satker=satker,
                 role_obj=role_obj,
+                is_active = True,
                 is_staff=(role_slug == 'superadmin'),
                 is_superuser=(role_slug == 'superadmin'),
+                status_verifikasi='approved',
             )
             self.stdout.write(
                 f'   [{self.style.SUCCESS("baru")}] '
