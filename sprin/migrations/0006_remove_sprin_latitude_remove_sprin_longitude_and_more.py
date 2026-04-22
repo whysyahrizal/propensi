@@ -10,16 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='sprin',
-            name='latitude',
-        ),
-        migrations.RemoveField(
-            model_name='sprin',
-            name='longitude',
-        ),
-        migrations.RemoveField(
-            model_name='sprin',
-            name='radius_meter',
-        ),
     ]
