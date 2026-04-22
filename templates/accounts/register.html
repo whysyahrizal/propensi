@@ -50,44 +50,63 @@
         {% endfor %}
       </div>
       {% endif %}
-
+      
       <form method="POST" class="flex flex-col gap-4">
         {% csrf_token %}
 
-        <!-- NRP -->
         <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">NRP</label>
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">NRP <span class="text-red-500">*</span></label>
           <input type="text" name="nrp" required maxlength="20"
             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
             placeholder="Masukkan NRP" value="{{ request.POST.nrp }}" />
         </div>
 
-        <!-- Nama Lengkap -->
         <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lengkap</label>
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Nama Lengkap <span class="text-red-500">*</span></label>
           <input type="text" name="nama_lengkap" required
             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
             placeholder="Nama lengkap" value="{{ request.POST.nama_lengkap }}" />
         </div>
 
-        <!-- Pangkat -->
-        <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pangkat</label>
-          <select name="pangkat"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition bg-white">
-            <option value="">-- Pilih Pangkat --</option>
-            {% for val, label in pangkat_choices %}
-            <option value="{{ val }}" {% if request.POST.pangkat == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Email <span class="text-red-500">*</span></label>
+            <input type="email" name="email" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
+              placeholder="email@polri.go.id" value="{{ request.POST.email }}" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">No. HP <span class="text-red-500">*</span></label>
+            <input type="tel" name="no_hp" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
+              placeholder="08xxxxxxxxxx" value="{{ request.POST.no_hp }}" />
+          </div>
         </div>
 
-        <!-- Satuan Kerja -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Pangkat <span class="text-red-500">*</span></label>
+            <select name="pangkat" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition bg-white">
+              <option value="">-- Pilih --</option>
+              {% for val, label in pangkat_choices %}
+              <option value="{{ val }}" {% if request.POST.pangkat == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Jabatan <span class="text-red-500">*</span></label>
+            <input type="text" name="jabatan" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
+              placeholder="cth: Banit" value="{{ request.POST.jabatan }}" />
+          </div>
+        </div>
+
         <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Satuan Kerja</label>
-          <select name="satker"
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Satuan Kerja <span class="text-red-500">*</span></label>
+          <select name="satker" required
             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition bg-white">
-            <option value="">-- Pilih Satker (opsional) --</option>
+            <option value="">-- Pilih --</option>
             {% for satker in satker_list %}
             <option value="{{ satker.pk }}" {% if request.POST.satker == satker.pk|stringformat:"s" %}selected{% endif %}>
               {{ satker.nama }}
@@ -95,28 +114,22 @@
             {% endfor %}
           </select>
         </div>
-
-        <!-- Password -->
+        
         <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Password</label>
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Password <span class="text-red-500">*</span></label>
           <input type="password" name="password1" required minlength="8"
             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
-            placeholder="Minimal 8 karakter" />
+            placeholder="Min 8 karakter" />
         </div>
-
-        <!-- Konfirmasi Password -->
         <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Konfirmasi Password</label>
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Konfirmasi <span class="text-red-500">*</span></label>
           <input type="password" name="password2" required minlength="8"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
-            placeholder="Ulangi password" />
+            class="w-100 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]/30 focus:border-[#1a3a6b] transition"
+            placeholder="Ulangi" />
         </div>
-
+        
         <button type="submit"
-          class="mt-1 w-full py-3 rounded-xl bg-[#1a3a6b] text-white text-sm font-bold hover:bg-[#2d5da6] transition-colors shadow-sm flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-          </svg>
+          class="mt-2 w-full py-3 rounded-xl bg-[#1a3a6b] text-white text-sm font-bold hover:bg-[#2d5da6] transition-colors shadow-sm flex items-center justify-center gap-2">
           Daftar Sekarang
         </button>
       </form>
