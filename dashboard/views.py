@@ -32,6 +32,7 @@ def dashboard_view(request):
         absensi_hari_ini = RekorAbsensi.objects.filter(
             personel=request.user, tanggal=today
         ).first()
+
         sprin_aktif_saya = None
         if personel_profile:
             sprin_aktif_saya = Sprin.objects.filter(
