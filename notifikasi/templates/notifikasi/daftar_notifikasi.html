@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifikasi — SIRAGA Korlantas{% endblock %}
+{% block page_title %}Notifikasi{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <!-- Header row -->
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-lg font-bold text-gray-900">Kotak Notifikasi</h1>
+      {% if total_unread > 0 %}
+      <p class="text-sm text-gray-500 mt-0.5">
+        <span class="font-semibold text-[#1a3a6b]">{{ total_unread }}</span> belum dibaca
+      </p>
+      {% else %}
+      <p class="text-sm text-gray-500 mt-0.5">Semua notifikasi sudah dibaca</p>
+      {% endif %}
+    </div>
+    <div class="flex gap-2">
+      {% if total_unread > 0 %}
+      <form method="post" action="{% url 'notifikasi:tandai_semua' %}">
+        {% csrf_token %}
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Tandai Semua
+        </button>
+      </form>
+      {% endif %}
+      
+      {% if page_obj %}
+      <button type="button" onclick="document.getElementById('modal-hapus-semua').classList.remove('hidden')"
+        class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        Hapus Semua
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="flex gap-1 mb-4 bg-gray-100 p-1 rounded-xl w-fit">
+    {% for val, label in forloop.parentloop|dictsort:"0" %}{% endfor %}
+    <a href="?filter=semua"
+      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+             {% if filter_read == 'semua' %}bg-white text-[#1a3a6b] shadow-sm{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+      Semua
+    </a>
+    <a href="?filter=belum_dibaca"
+      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+             {% if filter_read == 'belum_dibaca' %}bg-white text-[#1a3a6b] shadow-sm{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+      Belum Dibaca
+    </a>
+    <a href="?filter=sudah_dibaca"
+      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+             {% if filter_read == 'sudah_dibaca' %}bg-white text-[#1a3a6b] shadow-sm{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+      Sudah Dibaca
+    </a>
+  </div>
+
+  <!-- Notification List -->
+  <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+    {% for notif in page_obj %}
+    <div class="relative flex items-start gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group
+             {% if not notif.is_read %}bg-blue-50/40{% endif %}">
+      <!-- Main Clickable Area -->
+      <a href="{% url 'notifikasi:detail' notif.pk %}" class="absolute inset-0 z-0"></a>
+
+      <!-- Tipe icon badge -->
+      <div class="relative z-10 pointer-events-none shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base mt-0.5
+                  {% if notif.tipe == 'cuti' %}bg-blue-100 text-blue-600
+                  {% elif notif.tipe == 'sprin' %}bg-purple-100 text-purple-600
+                  {% elif notif.tipe == 'presensi' %}bg-green-100 text-green-600
+                  {% elif notif.tipe == 'sistem' %}bg-gray-100 text-gray-600
+                  {% else %}bg-yellow-100 text-yellow-600{% endif %}">
+        {{ notif.tipe_icon }}
+      </div>
+
+      <!-- Content -->
+      <div class="relative z-10 pointer-events-none flex-1 min-w-0 pr-2">
+        <div class="flex items-center gap-2">
+          <p class="text-sm font-semibold text-gray-900 truncate
+                    {% if not notif.is_read %}text-[#1a3a6b]{% endif %}">
+            {{ notif.judul }}
+          </p>
+          {% if not notif.is_read %}
+          <span class="inline-block w-2 h-2 rounded-full bg-[#1a3a6b] shrink-0"></span>
+          {% endif %}
+        </div>
+        <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ notif.pesan }}</p>
+        <p class="text-[10px] text-gray-400 mt-1">{{ notif.dibuat_pada|date:"d M Y, H:i" }}</p>
+      </div>
+
+      <!-- Delete Action -->
+      <div class="relative z-10 shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <form method="post" action="{% url 'notifikasi:hapus' notif.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Hapus Notifikasi">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+      <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl mb-3">🔔</div>
+      <p class="text-sm font-medium text-gray-500">Tidak ada notifikasi</p>
+      <p class="text-xs text-gray-400 mt-1">
+        {% if filter_read == 'belum_dibaca' %}Semua notifikasi sudah dibaca.
+        {% elif filter_read == 'sudah_dibaca' %}Belum ada notifikasi yang dibaca.
+        {% else %}Anda belum memiliki notifikasi.{% endif %}
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="flex items-center justify-between mt-4">
+    <p class="text-xs text-gray-500">
+      Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+      &mdash; {{ page_obj.paginator.count }} notifikasi
+    </p>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+      <a href="?filter={{ filter_read }}&page={{ page_obj.previous_page_number }}"
+        class="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        ← Sebelumnya
+      </a>
+      {% endif %}
+      {% if page_obj.has_next %}
+      <a href="?filter={{ filter_read }}&page={{ page_obj.next_page_number }}"
+        class="px-3 py-1.5 text-xs font-medium bg-[#1a3a6b] text-white rounded-lg hover:bg-[#2d5da6] transition-colors">
+        Berikutnya →
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Modal Hapus Semua -->
+  <div id="modal-hapus-semua" class="fixed inset-0 z-[100] hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="document.getElementById('modal-hapus-semua').classList.add('hidden')"></div>
+    <!-- Modal Panel -->
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0 pointer-events-none">
+      <div class="relative pointer-events-auto bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-md w-full p-6">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
+              Hapus Seluruh Notifikasi
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500">
+                Apakah Anda yakin ingin menghapus seluruh notifikasi? Tindakan ini tidak dapat dibatalkan dan semua riwayat notifikasi akan hilang secara permanen.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 sm:mt-5 sm:flex sm:flex-row-reverse gap-3">
+          <form method="post" action="{% url 'notifikasi:hapus_semua' %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent px-4 py-2 bg-red-600 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">
+              Ya, Hapus Semua
+            </button>
+          </form>
+          <button type="button" onclick="document.getElementById('modal-hapus-semua').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a3a6b] sm:mt-0 sm:w-auto sm:text-sm">
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

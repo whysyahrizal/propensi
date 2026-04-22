@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Absensi — SIRAGA{% endblock %}
+{% block page_title %}Riwayat Absensi{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Riwayat Absensi</h1>
+      <p class="text-sm text-gray-500 mt-1">Semua catatan check-in dan check-out Anda ada di sini.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'absensi:dashboard' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+        Kembali ke Absensi Harian
+      </a>
+      <a href="{% url 'absensi:rekap_pribadi' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#1a3a6b] text-sm font-semibold text-white hover:bg-[#2d5da6]">
+        Rekap Absensi Saya
+      </a>
+      {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
+      <a href="{% url 'absensi:rekap_admin' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-green-600 text-sm font-semibold text-white hover:bg-green-700">
+        Rekap Absensi Admin
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold tracking-wider">
+            <th class="px-6 py-3">Tanggal</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3">Check-In</th>
+            <th class="px-6 py-3">Check-Out</th>
+            <th class="px-6 py-3">Catatan</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for record in records %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 text-sm font-semibold text-gray-900">{{ record.tanggal|date:"l, d M Y" }}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">{{ record.status_badge }}</td>
+            <td class="px-6 py-4 text-sm font-mono text-gray-700">{{ record.waktu_masuk|time:"H:i"|default:"-" }}</td>
+            <td class="px-6 py-4 text-sm font-mono text-gray-700">{{ record.waktu_keluar|time:"H:i"|default:"-" }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ record.catatan|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada riwayat absensi.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

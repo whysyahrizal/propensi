@@ -46,19 +46,182 @@
       </div>
 
       <!-- Navigation -->
+      {% comment %} <nav class="flex-1 overflow-y-auto px-3 py-4">
+        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
+        <ul class="flex flex-col gap-0.5 mb-4">
+          <li>
+            <a href="{% url 'dashboard:index' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'dashboard' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'personel_list' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if 'personel' in request.path and 'accounts' not in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Personel
+            </a>
+          </li>
+          {% if user.role == 'superadmin' %}
+          <li>
+            <a href="{% url 'accounts:daftar_role' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if 'roles' in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Manajemen Role
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+
+        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Lainnya</p>
+        <ul class="flex flex-col gap-0.5">
+          <li>
+            <a href="{% url 'accounts:profil' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Sprin / Gas
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'manajemen_cuti:riwayat' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Cuti / Izin Saya
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'absensi:dashboard' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name != 'rekap_admin' and request.resolver_match.url_name != 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Absensi Harian
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'absensi:rekap_pribadi' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
+              </svg>
+              Rekap Absensi Saya
+            </a>
+          </li>
+
+          {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
+          <li>
+            <a href="{% url 'absensi:rekap_admin' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_admin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 20h5V4H2v16h5m10 0v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4m10 0H7m2-8h6m-6-4h6" />
+              </svg>
+              Rekap Absensi Admin
+            </a>
+          </li>
+          {% endif %}
+
+          {% if user.role in 'superadmin,operator,pimpinan' %}
+          <li>
+            <a href="{% url 'manajemen_cuti:kelola' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Kelola Cuti / Izin
+            </a>
+          </li>
+          {% endif %}
+
+          {% if user.role in 'superadmin,operator' %}
+          <li>
+            <a href="{% url 'locations:daftar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Wilayah Penugasan
+            </a>
+          </li>
+          {% endif %}
+          <li>
+            <a href="{% url 'pengumuman:daftar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'pengumuman' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+              <span class="flex-1">Pengumuman</span>
+              {% if pengumuman_baru_count > 0 %}
+              <span class="inline-flex items-center justify-center w-5 h-5 ml-auto text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm">
+                {{ pengumuman_baru_count }}
+              </span>
+              {% endif %}
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'notifikasi:daftar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'notifikasi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="flex-1">Notifikasi</span>
+              {% if notif_unread_count > 0 %}
+              <span class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm">
+                {{ notif_unread_count }}
+              </span>
+              {% endif %}
+            </a>
+          </li>
+
+        </ul>
+      </nav> {% endcomment %}
+      
       <nav class="flex-1 overflow-y-auto px-3 py-4">
         <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
         <ul class="flex flex-col gap-0.5 mb-4">
           
-          {% if user.is_authenticated and user.role_obj %}
+          {% if user.is_authenticated and user.role_obj and user.role_obj.menus.all %}
             {% for menu in user.role_obj.menus.all %}
               {% if menu.is_active %}
               <li>
                 <a href="{{ menu.get_url }}"
-                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors mb-0.5
                   {% if request.path == menu.get_url %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:bg-gray-100 hover:text-gray-900{% endif %}">
                   
-                  <iconify-icon icon="{{ menu.icon }}" class="text-[20px] shrink-0"></iconify-icon> 
+                  <iconify-icon icon="{{ menu.icon }}" class="text-[20px] shrink-0"></iconify-icon>
                   <span class="truncate">{{ menu.label }}</span>
                 </a>
               </li>
@@ -66,15 +229,124 @@
             {% endfor %}
           {% else %}
             <li>
-              <a href="{% url 'dashboard:index' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
-                <i class="i-heroicons-home w-4 h-4"></i> Dashboard
+              <a href="{% url 'dashboard:index' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'dashboard' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'personel_list' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if 'personel' in request.path and 'accounts' not in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Personel
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manajemen_cuti:riwayat' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Cuti / Izin Saya
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'absensi:dashboard' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name != 'rekap_admin' and request.resolver_match.url_name != 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Absensi Harian
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'absensi:rekap_pribadi' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
+                </svg>
+                Rekap Absensi Saya
+              </a>
+            </li>
+            {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
+            <li>
+              <a href="{% url 'absensi:rekap_admin' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_admin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 20h5V4H2v16h5m10 0v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4m10 0H7m2-8h6m-6-4h6" />
+                </svg>
+                Rekap Absensi Admin
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manajemen_cuti:kelola' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Kelola Cuti / Izin
+              </a>
+            </li>
+            {% endif %}
+            {% if user.role == 'superadmin' or user.role == 'operator' %}
+            <li>
+              <a href="{% url 'locations:daftar' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Wilayah Penugasan
+              </a>
+            </li>
+            {% endif %}
+            <li>
+              <a href="{% url 'pengumuman:daftar' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'pengumuman' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+                Pengumuman
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'notifikasi:daftar' %}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                  {% if request.resolver_match.app_name == 'notifikasi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                Notifikasi
               </a>
             </li>
           {% endif %}
 
         </ul>
       </nav>
-      
+
+
       <!-- User info + Logout -->
       <div class="px-4 py-3 border-t border-gray-200">
         <div class="flex items-center gap-2 mb-2">

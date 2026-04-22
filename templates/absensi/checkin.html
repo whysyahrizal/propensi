@@ -3,6 +3,11 @@
 {% block page_title %}Check-In Absensi{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-6 max-w-lg">
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'absensi:dashboard' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Absensi Harian</a>
+    <a href="{% url 'absensi:history' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Riwayat</a>
+    <a href="{% url 'absensi:rekap_pribadi' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50">Rekap Saya</a>
+  </div>
   <div class="card overflow-hidden">
     <div class="h-1 bg-green-500"></div>
     <div class="px-8 py-7">

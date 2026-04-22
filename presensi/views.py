@@ -1,9 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
 from .models import Presensi
-from personel.models import Personel
-from datetime import time
+from personel.models import Personel, Unit
+from datetime import time, timedelta
+import csv
+from django.http import HttpResponse
+from django.db.models import Count, Q
 
 def _get_mobile_personel(request):
     personel_id = request.GET.get('personel_id') or request.POST.get('personel_id')
@@ -128,3 +131,119 @@ def history(request):
         'records': records, 'selected_personel': user_personel,
         'personel_list': Personel.objects.filter(is_active=True)
     })
+
+def _build_rekap_admin_stats(queryset):
+    return queryset.values(
+        'personel__id',
+        'personel__nip',
+        'personel__nama',
+        'personel__unit__nama',
+    ).annotate(
+        total_hadir=Count('id', filter=Q(status='Hadir')),
+        total_terlambat=Count('id', filter=Q(status='Terlambat')),
+        total_izin=Count('id', filter=Q(type='Izin')),
+        total_dinas=Count('id', filter=Q(status='Dinas')),
+    ).order_by('personel__nama')
+
+def _export_csv(queryset, filename):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+    writer = csv.writer(response)
+
+    writer.writerow(['Tanggal', 'Status', 'Check-In', 'Check-Out', 'Tipe', 'Detail Izin'])
+    for r in queryset:
+        checkin = r.checkin_time.strftime('%H:%M') if r.checkin_time else '-'
+        checkout = r.checkout_time.strftime('%H:%M') if r.checkout_time else '-'
+        writer.writerow([r.date, r.status, checkin, checkout, r.type, r.izin_detail or '-'])
+            
+    return response
+
+def _export_admin_summary_csv(stats, filename):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+    writer = csv.writer(response)
+
+    writer.writerow(['NRP', 'Nama', 'Unit', 'Total Hadir', 'Total Terlambat', 'Total Izin / Cuti', 'Total Dinas'])
+    for row in stats:
+        writer.writerow([
+            row['personel__nip'],
+            row['personel__nama'],
+            row['personel__unit__nama'] or '-',
+            row['total_hadir'],
+            row['total_terlambat'],
+            row['total_izin'],
+            row['total_dinas'],
+        ])
+
+    return response
+
+# PBI-031
+def rekap_admin(request):
+    if not request.user.is_authenticated or request.user.role not in ['superadmin', 'operator', 'pimpinan']:
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+
+    today = timezone.localdate()
+    date_from = request.GET.get('date_from', (today - timedelta(days=30)).strftime('%Y-%m-%d'))
+    date_to = request.GET.get('date_to', today.strftime('%Y-%m-%d'))
+    unit_id = request.GET.get('unit')
+    search = request.GET.get('q', '')
+
+    qs = Presensi.objects.filter(date__range=[date_from, date_to]).select_related('personel', 'personel__unit')
+
+    if unit_id:
+        qs = qs.filter(personel__unit_id=unit_id)
+    if search:
+        qs = qs.filter(Q(personel__nama__icontains=search) | Q(personel__nip__icontains=search))
+
+    personel_stats = _build_rekap_admin_stats(qs)
+
+    if request.GET.get('export') == 'csv':
+        return _export_admin_summary_csv(personel_stats, f"Rekap_Presensi_{date_from}_to_{date_to}")
+
+    context = {
+        'stats': personel_stats,
+        'date_from': date_from,
+        'date_to': date_to,
+        'units': Unit.objects.all(),
+        'selected_unit': int(unit_id) if unit_id and unit_id.isdigit() else '',
+        'search': search,
+    }
+    return render(request, 'presensi/rekap_admin.html', context)
+
+
+# PBI-032
+def rekap_pribadi(request):
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
+        
+    personel = _get_mobile_personel(request)
+    if not personel:
+        messages.error(request, 'Profil personel tidak ditemukan.')
+        return redirect('dashboard:index')
+
+    today = timezone.localdate()
+    date_from = request.GET.get('date_from', (today - timedelta(days=30)).strftime('%Y-%m-%d'))
+    date_to = request.GET.get('date_to', today.strftime('%Y-%m-%d'))
+
+    qs = Presensi.objects.filter(personel=personel, date__range=[date_from, date_to]).order_by('-date')
+
+    if request.GET.get('export') == 'csv':
+        return _export_csv(qs, f"Rekap_Pribadi_{personel.nip}_{date_from}_to_{date_to}")
+
+    # Summary stats
+    stats = qs.aggregate(
+        total_hadir=Count('id', filter=Q(status='Hadir')),
+        total_terlambat=Count('id', filter=Q(status='Terlambat')),
+        total_izin=Count('id', filter=Q(type='Izin')),
+        total_dinas=Count('id', filter=Q(status='Dinas')),
+    )
+
+    context = {
+        'records': qs,
+        'stats': stats,
+        'date_from': date_from,
+        'date_to': date_to,
+        'personel': personel,
+    }
+    return render(request, 'presensi/rekap_pribadi.html', context)
