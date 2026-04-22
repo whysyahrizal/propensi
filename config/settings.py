@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'manajemen_cuti',
     'locations',
     'presensi',
-    # 'notifikasi',
+    'notifikasi',
     'pengumuman',
 ]
 
