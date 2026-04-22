@@ -12,15 +12,15 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('sprin/', include('sprin.urls')),
     path('absensi/', include('absensi.urls')),
+    path('cuti/', include('manajemen_cuti.urls')),
     path('presensi/', include('presensi.urls')),
     path('locations/', include('locations.urls')),
+    path('pengumuman/', include('pengumuman.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='root'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Optional modules: include only when app URL module exists.
 for prefix, module in [
-    ('cuti/', 'cuti.urls'),
-    ('pengumuman/', 'pengumuman.urls'),
     ('notifikasi/', 'notifikasi.urls'),
 ]:
     app_label = module.split('.', 1)[0]

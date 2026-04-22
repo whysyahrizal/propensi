@@ -24,66 +24,62 @@ SATKER_DATA = [
 ]
 
 ROLE_DATA = [
-    {"nama": "Superadmin",  "deskripsi": "Akses penuh ke seluruh fitur dan pengaturan sistem SIRAGA."},
-    {"nama": "Operator",    "deskripsi": "Mengelola data personel, sprin, dan pengumuman. Tidak dapat menyetujui cuti."},
-    {"nama": "Pimpinan",    "deskripsi": "Menyetujui atau menolak pengajuan cuti personel di bawah satker yang sama."},
-    {"nama": "Personel",    "deskripsi": "Melakukan presensi harian, mengajukan cuti, dan melihat sprin yang ditugaskan."},
+    {"nama": "superadmin", "display_label": "Super Administrator", "deskripsi": "Akses penuh ke seluruh sistem dan pengaturan."},
+    {"nama": "pimpinan", "display_label": "Pimpinan / Komandan", "deskripsi": "Akses pemantauan dashboard dan persetujuan."},
+    {"nama": "operator", "display_label": "Operator SDM", "deskripsi": "Akses kelola data personel dan absensi harian."},
+    {"nama": "personel", "display_label": "Personel Biasa", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
 ]
 
 PERSONEL_DATA = [
-    # Superadmin
     {
-        "nrp": "SUPER001", "nama_lengkap": "Admin Utama SIRAGA",
+        "nrp": "80010001", "nama_lengkap": "Admin Utama SIRAGA",
         "pangkat": "Kombespol", "jabatan": "Kepala Sistem Informasi",
-        "satker_kode": "NTMC", "role": "superadmin", "password": "siraga2026",
+        "satker_kode": "NTMC", "role_slug": "superadmin", "password": "siraga2026",
     },
-    # Operator
     {
-        "nrp": "OPR001", "nama_lengkap": "Budi Santoso",
+        "nrp": "82020001", "nama_lengkap": "Budi Santoso",
         "pangkat": "Aiptu", "jabatan": "Operator Data Kepegawaian",
-        "satker_kode": "BAGRENMIN", "role": "operator", "password": "siraga2026",
+        "satker_kode": "BAGRENMIN", "role_slug": "operator", "password": "siraga2026",
     },
     {
-        "nrp": "OPR002", "nama_lengkap": "Sari Handayani",
+        "nrp": "83020002", "nama_lengkap": "Sari Handayani",
         "pangkat": "Bripka", "jabatan": "Operator NTMC",
-        "satker_kode": "NTMC", "role": "operator", "password": "siraga2026",
+        "satker_kode": "NTMC", "role_slug": "operator", "password": "siraga2026",
     },
-    # Pimpinan
     {
-        "nrp": "PIM001", "nama_lengkap": "Kombes Andi Wijaya",
+        "nrp": "75030001", "nama_lengkap": "Kombes Andi Wijaya",
         "pangkat": "Kombespol", "jabatan": "Kasubdit Gakkum",
-        "satker_kode": "DITGAKKUM", "role": "pimpinan", "password": "siraga2026",
+        "satker_kode": "DITGAKKUM", "role_slug": "pimpinan", "password": "siraga2026",
     },
     {
-        "nrp": "PIM002", "nama_lengkap": "AKBP Rina Marlina",
+        "nrp": "78030002", "nama_lengkap": "AKBP Rina Marlina",
         "pangkat": "AKBP", "jabatan": "Kabag Operasional",
-        "satker_kode": "BAGOPS", "role": "pimpinan", "password": "siraga2026",
+        "satker_kode": "BAGOPS", "role_slug": "pimpinan", "password": "siraga2026",
     },
-    # Personel
     {
-        "nrp": "PRS001", "nama_lengkap": "Hendra Kusuma",
+        "nrp": "90040001", "nama_lengkap": "Hendra Kusuma",
         "pangkat": "Briptu", "jabatan": "Banit Gakkum",
-        "satker_kode": "DITGAKKUM", "role": "personel", "password": "siraga2026",
+        "satker_kode": "DITGAKKUM", "role_slug": "personel", "password": "siraga2026",
     },
     {
-        "nrp": "PRS002", "nama_lengkap": "Dewi Lestari",
+        "nrp": "91040002", "nama_lengkap": "Dewi Lestari",
         "pangkat": "Bripka", "jabatan": "Banit Kamsel",
-        "satker_kode": "SUBDITKAMSEL", "role": "personel", "password": "siraga2026",
+        "satker_kode": "SUBDITKAMSEL", "role_slug": "personel", "password": "siraga2026",
     },
     {
-        "nrp": "PRS003", "nama_lengkap": "Agus Setiawan",
-        "pangkat": "Brigadir", "jabatan": "Banit Regident",
-        "satker_kode": "SUBDITREGID", "role": "personel", "password": "siraga2026",
+        "nrp": "92040003", "nama_lengkap": "Agus Setiawan",
+        "pangkat": "Brigpol", "jabatan": "Banit Regident",
+        "satker_kode": "SUBDITREGID", "role_slug": "personel", "password": "siraga2026",
     },
     {
-        "nrp": "PRS004", "nama_lengkap": "Fitri Handayani",
+        "nrp": "85040004", "nama_lengkap": "Fitri Handayani",
         "pangkat": "Aipda", "jabatan": "Bamin Ops",
-        "satker_kode": "BAGOPS", "role": "personel", "password": "siraga2026",
+        "satker_kode": "BAGOPS", "role_slug": "personel", "password": "siraga2026",
     },
     {
-        "nrp": "PRS005", "nama_lengkap": "Rudi Hartono",
+        "nrp": "95040005", "nama_lengkap": "Rudi Hartono",
         "pangkat": "Bripda", "jabatan": "Banit Lantas",
-        "satker_kode": "DITLANTAS", "role": "personel", "password": "siraga2026",
+        "satker_kode": "DITLANTAS", "role_slug": "personel", "password": "siraga2026",
     },
 ]
 
@@ -174,7 +170,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--reset',
             action='store_true',
-            help='Hapus semua data Personel, Satker, dan Role sebelum seeding ulang',
+            help='Hapus semua data Personel, Satker, Role, dan Lokasi sebelum seeding ulang',
         )
 
     def handle(self, *args, **options):
@@ -186,7 +182,6 @@ class Command(BaseCommand):
             Location.objects.all().delete()
             self.stdout.write('   Data dihapus.\n')
 
-        # 1. Buat Satker
         self.stdout.write(self.style.HTTP_INFO('📦 Menyiapkan Satker...'))
         satker_map = {}
         for s in SATKER_DATA:
@@ -198,19 +193,20 @@ class Command(BaseCommand):
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
             self.stdout.write(f'   [{status}] {obj.kode} — {obj.nama}')
 
-        # 2. Buat Role (object)
-        self.stdout.write(self.style.HTTP_INFO('\n🔐 Menyiapkan Role...'))
+        self.stdout.write(self.style.HTTP_INFO('\n🛡️ Menyiapkan Role Akses...'))
         role_obj_map = {}
         for r in ROLE_DATA:
             obj, created = Role.objects.get_or_create(
                 nama=r['nama'],
-                defaults={'deskripsi': r['deskripsi']},
+                defaults={
+                    'display_label': r['display_label'],
+                    'deskripsi': r['deskripsi']
+                }
             )
-            role_obj_map[r['nama'].lower()] = obj
+            role_obj_map[r['nama']] = obj
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
-            self.stdout.write(f'   [{status}] {obj.nama}')
+            self.stdout.write(f'   [{status}] {obj.nama} — {obj.display_label}')
 
-        # 3. Buat Personel
         self.stdout.write(self.style.HTTP_INFO('\n👤 Menyiapkan Personel...'))
         for p in PERSONEL_DATA:
             if Personel.objects.filter(nrp=p['nrp']).exists():
@@ -218,13 +214,8 @@ class Command(BaseCommand):
                 continue
 
             satker = satker_map.get(p['satker_kode'])
-            role_key = p['role']
-            # Cari role object yang cocok
-            role_obj = None
-            for key, obj in role_obj_map.items():
-                if key.startswith(role_key):
-                    role_obj = obj
-                    break
+            role_slug = p['role_slug']
+            role_obj = role_obj_map.get(role_slug)
 
             personel = Personel.objects.create_user(
                 nrp=p['nrp'],
@@ -233,17 +224,15 @@ class Command(BaseCommand):
                 pangkat=p['pangkat'],
                 jabatan=p['jabatan'],
                 satker=satker,
-                role=role_key,
                 role_obj=role_obj,
-                is_staff=(role_key == 'superadmin'),
-                is_superuser=(role_key == 'superadmin'),
+                is_staff=(role_slug == 'superadmin'),
+                is_superuser=(role_slug == 'superadmin'),
             )
             self.stdout.write(
                 f'   [{self.style.SUCCESS("baru")}] '
-                f'{personel.nrp} — {personel.nama_lengkap} ({personel.get_role_display()})'
+                f'{personel.nrp} — {personel.nama_lengkap} ({role_obj.display_label if role_obj else "Tanpa Role"})'
             )
 
-        # 4. Buat Location (Wilayah Penugasan)
         self.stdout.write(self.style.HTTP_INFO('\n📍 Menyiapkan Wilayah Penugasan...'))
         for loc in LOCATION_DATA:
             obj, created = Location.objects.get_or_create(
@@ -260,7 +249,6 @@ class Command(BaseCommand):
             aktif = 'aktif' if obj.is_active else 'nonaktif'
             self.stdout.write(f'   [{status}] {obj.name} ({obj.get_type_display()}, {aktif})')
 
-        # Summary
         self.stdout.write('\n' + '─' * 55)
         self.stdout.write(self.style.SUCCESS('✅ Seeding selesai!'))
         self.stdout.write('')
@@ -269,5 +257,5 @@ class Command(BaseCommand):
         self.stdout.write(f'  {"NRP":<12} {"Nama":<28} {"Role":<12}')
         self.stdout.write(f'  {"─"*12} {"─"*28} {"─"*12}')
         for p in PERSONEL_DATA:
-            self.stdout.write(f'  {p["nrp"]:<12} {p["nama_lengkap"]:<28} {p["role"]:<12}')
+            self.stdout.write(f'  {p["nrp"]:<12} {p["nama_lengkap"]:<28} {p["role_slug"]:<12}')
         self.stdout.write('')

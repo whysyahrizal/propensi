@@ -44,8 +44,11 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
-    'presensi',
+    'manajemen_cuti',
     'locations',
+    'presensi',
+    # 'notifikasi',
+    'pengumuman',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sprin.context_processors.user_role',
+                'pengumuman.context_processors.pengumuman_aktif',
             ],
         },
     },

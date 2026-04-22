@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card p-8 max-w-3xl mx-auto">
+    <div class="mb-6 pb-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-[#1a3a6b]">{{ title }}</h2>
+    </div>
+
+    <form method="post" novalidate class="space-y-6">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Judul Pengumuman <span class="text-red-500">*</span></label>
+            {{ form.judul }}
+            {% if form.judul.errors %}
+            <div class="text-xs text-red-500 font-medium flex items-center gap-1.5 mt-1.5 error-msg"><i class="fa-regular fa-circle-xmark"></i> {{ form.judul.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Isi Pengumuman <span class="text-red-500">*</span></label>
+            {{ form.isi }}
+            {% if form.isi.errors %}
+            <div class="text-xs text-red-500 font-medium flex items-center gap-1.5 mt-1.5 error-msg"><i class="fa-regular fa-circle-xmark"></i> {{ form.isi.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Periode Mulai Tayang</label>
+                {{ form.periode_mulai }}
+                <p class="text-xs text-gray-400 mt-2">Kosongkan jika ingin langsung tayang.</p>
+                {% if form.periode_mulai.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.periode_mulai.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Periode Selesai Tayang</label>
+                {{ form.periode_selesai }}
+                <p class="text-xs text-gray-400 mt-2">Kosongkan jika tayang selamanya.</p>
+                {% if form.periode_selesai.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.periode_selesai.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+            {{ form.is_active }}
+            <label for="{{ form.is_active.id_for_label }}" class="text-sm font-semibold text-gray-700 cursor-pointer">
+                Aktif (Bisa Dilihat Personel)
+            </label>
+        </div>
+
+        <div class="pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+            <a href="{% url 'pengumuman:daftar' %}" class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-600 text-sm font-bold hover:bg-gray-50 transition-colors">
+                Batal
+            </a>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#1a3a6b] hover:bg-[#2d5da6] shadow-md shadow-blue-900/10 text-white text-sm font-bold transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-save"></i> Simpan Pengumuman
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const errorDivs = document.querySelectorAll('.error-msg');
+        errorDivs.forEach(div => {
+            if (div.innerText.trim().length > 0) {
+                const input = div.parentElement.querySelector('input, textarea');
+                if (input) {
+                    input.classList.remove('border-gray-200', 'focus:border-[#1a3a6b]', 'focus:ring-[#1a3a6b]/30');
+                    input.classList.add('border-red-300', 'bg-red-50/50', 'text-red-900', 'focus:border-red-500', 'focus:ring-red-500/20');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

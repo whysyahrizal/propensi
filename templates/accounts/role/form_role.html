@@ -1,158 +1,61 @@
 {% extends 'base.html' %}
-
-{% block title %}{% if action == 'edit' %}Edit Role{{ role.nama }}{% else %}Tambah Role Baru{% endif %} — SIRAGA{% endblock %}
-{% block page_title %}{% if action == 'edit' %}Edit Role{% else %}Tambah Role Baru{% endif %}{% endblock %}
+{% block title %}{% if action == 'edit' %}Edit Role - {{ role.nama }}{% else %}Tambah Role{% endif %} — SIRAGA{% endblock %}
+{% block page_title %}{% if action == 'edit' %}Edit Role{% else %}Tambah Role{% endif %}{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-6 max-w-xl">
+<div class="max-w-2xl mx-auto flex flex-col gap-6">
+  
+  <a href="{% url 'accounts:daftar_role' %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <iconify-icon icon="heroicons:arrow-left" class="text-lg"></iconify-icon>
+    Kembali ke Daftar Role
+  </a>
 
-  {# Back nav #}
-  <div>
-    {% if action == 'edit' %}
-    <a href="{% url 'accounts:detail_role' role.pk %}"
-       class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium">
-    {% else %}
-    <a href="{% url 'accounts:daftar_role' %}"
-       class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium">
-    {% endif %}
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-      {% if action == 'edit' %}Kembali ke Detail Role{% else %}Kembali ke Daftar Role{% endif %}
-    </a>
-  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+      <h1 class="text-xl font-bold text-gray-900">
+        {% if action == 'edit' %}Edit Role{% else %}Tambah Role{% endif %}
+      </h1>
+    </div>
 
-  {# Form Card #}
-  <div class="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-    <div class="h-1 w-full {% if action == 'edit' %}bg-amber-500{% else %}bg-[#1a3a6b]{% endif %}"></div>
-    <div class="px-8 py-7">
-      
-      {# Header #}
-      <div class="flex items-center gap-4 mb-8">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0
-                    {% if action == 'edit' %}bg-amber-50{% else %}bg-[#1a3a6b]/10{% endif %}">
-          {% if action == 'edit' %}
-          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-          </svg>
-          {% else %}
-          <svg class="w-6 h-6 text-[#1a3a6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          {% endif %}
-        </div>
-        <div>
-          <h1 class="text-lg font-bold text-gray-900">
-            {% if action == 'edit' %}Edit Role: {{ role.nama }}{% else %}Tambah Role Baru{% endif %}
-          </h1>
-          <p class="text-sm text-gray-500">
-            {% if action == 'edit' %}Perbarui nama dan deskripsi role{% else %}Buat role baru untuk pengaturan hak akses sistem{% endif %}
-          </p>
-        </div>
-      </div>
-
-      {# Form — PBI-013/014: form tambah/edit role tersedia #}
-      <form method="POST" action="" novalidate>
+    <div class="px-8 py-8">
+      <form method="POST" class="flex flex-col gap-6">
         {% csrf_token %}
-        <div class="flex flex-col gap-5">
-
-          {# Nama Role — PBI-013: validasi nama tidak kosong & unik #}
-          <div class="flex flex-col gap-1.5">
-            <label for="id_nama" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-              Nama Role <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="id_nama"
-              name="nama"
-              type="text"
-              required
-              maxlength="100"
-              placeholder="cth. Operator, Pimpinan, Kepala Satker..."
-              value="{{ form_data.nama|default:'' }}{% if role and not form_data.nama %}{{ role.nama }}{% endif %}"
-              class="h-11 w-full px-4 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
-            />
-            <p class="text-[11px] text-gray-400">Nama role harus unik. Gunakan nama yang deskriptif.</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Internal (Slug) <span class="text-red-500">*</span></label>
+            <input name="nama" type="text" required 
+                   placeholder="cth: auditor_internal" 
+                   {% if action == 'edit' %}value="{{ role.nama }}" readonly class="h-11 px-4 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed font-mono text-sm"{% else %}value="{{ form_data.nama|default:'' }}" class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none font-mono"{% endif %} />
+            <p class="text-[10px] text-gray-400 italic">Identitas unik sistem (huruf kecil & underscore).</p>
           </div>
 
-          {# Deskripsi #}
-          <div class="flex flex-col gap-1.5">
-            <label for="id_deskripsi" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-              Deskripsi
-            </label>
-            <textarea
-              id="id_deskripsi"
-              name="deskripsi"
-              rows="4"
-              placeholder="Jelaskan cakupan dan tanggung jawab role ini..."
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-all"
-            >{% if form_data.deskripsi %}{{ form_data.deskripsi }}{% elif role %}{{ role.deskripsi }}{% endif %}</textarea>
-          </div>
-
-          {# Actions — PBI-013: notifikasi sukses/gagal + PBI-014: notifikasi sukses/gagal #}
-          <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-            {% if action == 'edit' %}
-            <a href="{% url 'accounts:detail_role' role.pk %}"
-               class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-              Batal
-            </a>
-            <button type="submit"
-                    class="px-5 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-colors shadow-sm">
-              Simpan Perubahan
-            </button>
-            {% else %}
-            <a href="{% url 'accounts:daftar_role' %}"
-               class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-              Batal
-            </a>
-            <button type="submit"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1a3a6b] text-white text-sm font-bold hover:bg-[#2d5da6] transition-colors shadow-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
-              Simpan Role
-            </button>
-            {% endif %}
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Tampilan <span class="text-red-500">*</span></label>
+            <input name="display_label" type="text" required 
+                   placeholder="cth: Auditor Internal" 
+                   value="{% if action == 'edit' %}{{ role.display_label }}{% else %}{{ form_data.display_label|default:'' }}{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+            <p class="text-[10px] text-gray-400 italic">Nama yang akan muncul di antarmuka pengguna.</p>
           </div>
         </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Deskripsi Role</label>
+          <textarea name="deskripsi" rows="4" 
+                    placeholder="Jelaskan cakupan wewenang atau batasan akses role ini..."
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all resize-none">{% if action == 'edit' %}{{ role.deskripsi }}{% else %}{{ form_data.deskripsi|default:'' }}{% endif %}</textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+          <a href="{% url 'accounts:daftar_role' %}" class="px-6 py-2.5 rounded-lg border border-gray-300 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Batal</a>
+          <button type="submit" class="px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-light shadow-md transition-all">
+            {% if action == 'edit' %}Simpan Perubahan{% else %}Simpan Role{% endif %}
+          </button>
+        </div>
+        
       </form>
     </div>
   </div>
-
-  {# Info note #}
-  <div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-blue-50 border border-blue-200">
-    <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <p class="text-xs text-blue-700">
-      {% if action == 'edit' %}
-      Mengubah nama role tidak akan mempengaruhi pengguna yang sudah memiliki role ini. Pastikan nama baru tetap deskriptif.
-      {% else %}
-      Role baru dapat langsung ditetapkan ke personel setelah berhasil disimpan.
-      {% endif %}
-    </p>
-  </div>
-
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-  // PBI-013/014: Validasi input sebelum submit
-  document.querySelector('form').addEventListener('submit', function(e) {
-    const nama = document.getElementById('id_nama').value.trim();
-    if (!nama) {
-      e.preventDefault();
-      document.getElementById('id_nama').classList.add('border-red-500', 'ring-2', 'ring-red-200');
-      document.getElementById('id_nama').focus();
-      const errEl = document.createElement('p');
-      errEl.className = 'text-xs text-red-600 mt-1';
-      errEl.textContent = 'Nama role tidak boleh kosong.';
-      const existing = document.querySelector('.error-nama');
-      if (!existing) {
-        errEl.classList.add('error-nama');
-        document.getElementById('id_nama').parentNode.appendChild(errEl);
-      }
-    }
-  });
-</script>
 {% endblock %}
