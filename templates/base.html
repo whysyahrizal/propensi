@@ -46,7 +46,7 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 overflow-y-auto px-3 py-4">
+      {% comment %} <nav class="flex-1 overflow-y-auto px-3 py-4">
         <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
         <ul class="flex flex-col gap-0.5 mb-4">
           <li>
@@ -147,8 +147,38 @@
           </li>
 
         </ul>
-      </nav>
+      </nav> {% endcomment %}
       
+      <nav class="flex-1 overflow-y-auto px-3 py-4">
+        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
+        <ul class="flex flex-col gap-0.5 mb-4">
+          
+          {% if user.is_authenticated and user.role_obj %}
+            {% for menu in user.role_obj.menus.all %}
+              {% if menu.is_active %}
+              <li>
+                <a href="{{ menu.get_url }}"
+                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors mb-0.5
+                  {% if request.path == menu.get_url %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                  
+                  <iconify-icon icon="{{ menu.icon }}" class="text-[20px] shrink-0"></iconify-icon>
+                  <span class="truncate">{{ menu.label }}</span>
+                </a>
+              </li>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <li>
+              <a href="{% url 'dashboard:index' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+                <i class="i-heroicons-home w-4 h-4"></i> Dashboard
+              </a>
+            </li>
+          {% endif %}
+
+        </ul>
+      </nav>
+
+
       <!-- User info + Logout -->
       <div class="px-4 py-3 border-t border-gray-200">
         <div class="flex items-center gap-2 mb-2">
