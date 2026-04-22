@@ -31,6 +31,10 @@ class PengajuanCuti(models.Model):
         related_name='pengajuan_cuti', verbose_name='Personel'
     )
     jenis_cuti = models.CharField(max_length=20, choices=JENIS_CUTI_CHOICES, verbose_name='Jenis Cuti')
+    satuan_kerja = models.ForeignKey(
+        'accounts.Satker', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='pengajuan_cuti', verbose_name='Satuan Kerja'
+    )
     tanggal_mulai = models.DateField(verbose_name='Tanggal Mulai')
     tanggal_selesai = models.DateField(verbose_name='Tanggal Selesai')
     alasan = models.TextField(verbose_name='Alasan Cuti')

@@ -1,15 +1,17 @@
 from django import forms
 from .models import PengajuanCuti
+from accounts.models import Satker
 
 class LeaveRequestForm(forms.ModelForm):
     class Meta:
         model = PengajuanCuti
-        fields = ['jenis_cuti', 'tanggal_mulai', 'tanggal_selesai', 'alasan', 'lampiran']
+        fields = ['jenis_cuti', 'satuan_kerja', 'tanggal_mulai', 'tanggal_selesai', 'alasan', 'lampiran']
         widgets = {
             'tanggal_mulai': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}, format='%Y-%m-%d'),
             'tanggal_selesai': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}, format='%Y-%m-%d'),
             'alasan': forms.Textarea(attrs={'rows': 4, 'class': 'form-input', 'placeholder': 'Jelaskan alasan pengajuan...'}),
             'jenis_cuti': forms.Select(attrs={'class': 'form-input'}),
+            'satuan_kerja': forms.Select(attrs={'class': 'form-input'}),
         }
 
     def clean(self):

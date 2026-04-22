@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifikasi — SIRAGA Korlantas{% endblock %}
+{% block page_title %}Notifikasi{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <!-- Header row -->
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-lg font-bold text-gray-900">Kotak Notifikasi</h1>
+      {% if total_unread > 0 %}
+      <p class="text-sm text-gray-500 mt-0.5">
+        <span class="font-semibold text-[#1a3a6b]">{{ total_unread }}</span> belum dibaca
+      </p>
+      {% else %}
+      <p class="text-sm text-gray-500 mt-0.5">Semua notifikasi sudah dibaca</p>
+      {% endif %}
+    </div>
+    {% if total_unread > 0 %}
+    <form method="post" action="{% url 'notifikasi:tandai_semua' %}">
+      {% csrf_token %}
+      <button type="submit"
+        class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Tandai Semua Dibaca
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="flex gap-1 mb-4 bg-gray-100 p-1 rounded-xl w-fit">
+    {% for val, label in forloop.parentloop|dictsort:"0" %}{% endfor %}
+    <a href="?filter=semua"
+      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+             {% if filter_read == 'semua' %}bg-white text-[#1a3a6b] shadow-sm{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+      Semua
+    </a>
+    <a href="?filter=belum_dibaca"
+      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+             {% if filter_read == 'belum_dibaca' %}bg-white text-[#1a3a6b] shadow-sm{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+      Belum Dibaca
+    </a>
+    <a href="?filter=sudah_dibaca"
+      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+             {% if filter_read == 'sudah_dibaca' %}bg-white text-[#1a3a6b] shadow-sm{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+      Sudah Dibaca
+    </a>
+  </div>
+
+  <!-- Notification List -->
+  <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+    {% for notif in page_obj %}
+    <a href="{% url 'notifikasi:detail' notif.pk %}"
+      class="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group
+             {% if not notif.is_read %}bg-blue-50/40{% endif %}">
+
+      <!-- Tipe icon badge -->
+      <div class="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base mt-0.5
+                  {% if notif.tipe == 'cuti' %}bg-blue-100 text-blue-600
+                  {% elif notif.tipe == 'sprin' %}bg-purple-100 text-purple-600
+                  {% elif notif.tipe == 'presensi' %}bg-green-100 text-green-600
+                  {% elif notif.tipe == 'sistem' %}bg-gray-100 text-gray-600
+                  {% else %}bg-yellow-100 text-yellow-600{% endif %}">
+        {{ notif.tipe_icon }}
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <p class="text-sm font-semibold text-gray-900 truncate
+                    {% if not notif.is_read %}text-[#1a3a6b]{% endif %}">
+            {{ notif.judul }}
+          </p>
+          {% if not notif.is_read %}
+          <span class="inline-block w-2 h-2 rounded-full bg-[#1a3a6b] shrink-0"></span>
+          {% endif %}
+        </div>
+        <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ notif.pesan }}</p>
+        <p class="text-[10px] text-gray-400 mt-1">{{ notif.dibuat_pada|date:"d M Y, H:i" }}</p>
+      </div>
+
+      <!-- Arrow -->
+      <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 mt-1 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </a>
+    {% empty %}
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+      <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl mb-3">🔔</div>
+      <p class="text-sm font-medium text-gray-500">Tidak ada notifikasi</p>
+      <p class="text-xs text-gray-400 mt-1">
+        {% if filter_read == 'belum_dibaca' %}Semua notifikasi sudah dibaca.
+        {% elif filter_read == 'sudah_dibaca' %}Belum ada notifikasi yang dibaca.
+        {% else %}Anda belum memiliki notifikasi.{% endif %}
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="flex items-center justify-between mt-4">
+    <p class="text-xs text-gray-500">
+      Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+      &mdash; {{ page_obj.paginator.count }} notifikasi
+    </p>
+    <div class="flex gap-1">
+      {% if page_obj.has_previous %}
+      <a href="?filter={{ filter_read }}&page={{ page_obj.previous_page_number }}"
+        class="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        ← Sebelumnya
+      </a>
+      {% endif %}
+      {% if page_obj.has_next %}
+      <a href="?filter={{ filter_read }}&page={{ page_obj.next_page_number }}"
+        class="px-3 py-1.5 text-xs font-medium bg-[#1a3a6b] text-white rounded-lg hover:bg-[#2d5da6] transition-colors">
+        Berikutnya →
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
