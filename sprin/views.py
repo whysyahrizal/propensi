@@ -37,7 +37,7 @@ def create_sprin(request):
                 PersonelSprin.objects.create(sprin=sprin, personel_id=p_id)
         
         messages.success(request, "Sprin baru berhasil diterbitkan otomatis!")
-        return redirect('sprin:all_sprin')
+        return redirect('sprin:daftar')
 
     return render(request, 'sprin/create_sprin.html', {'personel_all': personel_all})
 

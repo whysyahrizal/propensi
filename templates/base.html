@@ -21,6 +21,7 @@
       }
     }
   </script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
@@ -48,9 +49,6 @@
       <nav class="flex-1 overflow-y-auto px-3 py-4">
         <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
         <ul class="flex flex-col gap-0.5 mb-4">
-          <!-- 
-        <li><a href="{% url 'dashboard:index' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>Dashboard</a></li>
-        -->
           <li>
             <a href="{% url 'personel_list' %}"
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
@@ -62,19 +60,6 @@
               Personel
             </a>
           </li>
-          {% if user.role in 'superadmin,operator' %}
-          <!-- <li>
-            <a href="{% url 'accounts:daftar_personel' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if 'accounts/personel' in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
-              </svg>
-              Akun Personel
-            </a>
-          </li> -->
-          {% endif %}
           {% if user.role == 'superadmin' %}
           <li>
             <a href="{% url 'accounts:daftar_role' %}"
@@ -88,65 +73,82 @@
             </a>
           </li>
           {% endif %}
-          <!-- Absensi (belum tersedia) -->
-          <!-- 
-          <li><a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Absensi</a></li>
-          -->
-          <!-- Cuti / Izin (belum tersedia) -->
-          <!-- 
-          <li><a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Cuti / Izin</a></li>
-          -->
-        <li>
-          <a href="{% url 'sprin:daftar' %}"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'sprin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Sprin / Gas
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'presensi:dashboard' %}"
-          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                {% if request.resolver_match.app_name == 'presensi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          Presensi
-        </a>
-      </li>
-      {% if user.role in 'superadmin,operator' %}
-        <!-- <li>
-          <a href="{% url 'locations:daftar' %}"
-             class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            Wilayah Penugasan
-          </a>
-        </li> -->
-        {% endif %}
-        <!-- Pengumuman menu dinonaktifkan sementara: app belum tersedia di deploy ini -->
-      </ul>
+        </ul>
 
         <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Lainnya</p>
         <ul class="flex flex-col gap-0.5">
-          <!-- Notifikasi (belum tersedia) -->
-          <!-- 
-          <li><a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>Notifikasi</a></li>
-          -->
           <li>
             <a href="{% url 'accounts:profil' %}"
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Profil Saya
+              Sprin / Gas
             </a>
           </li>
+          <li>
+            <a href="{% if user.role == 'personel' %}{% url 'manajemen_cuti:riwayat' %}{% else %}{% url 'manajemen_cuti:kelola' %}{% endif %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'manajemen_cuti' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Cuti / Izin
+            </a>
+          </li>
+
+          {% if user.role in 'superadmin,operator' %}
+          <li>
+            <a href="{% url 'locations:daftar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Wilayah Penugasan
+            </a>
+          </li>
+          {% endif %}
+          <li>
+            <a href="{% url 'pengumuman:daftar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'pengumuman' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+              <span class="flex-1">Pengumuman</span>
+              {% if pengumuman_baru_count > 0 %}
+              <span class="inline-flex items-center justify-center w-5 h-5 ml-auto text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm">
+                {{ pengumuman_baru_count }}
+              </span>
+              {% endif %}
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'notifikasi:daftar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'notifikasi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="flex-1">Notifikasi</span>
+              {% if notif_unread_count > 0 %}
+              <span class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm">
+                {{ notif_unread_count }}
+              </span>
+              {% endif %}
+            </a>
+          </li>
+
         </ul>
       </nav>
-
+      
       <!-- User info + Logout -->
       <div class="px-4 py-3 border-t border-gray-200">
         <div class="flex items-center gap-2 mb-2">
@@ -210,6 +212,82 @@
   {% endif %}
 
   {% block extra_scripts %}{% endblock %}
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+      // Convert standard selects into custom Tailwind dropdowns matching user design
+      const selects = document.querySelectorAll('select:not(.no-custom)');
+      selects.forEach(select => {
+          if (select.closest('#sidebar')) return;
+          
+          select.style.display = 'none';
+  
+          const wrapper = document.createElement('div');
+          wrapper.className = 'relative w-full custom-select-wrapper min-w-[140px]';
+          select.parentNode.insertBefore(wrapper, select);
+          wrapper.appendChild(select);
+  
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'flex justify-between items-center w-full h-[42px] px-4 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#1a3a6b] focus:ring-2 focus:ring-[#1a3a6b]/20 transition-all shadow-sm';
+          
+          const updateButtonText = () => {
+              const selectedOption = select.options[select.selectedIndex];
+              button.innerHTML = `<span class="truncate">${selectedOption ? selectedOption.text : 'Pilih...'}</span>
+              <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
+          };
+          updateButtonText();
+          wrapper.appendChild(button);
+  
+          const menu = document.createElement('div');
+          menu.className = 'absolute z-[100] w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-lg hidden flex-col max-h-60 overflow-y-auto overflow-x-hidden py-1 custom-select-menu';
+          wrapper.appendChild(menu);
+  
+          const renderMenu = () => {
+              menu.innerHTML = '';
+              Array.from(select.options).forEach((option, index) => {
+                  const item = document.createElement('div');
+                  item.className = 'px-4 py-2.5 text-sm cursor-pointer transition-colors block w-full text-left truncate';
+                  
+                  if (select.selectedIndex === index) {
+                      item.classList.add('bg-[#1a3a6b]', 'text-white', 'font-bold');
+                  } else {
+                      item.classList.add('text-gray-700', 'hover:bg-[#1a3a6b]', 'hover:text-white');
+                  }
+                  item.innerText = option.text;
+                  
+                  item.addEventListener('click', (e) => {
+                      e.stopPropagation();
+                      select.selectedIndex = index;
+                      updateButtonText();
+                      menu.classList.add('hidden');
+                      renderMenu();
+                      select.dispatchEvent(new Event('change', { bubbles: true }));
+                  });
+                  menu.appendChild(item);
+              });
+          };
+          renderMenu();
+  
+          button.addEventListener('click', (e) => {
+              e.stopPropagation();
+              document.querySelectorAll('.custom-select-menu').forEach(m => {
+                  if (m !== menu) m.classList.add('hidden');
+              });
+              menu.classList.toggle('hidden');
+          });
+          
+          select.addEventListener('change', () => {
+              updateButtonText();
+              renderMenu();
+          });
+      });
+  
+      document.addEventListener('click', () => {
+          document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.add('hidden'));
+      });
+  });
+  </script>
 </body>
 
 </html>

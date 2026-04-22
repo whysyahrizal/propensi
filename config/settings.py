@@ -44,8 +44,11 @@ INSTALLED_APPS = [
     'sprin',
     'absensi',
     'dashboard',
-    'presensi',
+    'manajemen_cuti',
     'locations',
+    'presensi',
+    'notifikasi',
+    'pengumuman',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +75,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sprin.context_processors.user_role',
+                'pengumuman.context_processors.pengumuman_aktif',
+                'notifikasi.context_processors.notifikasi_unread_count',
             ],
         },
     },
@@ -131,3 +136,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 PRESENSI_OFFICE_LATITUDE = -6.200000
 PRESENSI_OFFICE_LONGITUDE = 106.816666
 PRESENSI_OFFICE_RADIUS_METER = 500  # 500m dari kantor
+
+# Email Configuration (PBI-047)
+# Default to console backend for development so it doesn't crash without credentials
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'SIRAGA Korlantas <noreply@siraga.com>')
+
+# SIRAGA Site Configuration
+SIRAGA_SITE_NAME = 'SIRAGA Korlantas Polri'
+SIRAGA_BASE_URL = os.environ.get('SIRAGA_BASE_URL', 'http://localhost:8000')
