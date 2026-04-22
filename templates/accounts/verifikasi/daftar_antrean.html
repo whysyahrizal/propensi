@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-6xl mx-auto flex flex-col gap-6">
+  <div class="flex items-center gap-4">
+    <a href="{% url 'accounts:daftar_personel' %}" class="p-2 bg-white rounded-lg border border-gray-200 text-gray-500"><iconify-icon icon="heroicons:arrow-left"></iconify-icon></a>
+    <h1 class="text-xl font-bold">Verifikasi Pendaftaran Akun</h1>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm text-left">
+      <thead class="bg-gray-50/50 border-b border-gray-200 text-gray-500">
+        <tr>
+          <th class="px-6 py-4 text-xs font-semibold tracking-wider">NRP & NAMA LENGKAP</th>
+          <th class="px-4 py-4 text-xs font-semibold tracking-wider">PANGKAT/GOL</th>
+          <th class="px-4 py-4 text-xs font-semibold tracking-wider">SATKER</th>
+          <th class="px-6 py-4 text-xs font-semibold tracking-wider text-center">AKSI VERIFIKASI</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for p in antrean_list %}
+        <tr class="hover:bg-gray-50/70 transition-colors">
+          <td class="px-6 py-4">
+            <p class="text-xs text-gray-400 font-mono mb-0.5">{{ p.nrp }}</p>
+            <p class="font-semibold text-gray-800">{{ p.nama_lengkap }}</p>
+          </td>
+          <td class="px-4 py-4"><span class="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">{{ p.pangkat|default:"—" }}</span></td>
+          <td class="px-4 py-4 text-gray-600">{{ p.satker.nama|default:"—"|title }}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-center gap-3">
+                <a href="{% url 'accounts:detail_verifikasi' p.pk %}" class="text-gray-400 hover:text-blue-600" title="Lihat Detail Pendaftaran">
+                    <iconify-icon icon="heroicons:eye" class="text-xl"></iconify-icon>
+                </a>
+                <form action="{% url 'accounts:proses_verifikasi' p.pk 'approve' %}" method="POST" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-gray-400 hover:text-green-600" title="Setujui Akun"><iconify-icon icon="heroicons:check-circle" class="text-xl"></iconify-icon></button>
+                </form>
+                <form action="{% url 'accounts:proses_verifikasi' p.pk 'reject' %}" method="POST" class="inline" onsubmit="return confirm('Tolak pendaftaran ini?')">
+                {% csrf_token %}
+                <button type="submit" class="text-gray-400 hover:text-red-600" title="Tolak & Hapus"><iconify-icon icon="heroicons:x-circle" class="text-xl"></iconify-icon></button>
+                </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500 italic">Tidak ada antrean verifikasi saat ini.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

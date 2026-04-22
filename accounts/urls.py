@@ -17,6 +17,9 @@ urlpatterns = [
     path('personel/<int:pk>/edit/', views.edit_personel_view, name='edit_personel'),
     path('personel/<int:pk>/hapus/', views.hapus_personel_view, name='hapus_personel'),
     path('personel/<int:pk>/reaktivasi/', views.reaktivasi_personel_view, name='reaktivasi_personel'),
+    path('verifikasi/', views.daftar_verifikasi_view, name='daftar_verifikasi'),
+    path('personel/verifikasi/<int:pk>/detail/', views.detail_verifikasi_view, name='detail_verifikasi'),
+    path('verifikasi/<int:pk>/<str:action>/', views.proses_verifikasi_view, name='proses_verifikasi'),
 
     # Manajemen Role
     path('roles/', views.daftar_role, name='daftar_role'),

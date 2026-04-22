@@ -77,6 +77,7 @@ TEMPLATES = [
                 'sprin.context_processors.user_role',
                 'pengumuman.context_processors.pengumuman_aktif',
                 'notifikasi.context_processors.notifikasi_unread_count',
+                'accounts.context_processor.jumlah_verifikasi',
             ],
         },
     },
