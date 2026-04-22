@@ -6,7 +6,8 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
 
-  {% if jumlah_pending_verifikasi > 0 and request.user.is_operator or request.user.is_superadmin %}
+  {% if jumlah_pending_verifikasi > 0 %}
+  {% if request.user.is_operator or request.user.is_superadmin %}
   <div class="flex items-center justify-between rounded-xl border border-orange-100 bg-orange-50 p-4 shadow-sm mb-6">
     <div class="flex items-center gap-3">
       <div class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600">
@@ -21,6 +22,7 @@
       Tinjau Sekarang
     </a>
   </div>
+  {% endif %}
   {% endif %}
 
   <!-- Statistik hari ini -->
