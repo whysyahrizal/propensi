@@ -9,7 +9,7 @@ Jalankan dengan:
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from accounts.models import Personel, Satker, Role
+from accounts.models import MenuItem, Personel, Satker, Role
 from locations.models import Location
 
 
@@ -29,6 +29,45 @@ ROLE_DATA = [
     {"nama": "operator", "display_label": "Operator", "deskripsi": "Akses kelola data personel dan absensi harian."},
     {"nama": "personel", "display_label": "Personel", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
 ]
+
+MENU_DATA = [
+    {"key": "dashboard", "label": "Dashboard", "path": "dashboard:index", "icon": "heroicons:home", "sort_order": 10},
+    {"key": "personel", "label": "Personel", "path": "personel_list", "icon": "heroicons:users", "sort_order": 20},
+    {"key": "profil", "label": "Profil", "path": "accounts:profil", "icon": "heroicons:user-circle", "sort_order": 30},
+    {"key": "cuti_saya", "label": "Cuti / Izin Saya", "path": "manajemen_cuti:riwayat", "icon": "heroicons:calendar-days", "sort_order": 40},
+    {"key": "kelola_cuti", "label": "Kelola Cuti / Izin", "path": "manajemen_cuti:kelola", "icon": "heroicons:clipboard-document-list", "sort_order": 50},
+    {"key": "absensi", "label": "Absensi Harian", "path": "absensi:dashboard", "icon": "heroicons:calendar", "sort_order": 60},
+    {"key": "rekap_pribadi", "label": "Rekap Absensi Saya", "path": "absensi:rekap_pribadi", "icon": "heroicons:document-chart-bar", "sort_order": 70},
+    {"key": "rekap_admin", "label": "Rekap Absensi Admin", "path": "absensi:rekap_admin", "icon": "heroicons:presentation-chart-line", "sort_order": 80},
+    {"key": "sprin", "label": "Lihat Sprin", "path": "sprin:daftar", "icon": "heroicons:document-text", "sort_order": 90},
+    {"key": "locations", "label": "Wilayah Penugasan", "path": "locations:daftar", "icon": "heroicons:map-pin", "sort_order": 100},
+    {"key": "pengumuman", "label": "Pengumuman", "path": "pengumuman:daftar", "icon": "heroicons:megaphone", "sort_order": 110},
+    {"key": "notifikasi", "label": "Notifikasi", "path": "notifikasi:daftar", "icon": "heroicons:bell", "sort_order": 120},
+    {"key": "verifikasi", "label": "Verifikasi Akun", "path": "accounts:daftar_verifikasi", "icon": "heroicons:user-plus", "sort_order": 130},
+    {"key": "daftar_role", "label": "Manajemen Role", "path": "accounts:daftar_role", "icon": "heroicons:shield-check", "sort_order": 140},
+    {"key": "daftar_menu", "label": "Manajemen Menu", "path": "accounts:daftar_menu", "icon": "heroicons:squares-2x2", "sort_order": 150},
+]
+
+ROLE_MENU_MAP = {
+    "superadmin": [
+        "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
+        "rekap_pribadi", "rekap_admin", "sprin", "locations", "pengumuman",
+        "notifikasi", "verifikasi", "daftar_role", "daftar_menu",
+    ],
+    "operator": [
+        "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
+        "rekap_pribadi", "rekap_admin", "sprin", "locations", "pengumuman",
+        "notifikasi",
+    ],
+    "pimpinan": [
+        "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
+        "rekap_pribadi", "rekap_admin", "sprin", "pengumuman", "notifikasi",
+    ],
+    "personel": [
+        "dashboard", "profil", "cuti_saya", "absensi", "rekap_pribadi",
+        "sprin", "pengumuman", "notifikasi",
+    ],
+}
 
 PERSONEL_DATA = [
     {
@@ -179,6 +218,7 @@ class Command(BaseCommand):
             Personel.objects.all().delete()
             Satker.objects.all().delete()
             Role.objects.all().delete()
+            MenuItem.objects.all().delete()
             Location.objects.all().delete()
             self.stdout.write('   Data dihapus.\n')
 
@@ -206,6 +246,46 @@ class Command(BaseCommand):
             role_obj_map[r['nama']] = obj
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
             self.stdout.write(f'   [{status}] {obj.nama} — {obj.display_label}')
+
+        self.stdout.write(self.style.HTTP_INFO('\n🧭 Menyiapkan Menu Sidebar...'))
+        menu_map = {}
+        for menu in MENU_DATA:
+            obj, created = MenuItem.objects.get_or_create(
+                path=menu['path'],
+                defaults={
+                    'label': menu['label'],
+                    'icon': menu['icon'],
+                    'sort_order': menu['sort_order'],
+                    'is_active': True,
+                },
+            )
+            updated = False
+            if obj.label != menu['label']:
+                obj.label = menu['label']
+                updated = True
+            if obj.icon != menu['icon']:
+                obj.icon = menu['icon']
+                updated = True
+            if obj.sort_order != menu['sort_order']:
+                obj.sort_order = menu['sort_order']
+                updated = True
+            if not obj.is_active:
+                obj.is_active = True
+                updated = True
+            if updated:
+                obj.save()
+            menu_map[menu['key']] = obj
+            status = self.style.SUCCESS('baru') if created else 'sudah ada'
+            self.stdout.write(f'   [{status}] {obj.label} — {obj.path}')
+
+        self.stdout.write(self.style.HTTP_INFO('\n🔐 Mengaitkan Menu ke Role...'))
+        for role_name, menu_keys in ROLE_MENU_MAP.items():
+            role_obj = role_obj_map.get(role_name)
+            if not role_obj:
+                continue
+            menus = [menu_map[key] for key in menu_keys if key in menu_map]
+            role_obj.menus.set(menus)
+            self.stdout.write(f'   [{self.style.SUCCESS("ok")}] {role_obj.nama} — {len(menus)} menu')
 
         self.stdout.write(self.style.HTTP_INFO('\n👤 Menyiapkan Personel...'))
         for p in PERSONEL_DATA:
