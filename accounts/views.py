@@ -21,17 +21,22 @@ def login_view(request):
     if request.method == 'POST':
         nrp = request.POST.get('nrp', '').strip()
         password = request.POST.get('password', '')
+        
+        user_check = Personel.objects.filter(nrp=nrp).first()
+        
+        if user_check and user_check.status_verifikasi == 'pending':
+            messages.warning(request, 'Akses ditolak: Akun Anda masih dalam antrean verifikasi Administrator.')
+            return render(request, 'accounts/login.html')
+
         user = authenticate(request, username=nrp, password=password)
         if user is not None:
             if not user.is_active:
                 messages.error(request, 'Akun Anda telah dinonaktifkan. Hubungi Administrator.')
                 return render(request, 'accounts/login.html')
             login(request, user)
-            next_url = request.GET.get('next', 'dashboard:index')
-            return redirect(next_url)
+            return redirect('dashboard:index')
         else:
-            messages.error(request, 'NRP atau password salah. Silakan coba lagi.')
-
+            messages.error(request, 'NRP atau password salah.')
     return render(request, 'accounts/login.html')
 
 def logout_view(request):
@@ -46,13 +51,16 @@ def register_view(request):
     if request.method == 'POST':
         nrp = request.POST.get('nrp', '').strip()
         nama = request.POST.get('nama_lengkap', '').strip()
+        email = request.POST.get('email', '').strip()
+        no_hp = request.POST.get('no_hp', '').strip()
+        jabatan = request.POST.get('jabatan', '').strip()
+        pangkat = request.POST.get('pangkat', '')
+        satker_id = request.POST.get('satker')
         password1 = request.POST.get('password1', '')
         password2 = request.POST.get('password2', '')
-        satker_id = request.POST.get('satker')
-        pangkat = request.POST.get('pangkat', '')
 
-        if not nrp or not nama:
-            messages.error(request, 'NRP dan Nama Lengkap wajib diisi.')
+        if not all([nrp, nama, email, no_hp, jabatan, pangkat, satker_id, password1, password2]):
+            messages.error(request, 'Seluruh kolom bertanda bintang (*) wajib diisi.')
         elif Personel.objects.filter(nrp=nrp).exists():
             messages.error(request, 'NRP sudah terdaftar di sistem.')
         elif password1 != password2:
@@ -60,18 +68,16 @@ def register_view(request):
         elif len(password1) < 8:
             messages.error(request, 'Password minimal 8 karakter.')
         else:
-            satker = Satker.objects.filter(pk=satker_id).first() if satker_id else None
+            satker = Satker.objects.filter(pk=satker_id).first()
             user = Personel.objects.create_user(
-                nrp=nrp,
-                password=password1,
-                nama_lengkap=nama,
-                pangkat=pangkat,
-                satker=satker,
+                nrp=nrp, password=password1, nama_lengkap=nama,
+                email=email, no_hp=no_hp, pangkat=pangkat,
+                jabatan=jabatan, satker=satker,
+                is_active=False, status_verifikasi='pending'
             )
-            login(request, user)
-            messages.success(request, f'Selamat datang, {user.nama_lengkap}!')
-            return redirect('dashboard:index')
-
+            messages.success(request, 'Registrasi berhasil! Silakan tunggu verifikasi Administrator.')
+            return redirect('accounts:login')
+        
     satker_list = Satker.objects.all()
     pangkat_choices = Personel.PANGKAT_CHOICES
     return render(request, 'accounts/register.html', {
@@ -255,6 +261,42 @@ def reaktivasi_personel_view(request, pk):
 
     return render(request, 'accounts/konfirmasi_reaktivasi.html', {'personel': personel})
 
+@cek_akses_menu('accounts:daftar_personel')
+def daftar_verifikasi_view(request):
+    if not (request.user.is_superadmin or request.user.is_operator):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+        
+    antrean_list = Personel.objects.filter(status_verifikasi='pending').order_by('-id')
+    return render(request, 'accounts/verifikasi/daftar_antrean.html', {'antrean_list': antrean_list})
+
+@cek_akses_menu('accounts:daftar_personel')
+def detail_verifikasi_view(request, pk):
+    if not (request.user.is_superadmin or request.user.is_operator):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+    personel = get_object_or_404(Personel, pk=pk, status_verifikasi='pending')
+    return render(request, 'accounts/verifikasi/detail_verifikasi.html', {'personel': personel})
+
+@cek_akses_menu('accounts:daftar_personel')
+def proses_verifikasi_view(request, pk, action):
+    if not (request.user.is_superadmin or request.user.is_operator):
+        messages.error(request, 'Akses ditolak.')
+        return redirect('dashboard:index')
+        
+    personel = get_object_or_404(Personel, pk=pk)
+    
+    if request.method == 'POST':
+        if action == 'approve':
+            personel.is_active = True
+            personel.status_verifikasi = 'approved'
+            personel.save()
+            messages.success(request, f'Akun {personel.nama_lengkap} disetujui.')
+        elif action == 'reject':
+            personel.delete()
+            messages.success(request, f'Pendaftaran {personel.nama_lengkap} ditolak.')
+            
+    return redirect('accounts:daftar_verifikasi')
 
 # MANAJEMEN ROLE
 @cek_akses_menu('accounts:daftar_role')
