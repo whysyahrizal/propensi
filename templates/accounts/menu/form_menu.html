@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}{% if action == 'edit' %}Edit Menu - {{ menu.label }}{% else %}Tambah Menu {% endif %} — SIRAGA{% endblock %}
+{% block page_title %}{% if action == 'edit' %}Edit Menu{% else %}Tambah Menu {% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-6">
+  
+  <a href="{% url 'accounts:daftar_menu' %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 font-medium">
+    <iconify-icon icon="heroicons:arrow-left" class="text-lg"></iconify-icon>
+    Kembali ke Daftar Menu
+  </a>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+      <h1 class="text-xl font-bold text-gray-900">
+        {% if action == 'edit' %}Edit Menu{% else %}Tambah Menu {% endif %}
+      </h1>
+    </div>
+
+    <div class="px-8 py-8">
+      <form method="POST" class="flex flex-col gap-6">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Label Menu <span class="text-red-500">*</span></label>
+            <input name="label" type="text" required 
+                   placeholder="cth: Data Personel" 
+                   value="{% if action == 'edit' %}{{ menu.label }}{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Sort Order <span class="text-red-500">*</span></label>
+            <input name="sort_order" type="number" required 
+                   placeholder="0" 
+                   value="{% if action == 'edit' %}{{ menu.sort_order }}{% else %}0{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Path Name <span class="text-red-500">*</span></label>
+          <input name="path" type="text" required 
+                 placeholder="cth: accounts:daftar_personel" 
+                 value="{% if action == 'edit' %}{{ menu.path }}{% endif %}"
+                 class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none font-mono transition-all"/>
+          <p class="text-[10px] text-gray-400 italic">Gunakan nama path yang terdaftar di sistem (namespace:name).</p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Iconify Name</label>
+          <input name="icon" type="text" 
+                 placeholder="cth: heroicons:home" 
+                 value="{% if action == 'edit' %}{{ menu.icon }}{% else %}heroicons:stop{% endif %}"
+                 class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none font-mono transition-all"/>
+          <p class="text-[10px] text-gray-400 italic">Format: collection:icon-name (referensi: iconify.design).</p>
+        </div>
+
+        {% if action == 'edit' %}
+        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <input type="checkbox" name="is_active" id="id_is_active" {% if menu.is_active %}checked{% endif %} 
+                   class="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300">
+            <label for="id_is_active" class="text-sm font-medium text-gray-700 cursor-pointer">Menu ini aktif dan dimunculkan di sidebar</label>
+        </div>
+        {% endif %}
+
+        <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+          <a href="{% url 'accounts:daftar_menu' %}" class="px-6 py-2.5 rounded-lg border border-gray-300 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Batal</a>
+          <button type="submit" class="px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-light shadow-md transition-all">
+            {% if action == 'edit' %}Simpan Perubahan{% else %}Simpan{% endif %}
+          </button>
+        </div>
+        
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
