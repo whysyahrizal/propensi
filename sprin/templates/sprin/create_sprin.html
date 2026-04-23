@@ -32,8 +32,15 @@
 
             <h3 class="text-xs font-bold uppercase tracking-wider text-[#1a3a6b] border-b-2 border-gray-100 pb-2 mb-4 mt-8">Lokasi</h3>
             <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lokasi</label>
-                <input type="text" name="location_name" placeholder="Contoh: Pos Pantau Tol" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors" required>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Lokasi Penugasan</label>
+                <select name="location_id" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors">
+                    <option value="">-- Pilih Lokasi Aktif --</option>
+                    {% for location in active_locations %}
+                    <option value="{{ location.id }}" {% if selected_location_id|stringformat:"s" == location.id|stringformat:"s" %}selected{% endif %}>
+                        {{ location.name }} ({{ location.get_type_display }})
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <h3 class="text-xs font-bold uppercase tracking-wider text-[#1a3a6b] border-b-2 border-gray-100 pb-2 mb-4 mt-8">Waktu & Otoritas</h3>

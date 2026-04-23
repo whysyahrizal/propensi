@@ -98,9 +98,9 @@
             </a>
           </li>
           <li>
-            <a href="{% url 'manajemen_cuti:riwayat' %}"
+            <a href="{% url 'cuti:riwayat' %}"
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                    {% if request.resolver_match.app_name == 'cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -145,11 +145,11 @@
           </li>
           {% endif %}
 
-          {% if user.role in 'superadmin,operator,pimpinan' %}
+          {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
           <li>
-            <a href="{% url 'manajemen_cuti:kelola' %}"
+            <a href="{% url 'cuti:kelola' %}"
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                    {% if request.resolver_match.app_name == 'cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -250,9 +250,9 @@
               </a>
             </li>
             <li>
-              <a href="{% url 'manajemen_cuti:riwayat' %}"
+              <a href="{% url 'cuti:riwayat' %}"
                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                  {% if request.resolver_match.app_name == 'cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -295,9 +295,9 @@
               </a>
             </li>
             <li>
-              <a href="{% url 'manajemen_cuti:kelola' %}"
+              <a href="{% url 'cuti:kelola' %}"
                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                  {% if request.resolver_match.app_name == 'cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -306,7 +306,7 @@
               </a>
             </li>
             {% endif %}
-            {% if user.role == 'superadmin' or user.role == 'operator' %}
+            {% if user.role == 'superadmin' or user.role == 'pimpinan' %}
             <li>
               <a href="{% url 'locations:daftar' %}"
                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
@@ -316,7 +316,7 @@
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Wilayah Penugasan
+                Manajemen Wilayah
               </a>
             </li>
             {% endif %}
@@ -341,6 +341,34 @@
                 Notifikasi
               </a>
             </li>
+          {% endif %}
+
+          {% if user.role == 'superadmin' or user.role == 'pimpinan' %}
+          <li>
+            <a href="{% url 'schedules:calendar' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'schedules' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Manajemen Jadwal
+            </a>
+          </li>
+          {% endif %}
+
+          {% if user.role == 'personel' %}
+          <li>
+            <a href="{% url 'schedules:my_schedule' %}"
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                    {% if request.resolver_match.app_name == 'schedules' and request.resolver_match.url_name == 'my_schedule' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Jadwal Saya
+            </a>
+          </li>
           {% endif %}
 
         </ul>
