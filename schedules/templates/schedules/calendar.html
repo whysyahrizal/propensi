@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Manajemen Jadwal - SIRAGA{% endblock %}
+{% block page_title %}Manajemen Jadwal{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="bg-white border border-gray-200 rounded-xl p-5">
+  <div class="mb-4">
+    <h3 class="text-sm font-semibold text-gray-900">Kalender Penugasan</h3>
+    <p class="text-xs text-gray-500 mt-1">Kelola jadwal shift untuk personel sesuai role dan satker.</p>
+  </div>
+  <div id="schedule-calendar"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('schedule-calendar');
+    if (!calendarEl || !window.FullCalendar) return;
+
+    const shiftColorMap = {
+      pagi: '#2563eb',
+      siang: '#f59e0b',
+      malam: '#7c3aed'
+    };
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'id',
+      height: 'auto',
+      eventDisplay: 'block',
+      events: '{% url "schedules:events_api" %}',
+      eventDidMount: function(info) {
+        const shiftKey = info.event.extendedProps.shiftKey;
+        if (shiftColorMap[shiftKey]) {
+          info.el.style.backgroundColor = shiftColorMap[shiftKey];
+          info.el.style.borderColor = shiftColorMap[shiftKey];
+        }
+      }
+    });
+
+    calendar.render();
+  });
+</script>
+{% endblock %}

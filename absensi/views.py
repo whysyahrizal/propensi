@@ -1,4 +1,5 @@
 import csv
+import math
 from datetime import time, timedelta
 
 from django.contrib import messages
@@ -9,6 +10,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from accounts.models import Satker
+from locations.models import Location
 from sprin.models import Sprin
 from .models import RekorAbsensi
 
@@ -58,6 +60,24 @@ def _build_rekap_admin_stats(queryset):
         total_izin=Count('id', filter=Q(status__in=['izin', 'cuti'])),
         total_dinas=Count('id', filter=Q(sprin__isnull=False)),
     ).order_by('personel__nama_lengkap')
+
+
+def _haversine_distance_meter(lat1, lon1, lat2, lon2):
+    """Return distance between two coordinates in meters."""
+    earth_radius_meter = 6371000
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    delta_lat = lat2_rad - lat1_rad
+    delta_lon = lon2_rad - lon1_rad
+
+    a = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
+    )
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return earth_radius_meter * c
 
 
 def _export_personal_csv(queryset, filename):
@@ -118,6 +138,7 @@ def dashboard_view(request):
 @login_required
 def checkin_view(request):
     today = timezone.localdate()
+    active_locations = Location.objects.filter(is_active=True).order_by('name')
     existing = RekorAbsensi.objects.filter(personel=request.user, tanggal=today).first()
     if existing and existing.waktu_masuk:
         messages.warning(request, 'Anda sudah melakukan check-in hari ini.')
@@ -126,9 +147,53 @@ def checkin_view(request):
     if request.method == 'POST':
         lat = request.POST.get('lat') or request.POST.get('latitude')
         lon = request.POST.get('lon') or request.POST.get('longitude')
+        location_id = request.POST.get('location_id')
         foto = request.FILES.get('foto') or request.FILES.get('selfie_masuk')
         sprin_id = request.POST.get('sprin_id')
         sprin = Sprin.objects.filter(pk=sprin_id).first() if sprin_id else None
+        selected_location = Location.objects.filter(pk=location_id, is_active=True).first()
+
+        if not selected_location:
+            messages.error(request, 'Lokasi penugasan harus dipilih.')
+            return render(request, 'absensi/checkin.html', {
+                'sprin_aktif': sprin,
+                'absensi': existing,
+                'sudah_checkin': bool(existing and existing.waktu_masuk),
+                'active_locations': active_locations,
+                'selected_location_id': location_id,
+            })
+
+        try:
+            current_lat = float(lat)
+            current_lon = float(lon)
+        except (TypeError, ValueError):
+            messages.error(request, 'Koordinat GPS tidak terdeteksi. Aktifkan lokasi Anda.')
+            return render(request, 'absensi/checkin.html', {
+                'sprin_aktif': sprin,
+                'absensi': existing,
+                'sudah_checkin': bool(existing and existing.waktu_masuk),
+                'active_locations': active_locations,
+                'selected_location_id': location_id,
+            })
+
+        distance_meter = _haversine_distance_meter(
+            current_lat,
+            current_lon,
+            float(selected_location.latitude),
+            float(selected_location.longitude),
+        )
+        if distance_meter > selected_location.radius:
+            messages.error(
+                request,
+                f'Anda berada di luar radius penugasan (Jarak: {distance_meter:.2f} meter).'
+            )
+            return render(request, 'absensi/checkin.html', {
+                'sprin_aktif': sprin,
+                'absensi': existing,
+                'sudah_checkin': bool(existing and existing.waktu_masuk),
+                'active_locations': active_locations,
+                'selected_location_id': location_id,
+            })
 
         rekord, created = RekorAbsensi.objects.get_or_create(
             personel=request.user, tanggal=today, sprin=sprin
@@ -138,10 +203,12 @@ def checkin_view(request):
         rekord.lon_masuk = lon
         if foto:
             rekord.foto_masuk = foto
-        rekord.catatan = request.POST.get('catatan', '')
+        catatan = request.POST.get('catatan', '').strip()
+        geofence_note = f"Check-in valid di {selected_location.name} ({selected_location.get_type_display()})"
+        rekord.catatan = f"{catatan}\n{geofence_note}".strip() if catatan else geofence_note
         rekord.status = 'hadir'
         rekord.save()
-        messages.success(request, 'Check-in berhasil dicatat.')
+        messages.success(request, 'Check-in berhasil dicatat dan valid dalam radius penugasan.')
         return redirect('dashboard:index')
 
     # Ambil sprin aktif untuk personel ini
@@ -163,6 +230,8 @@ def checkin_view(request):
         'sprin_aktif': sprin_aktif,
         'absensi': today_record,
         'sudah_checkin': bool(today_record and today_record.waktu_masuk),
+        'active_locations': active_locations,
+        'selected_location_id': '',
     })
 
 

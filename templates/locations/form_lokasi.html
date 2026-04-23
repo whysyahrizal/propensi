@@ -4,7 +4,9 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -149,6 +151,47 @@ document.addEventListener('DOMContentLoaded', function() {
     lngInput.value = lng.toFixed(7);
     updateCircle(lat, lng);
   }
+
+  var proxyGeocoder = {
+    geocode: function(query, cb) {
+      fetch('{% url "locations:geocode" %}?q=' + encodeURIComponent(query), {
+        credentials: 'same-origin',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        var results = (data.results || []).map(function(item) {
+          var center = L.latLng(item.lat, item.lon);
+          return {
+            name: item.display_name,
+            center: center,
+            bbox: L.latLngBounds(center, center),
+            properties: item,
+          };
+        });
+        cb(results);
+      })
+      .catch(function() { cb([]); });
+    },
+    reverse: function(latLng, scale, cb) {
+      cb([]);
+    }
+  };
+
+  var geocoderControl = L.Control.geocoder({
+    defaultMarkGeocode: false,
+    geocoder: proxyGeocoder,
+    placeholder: 'Cari alamat atau lokasi...',
+    errorMessage: 'Alamat tidak ditemukan'
+  }).addTo(map);
+
+  geocoderControl.on('markgeocode', function(e) {
+    var center = e.geocode.center;
+    map.flyTo(center, 15);
+    placeMarker(center.lat, center.lng);
+  });
 
   if (hasExisting) {
     placeMarker(existingLat, existingLng);
