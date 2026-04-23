@@ -40,6 +40,8 @@ MENU_DATA = [
     {"key": "rekap_pribadi", "label": "Rekap Absensi Saya", "path": "absensi:rekap_pribadi", "icon": "heroicons:document-chart-bar", "sort_order": 70},
     {"key": "rekap_admin", "label": "Rekap Absensi Admin", "path": "absensi:rekap_admin", "icon": "heroicons:presentation-chart-line", "sort_order": 80},
     {"key": "sprin", "label": "Lihat Sprin", "path": "sprin:daftar", "icon": "heroicons:document-text", "sort_order": 90},
+    {"key": "schedules_kalender", "label": "Manajemen Jadwal", "path": "schedules:calendar", "icon": "heroicons:calendar-days", "sort_order": 92},
+    {"key": "schedules_saya", "label": "Jadwal Saya", "path": "schedules:my_schedule", "icon": "heroicons:calendar", "sort_order": 94},
     {"key": "locations", "label": "Wilayah Penugasan", "path": "locations:daftar", "icon": "heroicons:map-pin", "sort_order": 100},
     {"key": "pengumuman", "label": "Pengumuman", "path": "pengumuman:daftar", "icon": "heroicons:megaphone", "sort_order": 110},
     {"key": "notifikasi", "label": "Notifikasi", "path": "notifikasi:daftar", "icon": "heroicons:bell", "sort_order": 120},
@@ -51,7 +53,7 @@ MENU_DATA = [
 ROLE_MENU_MAP = {
     "superadmin": [
         "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
-        "rekap_pribadi", "rekap_admin", "sprin", "locations", "pengumuman",
+        "rekap_pribadi", "rekap_admin", "sprin", "schedules_kalender", "locations", "pengumuman",
         "notifikasi", "verifikasi", "daftar_role", "daftar_menu",
     ],
     "operator": [
@@ -61,11 +63,11 @@ ROLE_MENU_MAP = {
     ],
     "pimpinan": [
         "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
-        "rekap_pribadi", "rekap_admin", "sprin", "pengumuman", "notifikasi",
+        "rekap_pribadi", "rekap_admin", "sprin", "schedules_kalender", "pengumuman", "notifikasi",
     ],
     "personel": [
         "dashboard", "profil", "cuti_saya", "absensi", "rekap_pribadi",
-        "sprin", "pengumuman", "notifikasi",
+        "sprin", "schedules_saya", "pengumuman", "notifikasi",
     ],
 }
 
