@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -8,7 +9,7 @@ class Presensi(models.Model):
         ('Izin', 'Izin'),
     ]
     
-    personel = models.ForeignKey('personel.Personel', on_delete=models.CASCADE)
+    personel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField(default=timezone.now)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     

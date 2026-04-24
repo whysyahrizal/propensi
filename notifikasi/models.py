@@ -9,6 +9,7 @@ class Notifikasi(models.Model):
         ('cuti', 'Cuti'),
         ('sprin', 'Sprin'),
         ('presensi', 'Presensi'),
+        ('jadwal', 'Jadwal Piket'),
         ('sistem', 'Sistem'),
     ]
 
@@ -56,6 +57,7 @@ class Notifikasi(models.Model):
             'cuti': '🗓️',
             'sprin': '📋',
             'presensi': '🕒',
+            'jadwal': '📅',
             'sistem': '⚙️',
             'info': 'ℹ️',
         }
@@ -67,6 +69,7 @@ class Notifikasi(models.Model):
             'cuti': 'blue',
             'sprin': 'purple',
             'presensi': 'green',
+            'jadwal': 'indigo',
             'sistem': 'gray',
             'info': 'yellow',
         }

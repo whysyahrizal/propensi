@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Jadwal Saya — SIRAGA{% endblock %}
+{% block page_title %}Jadwal Saya{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+  <div class="card p-5">
+    <h1 class="text-lg font-bold text-gray-900 mb-2">Jadwal Anda Hari Ini</h1>
+    {% if today_shift %}
+    <div class="rounded-xl bg-blue-50 border border-blue-100 p-4">
+      <p class="text-sm font-bold text-[#1a3a6b]">{{ today_shift.get_shift_type_display }} · {{ today_shift.location.name }}</p>
+      <p class="text-xs text-gray-500">{{ today_shift.date|date:"d M Y" }}</p>
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-500">Tidak ada jadwal untuk hari ini.</p>
+    {% endif %}
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-100">
+      <h2 class="text-sm font-bold text-gray-900">Timeline Jadwal (Mulai Hari Ini)</h2>
+    </div>
+    <div class="divide-y divide-gray-100">
+      {% for schedule in timeline_schedules %}
+      <div class="px-5 py-3">
+        <p class="text-sm font-semibold text-gray-900">{{ schedule.get_shift_type_display }} · {{ schedule.location.name }}</p>
+        <p class="text-xs text-gray-500">{{ schedule.date|date:"d M Y" }}</p>
+      </div>
+      {% empty %}
+      <div class="px-5 py-8 text-sm text-gray-400">Belum ada jadwal ke depan.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

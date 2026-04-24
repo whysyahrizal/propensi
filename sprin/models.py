@@ -1,4 +1,6 @@
 import uuid
+
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -19,9 +21,13 @@ class Sprin(models.Model):
     # longitude = models.DecimalField(max_digits=12, decimal_places=9, null=True, blank=True)
     # radius_meter = models.IntegerField(default=100)
     
-    # Relasi ke modul Personel
-    created_by = models.ForeignKey('personel.Personel', on_delete=models.SET_NULL, null=True, related_name='sprin_dibuat')
-    approved_by = models.ForeignKey('personel.Personel', on_delete=models.SET_NULL, null=True, blank=True, related_name='sprin_pimpinan')
+    # Relasi ke akun login (AUTH_USER_MODEL), bukan model legacy personel.Personel
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='sprin_dibuat'
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='sprin_pimpinan'
+    )
     
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
@@ -50,7 +56,9 @@ class Sprin(models.Model):
 class PersonelSprin(models.Model):
     """Tabel junction untuk daftar personel di satu Sprin"""
     sprin = models.ForeignKey(Sprin, on_delete=models.CASCADE, related_name='daftar_personel')
-    personel = models.ForeignKey('personel.Personel', on_delete=models.CASCADE, related_name='penugasan_sprin')
+    personel = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='penugasan_sprin'
+    )
 
     class Meta:
         unique_together = ('sprin', 'personel')
