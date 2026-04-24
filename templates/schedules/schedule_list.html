@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Jadwal — SIRAGA{% endblock %}
+{% block page_title %}Daftar Jadwal{% endblock %}
+
+{% block content %}
+<div class="card overflow-hidden">
+  <div class="px-5 py-4 border-b border-gray-100">
+    <h1 class="text-sm font-bold text-gray-900">Daftar Jadwal Piket</h1>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-200 bg-gray-50/70">
+          <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+          <th class="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Shift</th>
+          <th class="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Lokasi</th>
+          <th class="text-center px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Personel</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for schedule in schedule_list %}
+        <tr class="hover:bg-gray-50/60 transition-colors">
+          <td class="px-5 py-3 text-xs text-gray-700 font-semibold">{{ schedule.date|date:"d M Y" }}</td>
+          <td class="px-4 py-3 text-sm text-gray-700">{{ schedule.get_shift_type_display }}</td>
+          <td class="px-4 py-3 text-sm text-gray-700">{{ schedule.location.name }}</td>
+          <td class="px-4 py-3 text-center text-xs text-gray-700 font-semibold">{{ schedule.personnel_count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="px-5 py-10 text-center text-sm text-gray-400">Belum ada data jadwal.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -24,6 +24,7 @@
                     {% if notif.tipe == 'cuti' %}bg-blue-100 text-blue-600
                     {% elif notif.tipe == 'sprin' %}bg-purple-100 text-purple-600
                     {% elif notif.tipe == 'presensi' %}bg-green-100 text-green-600
+                    {% elif notif.tipe == 'jadwal' %}bg-indigo-100 text-indigo-700
                     {% elif notif.tipe == 'sistem' %}bg-gray-100 text-gray-600
                     {% else %}bg-yellow-100 text-yellow-600{% endif %}">
           {{ notif.tipe_icon }}
@@ -35,6 +36,7 @@
                          {% if notif.tipe == 'cuti' %}bg-blue-100 text-blue-700
                          {% elif notif.tipe == 'sprin' %}bg-purple-100 text-purple-700
                          {% elif notif.tipe == 'presensi' %}bg-green-100 text-green-700
+                         {% elif notif.tipe == 'jadwal' %}bg-indigo-100 text-indigo-700
                          {% elif notif.tipe == 'sistem' %}bg-gray-100 text-gray-700
                          {% else %}bg-yellow-100 text-yellow-700{% endif %}">
               {{ notif.get_tipe_display }}

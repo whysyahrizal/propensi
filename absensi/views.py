@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from accounts.models import Satker
 from locations.models import Location
+from schedules.models import ShiftSchedulePersonnel
 from sprin.models import Sprin
 from .models import RekorAbsensi
 
@@ -21,8 +22,37 @@ def _get_today_record(user):
 def _is_terlambat(record):
     if not record or not record.waktu_masuk:
         return False
+    deadline = _get_checkin_deadline(record)
     local_time = timezone.localtime(record.waktu_masuk).time()
-    return record.status == 'hadir' and local_time > time(8, 0)
+    return record.status == 'hadir' and local_time > deadline
+
+
+def _get_checkin_deadline(record):
+    """
+    Determine lateness cutoff based on schedule on that date.
+    Defaults to office rule 08:00 when no schedule exists.
+    """
+    default_deadline = time(8, 0)
+    if not record or not getattr(record, 'personel_id', None) or not getattr(record, 'tanggal', None):
+        return default_deadline
+
+    shift_deadline = {
+        'pagi': time(7, 0),
+        'siang': time(15, 0),
+        'malam': time(23, 0),
+    }
+    shift_order = {'pagi': 1, 'siang': 2, 'malam': 3}
+    shifts = list(
+        ShiftSchedulePersonnel.objects.filter(
+            personel_id=record.personel_id,
+            schedule__date=record.tanggal,
+        ).values_list('schedule__shift_type', flat=True).distinct()
+    )
+    if not shifts:
+        return default_deadline
+
+    primary_shift = min(shifts, key=lambda value: shift_order.get(value, 99))
+    return shift_deadline.get(primary_shift, default_deadline)
 
 
 def _get_record_badge(record):
@@ -40,11 +70,12 @@ def _get_record_badge(record):
 
 
 def _build_personal_stats(queryset):
+    records = list(queryset)
     return {
-        'total_hadir': queryset.filter(status='hadir', sprin__isnull=True).count(),
-        'total_terlambat': queryset.filter(status='hadir', waktu_masuk__time__gt=time(8, 0), sprin__isnull=True).count(),
-        'total_izin': queryset.filter(status__in=['izin', 'cuti']).count(),
-        'total_dinas': queryset.filter(sprin__isnull=False).count(),
+        'total_hadir': sum(1 for record in records if record.status == 'hadir' and not record.sprin_id),
+        'total_terlambat': sum(1 for record in records if _is_terlambat(record)),
+        'total_izin': sum(1 for record in records if record.status in ['izin', 'cuti']),
+        'total_dinas': sum(1 for record in records if record.sprin_id),
     }
 
 
@@ -78,6 +109,23 @@ def _haversine_distance_meter(lat1, lon1, lat2, lon2):
     )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return earth_radius_meter * c
+
+
+def _find_matching_location(lat, lon, locations):
+    """Pick nearest location where user point is inside radius."""
+    best_location = None
+    best_distance = None
+    for loc in locations:
+        distance = _haversine_distance_meter(
+            lat,
+            lon,
+            float(loc.latitude),
+            float(loc.longitude),
+        )
+        if distance <= loc.radius and (best_distance is None or distance < best_distance):
+            best_location = loc
+            best_distance = distance
+    return best_location, best_distance
 
 
 def _export_personal_csv(queryset, filename):
@@ -151,18 +199,6 @@ def checkin_view(request):
         foto = request.FILES.get('foto') or request.FILES.get('selfie_masuk')
         sprin_id = request.POST.get('sprin_id')
         sprin = Sprin.objects.filter(pk=sprin_id).first() if sprin_id else None
-        selected_location = Location.objects.filter(pk=location_id, is_active=True).first()
-
-        if not selected_location:
-            messages.error(request, 'Lokasi penugasan harus dipilih.')
-            return render(request, 'absensi/checkin.html', {
-                'sprin_aktif': sprin,
-                'absensi': existing,
-                'sudah_checkin': bool(existing and existing.waktu_masuk),
-                'active_locations': active_locations,
-                'selected_location_id': location_id,
-            })
-
         try:
             current_lat = float(lat)
             current_lon = float(lon)
@@ -175,6 +211,24 @@ def checkin_view(request):
                 'active_locations': active_locations,
                 'selected_location_id': location_id,
             })
+
+        selected_location = Location.objects.filter(pk=location_id, is_active=True).first() if location_id else None
+        auto_selected = False
+        if not selected_location:
+            selected_location, auto_distance = _find_matching_location(current_lat, current_lon, active_locations)
+            auto_selected = bool(selected_location)
+            if auto_selected:
+                location_id = selected_location.id
+                distance_meter = auto_distance
+            else:
+                messages.error(request, 'Lokasi penugasan harus dipilih atau berada dalam radius lokasi aktif.')
+                return render(request, 'absensi/checkin.html', {
+                    'sprin_aktif': sprin,
+                    'absensi': existing,
+                    'sudah_checkin': bool(existing and existing.waktu_masuk),
+                    'active_locations': active_locations,
+                    'selected_location_id': location_id,
+                })
 
         distance_meter = _haversine_distance_meter(
             current_lat,
@@ -205,10 +259,39 @@ def checkin_view(request):
             rekord.foto_masuk = foto
         catatan = request.POST.get('catatan', '').strip()
         geofence_note = f"Check-in valid di {selected_location.name} ({selected_location.get_type_display()})"
-        rekord.catatan = f"{catatan}\n{geofence_note}".strip() if catatan else geofence_note
+        notes = [catatan] if catatan else []
+        notes.append(geofence_note)
+        if auto_selected:
+            notes.append('Lokasi dipilih otomatis berdasarkan titik GPS Anda.')
+
+        today_assignments = ShiftSchedulePersonnel.objects.filter(
+            personel=request.user,
+            schedule__date=today,
+        ).select_related('schedule', 'schedule__location')
+        if today_assignments.exists():
+            assigned_location_ids = {item.schedule.location_id for item in today_assignments}
+            if selected_location.id not in assigned_location_ids:
+                assigned_labels = sorted(
+                    {
+                        f"{item.schedule.location.name} ({item.schedule.get_shift_type_display()})"
+                        for item in today_assignments
+                    }
+                )
+                notes.append(
+                    "Catatan Jadwal: lokasi check-in tidak sesuai lokasi jadwal hari ini. "
+                    f"Lokasi jadwal: {', '.join(assigned_labels)}."
+                )
+
+        rekord.catatan = "\n".join(notes).strip()
         rekord.status = 'hadir'
         rekord.save()
-        messages.success(request, 'Check-in berhasil dicatat dan valid dalam radius penugasan.')
+        if auto_selected:
+            messages.success(
+                request,
+                f'Check-in berhasil. Lokasi dipilih otomatis: {selected_location.name}.'
+            )
+        else:
+            messages.success(request, 'Check-in berhasil dicatat dan valid dalam radius penugasan.')
         return redirect('dashboard:index')
 
     # Ambil sprin aktif untuk personel ini
