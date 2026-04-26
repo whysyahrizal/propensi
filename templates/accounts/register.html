@@ -109,7 +109,7 @@
             <option value="">-- Pilih --</option>
             {% for satker in satker_list %}
             <option value="{{ satker.pk }}" {% if request.POST.satker == satker.pk|stringformat:"s" %}selected{% endif %}>
-              {{ satker.nama }}
+              {{ satker.kode }} - {{ satker.nama }}
             </option>
             {% endfor %}
           </select>

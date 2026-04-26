@@ -27,6 +27,15 @@
             {% endif %}
         </div>
 
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Tanggal Pelaksanaan (Opsional)</label>
+            {{ form.tanggal_pelaksanaan }}
+            <p class="text-xs text-gray-400 mt-2">Digunakan untuk reminder otomatis H-1 sebelum pelaksanaan.</p>
+            {% if form.tanggal_pelaksanaan.errors %}
+            <div class="text-xs text-red-500 font-medium flex items-center gap-1.5 mt-1.5 error-msg"><i class="fa-regular fa-circle-xmark"></i> {{ form.tanggal_pelaksanaan.errors.0 }}</div>
+            {% endif %}
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-2">Periode Mulai Tayang</label>

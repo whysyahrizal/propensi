@@ -8,6 +8,7 @@ class Pengumuman(models.Model):
     tanggal_publikasi = models.DateTimeField(default=timezone.now)
     periode_mulai = models.DateTimeField(null=True, blank=True)
     periode_selesai = models.DateTimeField(null=True, blank=True)
+    tanggal_pelaksanaan = models.DateField(null=True, blank=True)
     dibuat_oleh = models.ForeignKey(Personel, on_delete=models.SET_NULL, null=True, related_name='pengumuman_dibuat')
     diperbarui_pada = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)

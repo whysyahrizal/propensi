@@ -167,7 +167,15 @@
                                     </svg>
                                     Detail
                                 </a>
-                                {% if cuti.status == 'pending' %}
+                                {% if cuti.surat_cuti_final %}
+                                <a href="{{ cuti.surat_cuti_final.url }}" target="_blank" title="Unduh Surat Final"
+                                    class="inline-flex items-center justify-center px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                </a>
+                                {% endif %}
+                                {% if cuti.status == 'pending' or cuti.status == 'rejected' %}
                                 <a href="{% url 'manajemen_cuti:edit' cuti.pk %}"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 text-xs font-bold hover:bg-amber-600 hover:text-white transition-all border border-amber-100">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,6 +184,8 @@
                                     </svg>
                                     Edit
                                 </a>
+                                {% endif %}
+                                {% if cuti.status == 'pending' %}
                                 <form action="{% url 'manajemen_cuti:delete' cuti.pk %}" method="post"
                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengajuan ini?')"
                                     class="inline m-0">

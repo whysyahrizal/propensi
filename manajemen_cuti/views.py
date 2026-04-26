@@ -22,7 +22,7 @@ def get_kuota_info(user, year=None):
     pengajuan = PengajuanCuti.objects.filter(
         personel=user,
         jenis_cuti='tahunan',
-        status__in=['pending', 'approved'],
+        status='approved',
         tanggal_mulai__year=year,
     )
     hari_terpakai = sum(p.durasi_hari for p in pengajuan)
@@ -106,8 +106,8 @@ class LeaveRequestUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('manajemen_cuti:riwayat')
 
     def get_queryset(self):
-        # Only allow editing own pending requests
-        return PengajuanCuti.objects.filter(personel=self.request.user, status='pending')
+        # Allow editing pending or rejected requests
+        return PengajuanCuti.objects.filter(personel=self.request.user, status__in=['pending', 'rejected'])
 
     def form_valid(self, form):
         # pbi 033: validasi overlap (exclude current instance)
@@ -124,7 +124,13 @@ class LeaveRequestUpdateView(LoginRequiredMixin, UpdateView):
             messages.error(self.request, "Anda sudah memiliki pengajuan cuti aktif pada periode tersebut.")
             return self.form_invalid(form)
 
-        messages.success(self.request, "Pengajuan cuti berhasil diperbarui.")
+        if form.instance.status == 'rejected':
+            form.instance.status = 'pending'
+            form.instance.catatan_pimpinan = ''
+            form.instance.disetujui_oleh = None
+            form.instance.disetujui_pada = None
+
+        messages.success(self.request, "Pengajuan cuti berhasil diperbarui dan status kembali menjadi pending.")
         return super().form_valid(form)
 
 class LeaveRequestDeleteView(LoginRequiredMixin, DeleteView):
