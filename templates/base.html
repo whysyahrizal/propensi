@@ -139,14 +139,74 @@
           {% if messages %}
           <span class="text-xs text-gray-500">{{ messages|length }} notif sistem</span>
           {% endif %}
+          
+          <!-- Notification Bell -->
+          <div class="relative" id="notification-dropdown-wrapper">
+              <button type="button" id="notification-btn" class="relative p-2 text-gray-400 hover:text-[#1a3a6b] transition-colors focus:outline-none">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {% if pengumuman_total_notif > 0 %}
+                  <span class="absolute top-1.5 right-1.5 flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-red-500 border-2 border-white rounded-full">
+                      {{ pengumuman_total_notif }}
+                  </span>
+                  {% endif %}
+              </button>
+              
+              <!-- Dropdown Menu -->
+              <div id="notification-menu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                  <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                      <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Notifikasi</h3>
+                  </div>
+                  
+                  <div class="max-h-[300px] overflow-y-auto">
+                      {% if pengumuman_total_notif > 0 %}
+                          {% if pengumuman_reminder_list %}
+                              <div class="px-4 py-2 bg-amber-50/50">
+                                  <p class="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">Pengingat H-1 Pelaksanaan</p>
+                                  {% for r in pengumuman_reminder_list %}
+                                  <a href="{% url 'pengumuman:detail' r.pk %}" class="block mb-2 last:mb-0 hover:bg-amber-100/50 p-2 rounded-xl transition-colors">
+                                      <p class="text-sm font-bold text-gray-800">{{ r.judul }}</p>
+                                      <p class="text-xs text-gray-500 mt-0.5">Akan dilaksanakan besok.</p>
+                                  </a>
+                                  {% endfor %}
+                              </div>
+                          {% endif %}
+                          
+                          {% if pengumuman_unread_list %}
+                              <div class="px-4 py-2">
+                                  <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">Pengumuman Baru</p>
+                                  {% for u in pengumuman_unread_list %}
+                                  <a href="{% url 'pengumuman:detail' u.pk %}" class="block mb-2 last:mb-0 hover:bg-gray-50 p-2 rounded-xl transition-colors">
+                                      <div class="flex gap-2">
+                                          <div class="w-2 h-2 mt-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                                          <div>
+                                              <p class="text-sm font-bold text-gray-800">{{ u.judul }}</p>
+                                              <p class="text-[10px] text-gray-400 mt-0.5">{{ u.tanggal_publikasi|date:"d M Y, H:i" }}</p>
+                                          </div>
+                                      </div>
+                                  </a>
+                                  {% endfor %}
+                              </div>
+                          {% endif %}
+                      {% else %}
+                          <div class="p-6 text-center">
+                              <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                              </svg>
+                              <p class="text-sm text-gray-500 font-medium">Belum ada notifikasi.</p>
+                          </div>
+                      {% endif %}
+                  </div>
+                  
+                  <div class="border-t border-gray-100 p-2 bg-gray-50 text-center">
+                      <a href="{% url 'pengumuman:daftar' %}" class="text-[11px] font-bold text-[#1a3a6b] hover:underline">Lihat Semua Pengumuman</a>
+                  </div>
+              </div>
+          </div>
+          
           <span class="text-xs text-gray-500 font-mono">{{ user.nrp }}</span>
 
-          <button class="relative p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-all">
-            <iconify-icon icon="heroicons:bell" class="text-xl"></iconify-icon>
-            {% if jumlah_notif_unread > 0 %}
-              <span class="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-            {% endif %}
-          </button>
         </div>
       </header>
 
@@ -174,7 +234,7 @@
       {% block full_page %}{% endblock %}
   {% endif %}
 
-  {% block extra_scripts %}{% endblock %} 
+  {% block extra_scripts %}{% endblock %}
 
   <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -249,6 +309,22 @@
       document.addEventListener('click', () => {
           document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.add('hidden'));
       });
+
+      // Notification Dropdown Toggle
+      const notifBtn = document.getElementById('notification-btn');
+      const notifMenu = document.getElementById('notification-menu');
+      if (notifBtn && notifMenu) {
+          notifBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              notifMenu.classList.toggle('hidden');
+          });
+          notifMenu.addEventListener('click', (e) => {
+              e.stopPropagation();
+          });
+          document.addEventListener('click', () => {
+              notifMenu.classList.add('hidden');
+          });
+      }
   });
   </script>
 </body>

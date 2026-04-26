@@ -125,8 +125,13 @@
                             </div>
                         </td>
                         
-                        <td class="px-5 py-4 whitespace-nowrap text-xs text-gray-600 font-mono">
-                            {{ p.tanggal_publikasi|date:"d M Y" }}
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <div class="text-xs text-gray-600 font-mono">{{ p.tanggal_publikasi|date:"d M Y" }}</div>
+                            {% if p.tanggal_pelaksanaan %}
+                            <div class="text-[10px] font-bold text-[#1a3a6b] mt-1 bg-blue-50 inline-block px-1.5 py-0.5 rounded">
+                                Pelaksanaan: {{ p.tanggal_pelaksanaan|date:"d M Y" }}
+                            </div>
+                            {% endif %}
                         </td>
                         
                         <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-500">

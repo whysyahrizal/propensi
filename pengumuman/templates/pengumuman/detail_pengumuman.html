@@ -77,6 +77,10 @@
                     <span class="text-xs font-semibold text-gray-400">Periode Selesai</span>
                     <span class="text-sm font-bold text-gray-800">{{ pengumuman.periode_selesai|date:"d M Y"|default:"Selamanya" }}</span>
                 </div>
+                <div class="flex justify-between items-center pb-3 border-b border-gray-50">
+                    <span class="text-xs font-semibold text-gray-400">Pelaksanaan</span>
+                    <span class="text-sm font-bold text-gray-800">{{ pengumuman.tanggal_pelaksanaan|date:"d M Y"|default:"-" }}</span>
+                </div>
                 <div class="flex justify-between items-center">
                     <span class="text-xs font-semibold text-gray-400">Visibilitas</span>
                     <span class="text-sm font-bold {% if pengumuman.is_active %}text-emerald-600{% else %}text-red-500{% endif %}">
