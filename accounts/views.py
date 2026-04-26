@@ -24,19 +24,26 @@ def login_view(request):
         
         user_check = Personel.objects.filter(nrp=nrp).first()
         
-        if user_check and user_check.status_verifikasi == 'pending':
-            messages.warning(request, 'Akses ditolak: Akun Anda masih dalam antrean verifikasi Administrator.')
+        if not user_check:
+            messages.error(request, 'Autentikasi gagal. Akun dengan NRP tersebut tidak terdaftar di dalam sistem.')
+            return render(request, 'accounts/login.html')
+            
+        if user_check.status_verifikasi == 'pending':
+            messages.warning(request, 'Akses ditolak. Akun Anda masih dalam proses verifikasi. Silakan hubungi Administrator untuk tindak lanjut.')
             return render(request, 'accounts/login.html')
 
         user = authenticate(request, username=nrp, password=password)
+        
         if user is not None:
             if not user.is_active:
-                messages.error(request, 'Akun Anda telah dinonaktifkan. Hubungi Administrator.')
+                messages.error(request, 'Akses ditolak. Akun Anda telah dinonaktifkan. Silakan hubungi Administrator untuk informasi lebih lanjut.')
                 return render(request, 'accounts/login.html')
+            
             login(request, user)
             return redirect('dashboard:index')
         else:
-            messages.error(request, 'NRP atau password salah.')
+            messages.error(request, 'Autentikasi gagal. Password yang Anda masukkan tidak valid.')
+            
     return render(request, 'accounts/login.html')
 
 def logout_view(request):
@@ -401,40 +408,6 @@ def daftar_menu(request):
     return render(request, 'accounts/menu/daftar_menu.html', {'menus': menus})
 
 @cek_akses_menu('accounts:daftar_menu')
-def tambah_menu(request):
-    if request.method == 'POST':
-        label = request.POST.get('label')
-        path = request.POST.get('path') 
-        icon = request.POST.get('icon', 'i-heroicons-link')
-        sort_order = request.POST.get('sort_order', 0)
-        
-        MenuItem.objects.create(label=label, path=path, icon=icon, sort_order=sort_order)
-        messages.success(request, f'Menu "{label}" berhasil dibuat.')
-        return redirect('accounts:daftar_menu')
-
-    return render(request, 'accounts/menu/form_menu.html', {'action': 'tambah'})
-
-@cek_akses_menu('accounts:daftar_menu')
-def edit_menu(request, pk):
-    menu = get_object_or_404(MenuItem, pk=pk)
-
-    if request.method == 'POST':
-        menu.label = request.POST.get('label')
-        menu.path = request.POST.get('path') 
-        menu.icon = request.POST.get('icon', 'i-heroicons-link')
-        menu.sort_order = request.POST.get('sort_order', 0)
-        menu.is_active = request.POST.get('is_active') == 'on' 
-        
-        menu.save()
-        messages.success(request, f'Menu "{menu.label}" berhasil diperbarui.')
-        return redirect('accounts:daftar_menu')
-
-    return render(request, 'accounts/menu/form_menu.html', {
-        'action': 'edit',
-        'menu': menu
-    })
-
-@cek_akses_menu('accounts:daftar_menu')
 def toggle_status_menu(request, pk):
     menu = get_object_or_404(MenuItem, pk=pk)
 
@@ -442,7 +415,7 @@ def toggle_status_menu(request, pk):
         menu.is_active = not menu.is_active
         menu.save()
         
-        status = "diaktifkan" if menu.is_active else "dinonaktifkan (soft delete)"
+        status = "diaktifkan" if menu.is_active else "dinonaktifkan"
         messages.success(request, f'Menu "{menu.label}" berhasil {status}.')
         
     return redirect('accounts:daftar_menu')

@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from accounts.models import MenuItem, Personel, Satker, Role
 from locations.models import Location
-
+from schedules.models import ShiftSchedule  # Ditambah untuk mengelakkan ProtectedError
 
 SATKER_DATA = [
     {"kode": "DITLANTAS",  "nama": "Direktorat Lalu Lintas"},
@@ -30,44 +30,83 @@ ROLE_DATA = [
     {"nama": "personel", "display_label": "Personel", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
 ]
 
-MENU_DATA = [
-    {"key": "dashboard", "label": "Dashboard", "path": "dashboard:index", "icon": "heroicons:home", "sort_order": 10},
-    {"key": "personel", "label": "Personel", "path": "personel_list", "icon": "heroicons:users", "sort_order": 20},
-    {"key": "profil", "label": "Profil", "path": "accounts:profil", "icon": "heroicons:user-circle", "sort_order": 30},
-    {"key": "cuti_saya", "label": "Cuti / Izin Saya", "path": "manajemen_cuti:riwayat", "icon": "heroicons:calendar-days", "sort_order": 40},
-    {"key": "kelola_cuti", "label": "Kelola Cuti / Izin", "path": "manajemen_cuti:kelola", "icon": "heroicons:clipboard-document-list", "sort_order": 50},
-    {"key": "absensi", "label": "Absensi Harian", "path": "absensi:dashboard", "icon": "heroicons:calendar", "sort_order": 60},
-    {"key": "rekap_pribadi", "label": "Rekap Absensi Saya", "path": "absensi:rekap_pribadi", "icon": "heroicons:document-chart-bar", "sort_order": 70},
-    {"key": "rekap_admin", "label": "Rekap Absensi Admin", "path": "absensi:rekap_admin", "icon": "heroicons:presentation-chart-line", "sort_order": 80},
-    {"key": "sprin", "label": "Lihat Sprin", "path": "sprin:daftar", "icon": "heroicons:document-text", "sort_order": 90},
-    {"key": "schedules_kalender", "label": "Manajemen Jadwal", "path": "schedules:calendar", "icon": "heroicons:calendar-days", "sort_order": 92},
-    {"key": "schedules_saya", "label": "Jadwal Saya", "path": "schedules:my_schedule", "icon": "heroicons:calendar", "sort_order": 94},
-    {"key": "locations", "label": "Wilayah Penugasan", "path": "locations:daftar", "icon": "heroicons:map-pin", "sort_order": 100},
-    {"key": "pengumuman", "label": "Pengumuman", "path": "pengumuman:daftar", "icon": "heroicons:megaphone", "sort_order": 110},
-    {"key": "notifikasi", "label": "Notifikasi", "path": "notifikasi:daftar", "icon": "heroicons:bell", "sort_order": 120},
-    {"key": "verifikasi", "label": "Verifikasi Akun", "path": "accounts:daftar_verifikasi", "icon": "heroicons:user-plus", "sort_order": 130},
-    {"key": "daftar_role", "label": "Manajemen Role", "path": "accounts:daftar_role", "icon": "heroicons:shield-check", "sort_order": 140},
-    {"key": "daftar_menu", "label": "Manajemen Menu", "path": "accounts:daftar_menu", "icon": "heroicons:squares-2x2", "sort_order": 150},
+MENU_HIERARCHY = [
+    # MENU UTAMA
+    {
+        "key": "dashboard", "label": "Dashboard", "path": "dashboard:index", "icon": "heroicons:home", "sort_order": 1,
+        "children": []
+    },
+
+    # GRUP: KEHADIRAN & CUTI 
+    {
+        "key": "grup_kehadiran", "label": "Kehadiran & Cuti", "path": "", "icon": "heroicons:calendar-days", "sort_order": 30,
+        "children": [
+            {"key": "absensi", "label": "Absensi Harian", "path": "absensi:dashboard", "icon": "heroicons:calendar", "sort_order": 1},
+            {"key": "cuti_saya", "label": "Cuti / Izin Saya", "path": "manajemen_cuti:riwayat", "icon": "heroicons:document", "sort_order": 2},
+            {"key": "rekap_pribadi", "label": "Rekap Absensi Saya", "path": "absensi:rekap_pribadi", "icon": "heroicons:document-chart-bar", "sort_order": 3},
+            {"key": "kelola_cuti", "label": "Kelola Cuti / Izin", "path": "manajemen_cuti:kelola", "icon": "heroicons:clipboard-document-list", "sort_order": 4},
+            {"key": "rekap_admin", "label": "Rekap Absensi Admin", "path": "absensi:rekap_admin", "icon": "heroicons:presentation-chart-line", "sort_order": 5},
+        ]
+    },
+
+    # GRUP: PENUGASAN 
+    {
+        "key": "grup_penugasan", "label": "Penugasan", "path": "", "icon": "heroicons:briefcase", "sort_order": 40,
+        "children": [
+            {"key": "schedules_saya", "label": "Jadwal Saya", "path": "schedules:my_schedule", "icon": "heroicons:calendar", "sort_order": 1},
+            {"key": "sprin", "label": "Lihat Sprin", "path": "sprin:daftar", "icon": "heroicons:document-text", "sort_order": 2},
+            {"key": "schedules_kalender", "label": "Manajemen Jadwal", "path": "schedules:calendar", "icon": "heroicons:calendar-days", "sort_order": 3},
+            {"key": "locations", "label": "Wilayah Penugasan", "path": "locations:daftar", "icon": "heroicons:map-pin", "sort_order": 4},
+        ]
+    },
+
+    # GRUP: PUSAT INFORMASI
+    {
+        "key": "grup_info", "label": "Pusat Informasi", "path": "", "icon": "heroicons:megaphone", "sort_order": 50,
+        "children": [
+            {"key": "notifikasi", "label": "Notifikasi", "path": "notifikasi:daftar", "icon": "heroicons:bell", "sort_order": 1},
+            {"key": "pengumuman", "label": "Pengumuman", "path": "pengumuman:daftar", "icon": "heroicons:speaker-wave", "sort_order": 2},
+        ]
+    },
+
+    # GRUP: ADMINISTRATOR
+    {
+        "key": "grup_admin", "label": "Administrator", "path": "", "icon": "heroicons:shield-check", "sort_order": 60,
+        "children": [
+            {"key": "personel", "label": "Direktori Personel", "path": "accounts:daftar_personel", "icon": "heroicons:users", "sort_order": 1},
+            {"key": "verifikasi", "label": "Verifikasi Akun", "path": "accounts:daftar_verifikasi", "icon": "heroicons:user-plus", "sort_order": 2},
+            {"key": "daftar_role", "label": "Manajemen Role", "path": "accounts:daftar_role", "icon": "heroicons:key", "sort_order": 3},
+            # Catatan: Fitur manajemen menu dinonaktifkan sesuai permintaan klien.
+        ]
+    }
 ]
 
 ROLE_MENU_MAP = {
     "superadmin": [
-        "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
-        "rekap_pribadi", "rekap_admin", "sprin", "schedules_kalender", "locations", "pengumuman",
-        "notifikasi", "verifikasi", "daftar_role", "daftar_menu",
+        "dashboard",
+        "grup_kehadiran", "absensi", "cuti_saya", "rekap_pribadi", "kelola_cuti", "rekap_admin",
+        "grup_penugasan", "schedules_saya", "sprin", "schedules_kalender", "locations",
+        "grup_info", "notifikasi", "pengumuman",
+        "grup_admin", "personel", "verifikasi", "daftar_role",
     ],
     "operator": [
-        "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
-        "rekap_pribadi", "rekap_admin", "sprin", "locations", "pengumuman",
-        "notifikasi",
+        "dashboard", 
+        "grup_kehadiran", "absensi", "cuti_saya", "rekap_pribadi", "kelola_cuti", "rekap_admin",
+        "grup_penugasan", "sprin", "locations",
+        "grup_info", "notifikasi", "pengumuman",
+        "grup_admin", "personel", "verifikasi",
     ],
     "pimpinan": [
-        "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
-        "rekap_pribadi", "rekap_admin", "sprin", "schedules_kalender", "pengumuman", "notifikasi",
+        "dashboard", 
+        "grup_kehadiran", "absensi", "cuti_saya", "rekap_pribadi", "kelola_cuti", "rekap_admin",
+        "grup_penugasan", "sprin", "schedules_kalender",
+        "grup_info", "notifikasi", "pengumuman",
     ],
     "personel": [
-        "dashboard", "profil", "cuti_saya", "absensi", "rekap_pribadi",
-        "sprin", "schedules_saya", "pengumuman", "notifikasi",
+        "dashboard", 
+        "grup_kehadiran", "absensi", "cuti_saya", "rekap_pribadi",
+        "grup_penugasan", "schedules_saya", "sprin",
+        "grup_info", "notifikasi", "pengumuman",
     ],
 }
 
@@ -123,7 +162,6 @@ PERSONEL_DATA = [
         "satker_kode": "DITLANTAS", "role_slug": "personel", "password": "siraga2026",
     },
 ]
-
 
 LOCATION_DATA = [
     # Pos-pos pengamanan lalu lintas
@@ -217,6 +255,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['reset']:
             self.stdout.write(self.style.WARNING('⚠  Reset: menghapus data lama...'))
+            
+            # HAPUS DATA TRANSAKSIONAL (CHILD) TERLEBIH DAHULU
+            # Ini mengelakkan ProtectedError dari jadual yang merujuk kepada lokasi atau personel
+            ShiftSchedule.objects.all().delete()
+            
+            # (Jika ada model transaksi lain seperti Absensi/Cuti, boleh dipadamkan di sini pada masa hadapan)
+            
+            # BARU HAPUS DATA MASTER (PARENT)
             Personel.objects.all().delete()
             Satker.objects.all().delete()
             Role.objects.all().delete()
@@ -249,36 +295,39 @@ class Command(BaseCommand):
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
             self.stdout.write(f'   [{status}] {obj.nama} — {obj.display_label}')
 
-        self.stdout.write(self.style.HTTP_INFO('\n🧭 Menyiapkan Menu Sidebar...'))
+        self.stdout.write(self.style.HTTP_INFO('\n🧭 Menyiapkan Menu Sidebar (Hierarkis)...'))
         menu_map = {}
-        for menu in MENU_DATA:
-            obj, created = MenuItem.objects.get_or_create(
-                path=menu['path'],
+        for group in MENU_HIERARCHY:
+            # 1. Buat Grup / Menu Induk
+            parent_obj, created = MenuItem.objects.get_or_create(
+                path=group['path'], 
+                label=group['label'], # Label dan path sebagai patokan
                 defaults={
-                    'label': menu['label'],
-                    'icon': menu['icon'],
-                    'sort_order': menu['sort_order'],
+                    'icon': group['icon'],
+                    'sort_order': group['sort_order'],
                     'is_active': True,
+                    'parent': None
                 },
             )
-            updated = False
-            if obj.label != menu['label']:
-                obj.label = menu['label']
-                updated = True
-            if obj.icon != menu['icon']:
-                obj.icon = menu['icon']
-                updated = True
-            if obj.sort_order != menu['sort_order']:
-                obj.sort_order = menu['sort_order']
-                updated = True
-            if not obj.is_active:
-                obj.is_active = True
-                updated = True
-            if updated:
-                obj.save()
-            menu_map[menu['key']] = obj
+            menu_map[group['key']] = parent_obj
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
-            self.stdout.write(f'   [{status}] {obj.label} — {obj.path}')
+            self.stdout.write(f'   [{status}] {parent_obj.label} (Induk)')
+
+            # 2. Buat Menu Anak untuk Grup Tersebut
+            for child in group['children']:
+                child_obj, c_created = MenuItem.objects.get_or_create(
+                    path=child['path'],
+                    defaults={
+                        'label': child['label'],
+                        'icon': child.get('icon', 'heroicons:chevron-right'),
+                        'sort_order': child['sort_order'],
+                        'is_active': True,
+                        'parent': parent_obj # Kaitkan dengan Induk
+                    },
+                )
+                menu_map[child['key']] = child_obj
+                c_status = self.style.SUCCESS('baru') if c_created else 'sudah ada'
+                self.stdout.write(f'      ├─ [{c_status}] {child_obj.label} — {child_obj.path}')
 
         self.stdout.write(self.style.HTTP_INFO('\n🔐 Mengaitkan Menu ke Role...'))
         for role_name, menu_keys in ROLE_MENU_MAP.items():
@@ -287,7 +336,7 @@ class Command(BaseCommand):
                 continue
             menus = [menu_map[key] for key in menu_keys if key in menu_map]
             role_obj.menus.set(menus)
-            self.stdout.write(f'   [{self.style.SUCCESS("ok")}] {role_obj.nama} — {len(menus)} menu')
+            self.stdout.write(f'   [{self.style.SUCCESS("ok")}] {role_obj.nama} — {len(menus)} menu terhubung')
 
         self.stdout.write(self.style.HTTP_INFO('\n👤 Menyiapkan Personel...'))
         for p in PERSONEL_DATA:

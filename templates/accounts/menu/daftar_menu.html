@@ -11,7 +11,7 @@
         <iconify-icon icon="heroicons:list-bullet" class="text-xl"></iconify-icon>
       </div>
       <div>
-        <h1 class="text-xl font-bold text-gray-900">Daftar Menu Navigasi</h1>
+        <h1 class="text-xl font-bold text-gray-900">Daftar Menu</h1>
       </div>
     </div>
 
@@ -20,10 +20,6 @@
             <a href="{% url 'accounts:daftar_role' %}" class="px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">Role</a>
             <a href="{% url 'accounts:daftar_menu' %}" class="px-4 py-1.5 text-xs font-bold rounded-md bg-white text-primary shadow-sm">Menu</a>
         </div>
-        <a href="{% url 'accounts:tambah_menu' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a3a6b] text-white text-sm font-semibold hover:bg-[#11274a] transition-colors shadow-sm mt-4 sm:mt-0">
-            <iconify-icon icon="heroicons:plus-circle" class="text-lg"></iconify-icon>
-            Tambah Menu
-        </a>
     </div>
   </div>
 
@@ -32,7 +28,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-200 text-gray-500">
-            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Label Menu</th>
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Menu</th>
             <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Path</th>
             <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-center">Status</th>
             <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-center">Aksi</th>
@@ -69,12 +65,6 @@
               </div>
             </td>
 
-            <td class="px-6 py-4 text-center">
-              <a href="{% url 'accounts:edit_menu' menu.pk %}" 
-                 class="inline-flex items-center px-4 py-1.5 rounded-lg border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
-                Edit
-              </a>
-            </td>
           </tr>
           {% empty %}
           <tr>

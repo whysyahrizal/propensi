@@ -80,6 +80,7 @@ TEMPLATES = [
                 'pengumuman.context_processors.pengumuman_aktif',
                 'notifikasi.context_processors.notifikasi_unread_count',
                 'accounts.context_processor.jumlah_verifikasi',
+                'accounts.context_processor.sidebar_menu_processor',
             ],
         },
     },
