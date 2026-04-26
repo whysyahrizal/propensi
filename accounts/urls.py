@@ -31,7 +31,5 @@ urlpatterns = [
 
     # Manajemen Menu
     path('menus/', views.daftar_menu, name='daftar_menu'),
-    path('menus/tambah/', views.tambah_menu, name='tambah_menu'),
-    path('menus/<int:pk>/edit/', views.edit_menu, name='edit_menu'),  
     path('menus/<int:pk>/toggle-status/', views.toggle_status_menu, name='toggle_status_menu'),
 ]
