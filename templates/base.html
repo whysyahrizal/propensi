@@ -217,9 +217,13 @@
             {% for menu in user.role_obj.menus.all %}
               {% if menu.is_active %}
               <li>
-                <a href="{{ menu.get_url }}"
+                <a href="{% if menu.label|lower == 'personel' %}{% url 'accounts:daftar_personel' %}{% else %}{{ menu.get_url }}{% endif %}"
                   class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors mb-0.5
-                  {% if request.path == menu.get_url %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                  {% if menu.label|lower == 'personel' %}
+                    {% if '/accounts/personel' in request.path %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:bg-gray-100 hover:text-gray-900{% endif %}
+                  {% else %}
+                    {% if request.path == menu.get_url %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:bg-gray-100 hover:text-gray-900{% endif %}
+                  {% endif %}">
                   
                   <iconify-icon icon="{{ menu.icon }}" class="text-[20px] shrink-0"></iconify-icon>
                   <span class="truncate">{{ menu.label }}</span>
@@ -239,9 +243,9 @@
               </a>
             </li>
             <li>
-              <a href="{% url 'personel_list' %}"
+              <a href="{% url 'accounts:daftar_personel' %}"
                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if 'personel' in request.path and 'accounts' not in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
+                  {% if '/accounts/personel' in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -341,34 +345,6 @@
                 Notifikasi
               </a>
             </li>
-          {% endif %}
-
-          {% if user.role == 'superadmin' or user.role == 'pimpinan' %}
-          <li>
-            <a href="{% url 'schedules:calendar' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'schedules' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Manajemen Jadwal
-            </a>
-          </li>
-          {% endif %}
-
-          {% if user.role == 'personel' %}
-          <li>
-            <a href="{% url 'schedules:my_schedule' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'schedules' and request.resolver_match.url_name == 'my_schedule' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Jadwal Saya
-            </a>
-          </li>
           {% endif %}
 
         </ul>

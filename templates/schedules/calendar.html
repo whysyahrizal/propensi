@@ -226,8 +226,18 @@ document.addEventListener('DOMContentLoaded', function() {
   function apiFetch(url, options) {
     return fetch(url, options).then(function(response) {
       if (!response.ok) {
-        return response.json().then(function(data) { throw new Error(data.error || 'Terjadi kesalahan server.'); })
-          .catch(function() { throw new Error('Terjadi kesalahan server.'); });
+        return response.text().then(function(raw) {
+          var message = 'Terjadi kesalahan server.';
+          if (raw) {
+            try {
+              var data = JSON.parse(raw);
+              if (data && data.error) message = data.error;
+            } catch (e) {
+              // keep default message for non-JSON responses
+            }
+          }
+          throw new Error(message);
+        });
       }
       return response.json();
     });

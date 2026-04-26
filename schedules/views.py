@@ -543,6 +543,14 @@ class ScheduleUpdateView(ScheduleAccessMixin, View):
         if not location:
             return JsonResponse({'error': 'Lokasi tidak valid atau nonaktif.'}, status=400)
 
+        exists = ShiftSchedule.objects.filter(
+            date=schedule.date,
+            shift_type=shift_type,
+            location_id=location_id,
+        ).exclude(pk=schedule.pk).exists()
+        if exists:
+            return JsonResponse({'error': 'Jadwal tersebut sudah ada'}, status=400)
+
         schedule.shift_type = shift_type
         schedule.location = location
         schedule.save(update_fields=['shift_type', 'location', 'updated_at'])
