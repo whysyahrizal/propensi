@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from accounts.models import Personel
 from locations.models import Location
 from .models import Sprin, PersonelSprin
-from personel.models import Personel
 
 
 def _active_location_queryset():
@@ -24,7 +24,10 @@ def create_sprin(request):
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard:index')
 
-    personel_all = Personel.objects.filter(is_active=True)
+    personel_all = Personel.objects.filter(is_active=True).order_by('nama_lengkap')
+    personel_staff = personel_all.filter(role__in=['operator', 'superadmin'])
+    personel_pimpinan = personel_all.filter(role='pimpinan')
+    personel_terlibat = personel_all.filter(role='personel')
     active_locations = _active_location_queryset()
 
     if request.method == 'POST':
@@ -34,6 +37,9 @@ def create_sprin(request):
             messages.error(request, "Lokasi penugasan wajib dipilih dari daftar wilayah aktif.")
             return render(request, 'sprin/create_sprin.html', {
                 'personel_all': personel_all,
+                'personel_staff': personel_staff,
+                'personel_pimpinan': personel_pimpinan,
+                'personel_terlibat': personel_terlibat,
                 'active_locations': active_locations,
                 'selected_location_id': location_id,
             })
@@ -63,6 +69,9 @@ def create_sprin(request):
 
     return render(request, 'sprin/create_sprin.html', {
         'personel_all': personel_all,
+        'personel_staff': personel_staff,
+        'personel_pimpinan': personel_pimpinan,
+        'personel_terlibat': personel_terlibat,
         'active_locations': active_locations,
         'selected_location_id': '',
     })

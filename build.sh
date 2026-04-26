@@ -8,9 +8,6 @@ pip install -r requirements.txt
 # Convert static asset files
 python manage.py collectstatic --no-input
 
-# Create migration files if models changed (commit these from local when possible)
-python manage.py makemigrations --no-input
-
 # Apply any outstanding database migrations
 python manage.py migrate
 

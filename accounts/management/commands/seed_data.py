@@ -59,7 +59,7 @@ ROLE_MENU_MAP = {
     "operator": [
         "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
         "rekap_pribadi", "rekap_admin", "sprin", "locations", "pengumuman",
-        "notifikasi", "verifikasi",
+        "notifikasi",
     ],
     "pimpinan": [
         "dashboard", "personel", "profil", "cuti_saya", "kelola_cuti", "absensi",
