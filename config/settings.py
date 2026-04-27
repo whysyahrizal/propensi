@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'absensi',
     'dashboard',
     'manajemen_cuti',
+    'cuti',
     'locations',
+    'schedules',
     'presensi',
     'notifikasi',
     'pengumuman',
@@ -78,6 +80,7 @@ TEMPLATES = [
                 'pengumuman.context_processors.pengumuman_aktif',
                 'notifikasi.context_processors.notifikasi_unread_count',
                 'accounts.context_processor.jumlah_verifikasi',
+                'accounts.context_processor.sidebar_menu_processor',
             ],
         },
     },
@@ -86,16 +89,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database — PostgreSQL
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get(
-            'DATABASE_URL',
-            f"postgresql://{os.environ.get('POSTGRES_USER', 'siraga_user')}:{os.environ.get('POSTGRES_PASSWORD', 'siraga_password')}@{os.environ.get('POSTGRES_HOST', 'localhost')}:{os.environ.get('POSTGRES_PORT', '5432')}/{os.environ.get('POSTGRES_DB', 'siraga_db')}"
-        ),
-        conn_max_age=600
-    )
-}
+# Database
+# - Render/production: set DATABASE_URL (PostgreSQL).
+# - Local: omit DATABASE_URL to use SQLite, or set DJANGO_USE_SQLITE=1 to ignore DATABASE_URL
+#   when PostgreSQL is not running (stops migration warnings about connection refused).
+_sqlite_path = str(BASE_DIR / 'db.sqlite3')
+if os.environ.get('DJANGO_USE_SQLITE', '').lower() in ('1', 'true', 'yes'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': _sqlite_path,
+        }
+    }
+else:
+    _default_url = f'sqlite:///{_sqlite_path}'
+    _effective = os.environ.get('DATABASE_URL', _default_url)
+    _conn = 0 if str(_effective).lower().split('://', 1)[0] == 'sqlite' else 600
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=_default_url,
+            conn_max_age=_conn,
+        )
+    }
 
 
 # Custom User Model

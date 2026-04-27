@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Jadwal Saya - SIRAGA{% endblock %}
+{% block page_title %}Jadwal Saya{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-gray-900">Jadwal Hari Ini</h3>
+      <span class="text-xs text-gray-500">{{ today|date:"d M Y" }}</span>
+    </div>
+    {% if today_shift %}
+      <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p class="text-base font-semibold text-gray-900">{{ today_shift.location.name }}</p>
+        <p class="text-xs text-gray-600 mt-1">Shift {{ today_shift.get_shift_type_display }}</p>
+      </div>
+    {% else %}
+      <div class="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500">
+        Tidak ada jadwal untuk hari ini.
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-gray-900">Timeline Jadwal Mendatang</h3>
+      <span class="text-xs text-gray-500">{{ timeline_schedules|length }} jadwal</span>
+    </div>
+    {% if timeline_schedules %}
+      <div class="space-y-2">
+        {% for item in timeline_schedules %}
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border border-gray-100 rounded-lg p-3">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ item.date|date:"l, d M Y" }}</p>
+              <p class="text-xs text-gray-500">{{ item.location.name }}</p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+              {{ item.get_shift_type_display }}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
+        Belum ada jadwal aktif.
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

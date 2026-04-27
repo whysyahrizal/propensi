@@ -11,6 +11,17 @@ def pengumuman_aktif(request):
         ).filter(
             models.Q(periode_selesai__isnull=True) | models.Q(periode_selesai__gte=now)
         )
-        count = active_pengumuman.exclude(dibaca_oleh=request.user).count()
-        return {'pengumuman_baru_count': count}
+        # Pengumuman yang belum dibaca (jangan tampilkan untuk pembuatnya)
+        unread = active_pengumuman.exclude(dibaca_oleh=request.user).exclude(dibuat_oleh=request.user)
+        
+        # Pengingat H-1 Pelaksanaan (jangan tampilkan untuk pembuatnya)
+        tomorrow = (now + timedelta(days=1)).date()
+        reminders = active_pengumuman.filter(tanggal_pelaksanaan=tomorrow).exclude(dibuat_oleh=request.user)
+        
+        return {
+            'pengumuman_baru_count': unread.count(),
+            'pengumuman_unread_list': unread.order_by('-tanggal_publikasi')[:5],
+            'pengumuman_reminder_list': reminders.order_by('-tanggal_publikasi')[:5],
+            'pengumuman_total_notif': unread.count() + reminders.count(),
+        }
     return {}

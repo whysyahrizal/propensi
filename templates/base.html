@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="id" class="h-full">
 
@@ -5,9 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}SIRAGA Korlantas{% endblock %}</title>
-  <meta name="description" content="Sistem Informasi Kehadiran dan Penugasan Korlantas Polri" />
-
-  <!-- Tailwind CSS -->
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -21,392 +20,218 @@
       }
     }
   </script>
+  
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  {% load static %}
   <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
   {% block extra_head %}{% endblock %}
 </head>
 
-<body class="h-full bg-gray-50 text-gray-900 antialiased">
+<body class="h-full bg-gray-50 text-gray-900 antialiased" x-data="{ sidebarOpen: true }">
 
   {% if user.is_authenticated %}
-  <div class="flex h-full min-h-screen">
-    <!-- Sidebar -->
-    <aside id="sidebar"
-      class="w-60 bg-white border-r border-gray-200 flex flex-col shrink-0 transition-all duration-300">
-      <!-- Logo -->
-      <div class="flex items-center gap-3 h-16 px-4 border-b border-gray-200">
-        {% load static %}
-        <img src="{% static 'images/logo-siraga.png' %}" alt="SIRAGA" class="w-9 h-9 object-contain" />
-        <div>
-          <p class="text-sm font-bold text-[#1a3a6b] leading-tight">SIRAGA</p>
-          <p class="text-[10px] text-gray-500 leading-tight">Korlantas Polri</p>
+  <div class="flex h-screen overflow-hidden">
+    
+    <aside 
+      :class="sidebarOpen ? 'w-64' : 'w-20'" 
+      class="flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out z-20 overflow-x-hidden"
+    >
+      <div class="flex h-16 items-center justify-between px-4 border-b border-gray-100 shrink-0">
+        <div class="flex items-center gap-3" x-show="sidebarOpen" x-transition:enter.opacity.duration.300ms>
+          {% load static %}
+          <img src="{% static 'images/logo-siraga.png' %}" alt="SIRAGA" class="w-9 h-9 object-contain" />
+          <div>
+            <p class="text-sm font-bold text-[#1a3a6b] leading-tight">SIRAGA</p>
+            <p class="text-[10px] text-gray-500 leading-tight">Korlantas Polri</p>
+          </div>
         </div>
+        <button @click="sidebarOpen = !sidebarOpen" 
+                class="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-primary transition-colors shrink-0"
+                :class="!sidebarOpen ? 'mx-auto' : ''">
+          <iconify-icon icon="heroicons:bars-3-bottom-left" class="text-xl"></iconify-icon>
+        </button>
       </div>
 
-      <!-- Navigation -->
-      {% comment %} <nav class="flex-1 overflow-y-auto px-3 py-4">
-        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
-        <ul class="flex flex-col gap-0.5 mb-4">
-          <li>
-            <a href="{% url 'dashboard:index' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'dashboard' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-              </svg>
-              Dashboard
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'personel_list' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if 'personel' in request.path and 'accounts' not in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              Personel
-            </a>
-          </li>
-          {% if user.role == 'superadmin' %}
-          <li>
-            <a href="{% url 'accounts:daftar_role' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if 'roles' in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              Manajemen Role
-            </a>
-          </li>
-          {% endif %}
-        </ul>
-
-        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Lainnya</p>
-        <ul class="flex flex-col gap-0.5">
-          <li>
-            <a href="{% url 'accounts:profil' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Sprin / Gas
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'manajemen_cuti:riwayat' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Cuti / Izin Saya
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'absensi:dashboard' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name != 'rekap_admin' and request.resolver_match.url_name != 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Absensi Harian
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'absensi:rekap_pribadi' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
-              </svg>
-              Rekap Absensi Saya
-            </a>
-          </li>
-
-          {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
-          <li>
-            <a href="{% url 'absensi:rekap_admin' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_admin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17 20h5V4H2v16h5m10 0v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4m10 0H7m2-8h6m-6-4h6" />
-              </svg>
-              Rekap Absensi Admin
-            </a>
-          </li>
-          {% endif %}
-
-          {% if user.role in 'superadmin,operator,pimpinan' %}
-          <li>
-            <a href="{% url 'manajemen_cuti:kelola' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              Kelola Cuti / Izin
-            </a>
-          </li>
-          {% endif %}
-
-          {% if user.role in 'superadmin,operator' %}
-          <li>
-            <a href="{% url 'locations:daftar' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Wilayah Penugasan
-            </a>
-          </li>
-          {% endif %}
-          <li>
-            <a href="{% url 'pengumuman:daftar' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'pengumuman' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-              </svg>
-              <span class="flex-1">Pengumuman</span>
-              {% if pengumuman_baru_count > 0 %}
-              <span class="inline-flex items-center justify-center w-5 h-5 ml-auto text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm">
-                {{ pengumuman_baru_count }}
+      <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
+        {% for menu in sidebar_menus %}
+          {% if not menu.submenus.all %}
+            <a href="{{ menu.get_url }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group hover:bg-primary/5"
+               :class="!sidebarOpen ? 'justify-center' : ''">
+              <iconify-icon icon="{{ menu.icon }}" 
+                class="text-xl text-gray-400 group-hover:text-primary transition-colors shrink-0">
+              </iconify-icon>
+              <span x-show="sidebarOpen" x-transition.opacity class="text-sm font-medium text-gray-600 group-hover:text-primary whitespace-nowrap">
+                {{ menu.label }}
               </span>
-              {% endif %}
             </a>
-          </li>
-
-          <li>
-            <a href="{% url 'notifikasi:daftar' %}"
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                    {% if request.resolver_match.app_name == 'notifikasi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-              <span class="flex-1">Notifikasi</span>
-              {% if notif_unread_count > 0 %}
-              <span class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm">
-                {{ notif_unread_count }}
-              </span>
-              {% endif %}
-            </a>
-          </li>
-
-        </ul>
-      </nav> {% endcomment %}
-      
-      <nav class="flex-1 overflow-y-auto px-3 py-4">
-        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu Utama</p>
-        <ul class="flex flex-col gap-0.5 mb-4">
-          
-          {% if user.is_authenticated and user.role_obj and user.role_obj.menus.all %}
-            {% for menu in user.role_obj.menus.all %}
-              {% if menu.is_active %}
-              <li>
-                <a href="{{ menu.get_url }}"
-                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors mb-0.5
-                  {% if request.path == menu.get_url %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                  
-                  <iconify-icon icon="{{ menu.icon }}" class="text-[20px] shrink-0"></iconify-icon>
-                  <span class="truncate">{{ menu.label }}</span>
-                </a>
-              </li>
-              {% endif %}
-            {% endfor %}
           {% else %}
-            <li>
-              <a href="{% url 'dashboard:index' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'dashboard' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-                Dashboard
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'personel_list' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if 'personel' in request.path and 'accounts' not in request.path %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                Personel
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'manajemen_cuti:riwayat' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name != 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Cuti / Izin Saya
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'absensi:dashboard' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name != 'rekap_admin' and request.resolver_match.url_name != 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Absensi Harian
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'absensi:rekap_pribadi' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_pribadi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
-                </svg>
-                Rekap Absensi Saya
-              </a>
-            </li>
-            {% if user.role == 'superadmin' or user.role == 'operator' or user.role == 'pimpinan' %}
-            <li>
-              <a href="{% url 'absensi:rekap_admin' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'absensi' and request.resolver_match.url_name == 'rekap_admin' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 20h5V4H2v16h5m10 0v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4m10 0H7m2-8h6m-6-4h6" />
-                </svg>
-                Rekap Absensi Admin
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'manajemen_cuti:kelola' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'manajemen_cuti' and request.resolver_match.url_name == 'kelola' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Kelola Cuti / Izin
-              </a>
-            </li>
-            {% endif %}
-            {% if user.role == 'superadmin' or user.role == 'operator' %}
-            <li>
-              <a href="{% url 'locations:daftar' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'locations' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Wilayah Penugasan
-              </a>
-            </li>
-            {% endif %}
-            <li>
-              <a href="{% url 'pengumuman:daftar' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'pengumuman' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-                Pengumuman
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'notifikasi:daftar' %}"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  {% if request.resolver_match.app_name == 'notifikasi' %}bg-[#1a3a6b] text-white{% else %}text-gray-500 hover:bg-gray-100 hover:text-gray-900{% endif %}">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                Notifikasi
-              </a>
-            </li>
+            <div x-data="{ dropdownOpen: false }">
+              <button @click="dropdownOpen = !dropdownOpen" 
+                      class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group hover:bg-primary/5"
+                      :class="!sidebarOpen ? 'justify-center' : ''">
+                <div class="flex items-center gap-3">
+                  <iconify-icon icon="{{ menu.icon }}" 
+                    class="text-xl text-gray-400 group-hover:text-primary transition-colors shrink-0">
+                  </iconify-icon>
+                  <span x-show="sidebarOpen" x-transition.opacity class="text-sm font-medium text-gray-600 group-hover:text-primary whitespace-nowrap">
+                    {{ menu.label }}
+                  </span>
+                </div>
+                <iconify-icon x-show="sidebarOpen" icon="heroicons:chevron-down" 
+                  :class="dropdownOpen ? 'rotate-180' : ''" 
+                  class="text-xs text-gray-400 transition-transform">
+                </iconify-icon>
+              </button>
+
+              <div x-show="dropdownOpen && sidebarOpen" x-collapse class="mt-1 ml-4 pl-5 border-l border-gray-100 space-y-1">
+                {% for sub in menu.submenus.all %}
+                  {% if sub.is_active and sub.id in user_allowed_menu_ids %}
+                    <a href="{{ sub.get_url }}" class="block py-2 text-xs font-medium text-gray-500 hover:text-primary transition-colors">
+                      {{ sub.label }}
+                    </a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
           {% endif %}
+        {% endfor %}
+      </div>
 
-        </ul>
-      </nav>
-
-
-      <!-- User info + Logout -->
-      <div class="px-4 py-3 border-t border-gray-200">
-        <div class="flex items-center gap-2 mb-2">
-          <div
-            class="w-8 h-8 rounded-full bg-[#1a3a6b] flex items-center justify-center text-white text-xs font-bold shrink-0">
-            {{ user.nama_lengkap|first|upper }}
+      <div class="mt-auto border-t border-gray-100 p-4 shrink-0">
+        <a href="{% url 'accounts:profil' %}" 
+           class="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-all group"
+           :class="!sidebarOpen ? 'justify-center' : ''">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold group-hover:ring-4 group-hover:ring-primary/10 transition-all shadow-sm">
+            {% if user.foto %}
+              <img src="{{ user.foto.url }}" class="h-10 w-10 rounded-full object-cover" alt="Foto Profil">
+            {% else %}
+              {{ user.nama_lengkap|slice:":2"|upper }}
+            {% endif %}
           </div>
-          <div class="min-w-0">
-            <p class="text-xs font-semibold text-gray-900 truncate">{{ user.nama_lengkap }}</p>
-            <p class="text-[10px] text-gray-500 truncate">{{ user.get_role_display }}</p>
+          <div x-show="sidebarOpen" x-transition.opacity class="flex flex-col overflow-hidden whitespace-nowrap">
+            <span class="text-sm font-semibold text-gray-900 truncate">{{ user.nama_lengkap }}</span>
+            <span class="text-[10px] text-gray-500 truncate uppercase tracking-wider font-medium">{{ user.role_obj.nama}}</span>
           </div>
-        </div>
-        <a href="{% url 'accounts:logout' %}"
-          class="flex items-center gap-2 text-xs text-red-600 hover:text-red-800 font-medium transition-colors">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Logout
         </a>
+        
+        <form action="{% url 'accounts:logout' %}" method="POST" class="mt-2">
+          {% csrf_token %}
+          <button type="submit" 
+                  class="flex w-full items-center gap-3 px-3 py-2 text-[11px] font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  :class="!sidebarOpen ? 'justify-center' : ''">
+            <iconify-icon icon="heroicons:arrow-left-on-rectangle" class="text-lg shrink-0"></iconify-icon>
+            <span x-show="sidebarOpen" x-transition.opacity>Keluar</span>
+          </button>
+        </form>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Top Header -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center px-6 shrink-0">
-        <h2 class="text-sm font-semibold text-gray-900">{% block page_title %}Dashboard{% endblock %}</h2>
-        <div class="ml-auto flex items-center gap-3">
+    <main class="flex-1 flex flex-col min-w-0 bg-gray-50 overflow-hidden">
+      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
+        <h2 class="text-lg font-bold text-gray-800">
+          {% block header_title %}{% endblock %}
+        </h2>
+        
+        <div class="flex items-center gap-4">
           {% if messages %}
           <span class="text-xs text-gray-500">{{ messages|length }} notif sistem</span>
           {% endif %}
+          
+          <!-- Notification Bell -->
+          <div class="relative" id="notification-dropdown-wrapper">
+              <button type="button" id="notification-btn" class="relative p-2 text-gray-400 hover:text-[#1a3a6b] transition-colors focus:outline-none">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {% if pengumuman_total_notif > 0 %}
+                  <span class="absolute top-1.5 right-1.5 flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-red-500 border-2 border-white rounded-full">
+                      {{ pengumuman_total_notif }}
+                  </span>
+                  {% endif %}
+              </button>
+              
+              <!-- Dropdown Menu -->
+              <div id="notification-menu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                  <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                      <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Notifikasi</h3>
+                  </div>
+                  
+                  <div class="max-h-[300px] overflow-y-auto">
+                      {% if pengumuman_total_notif > 0 %}
+                          {% if pengumuman_reminder_list %}
+                              <div class="px-4 py-2 bg-amber-50/50">
+                                  <p class="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">Pengingat H-1 Pelaksanaan</p>
+                                  {% for r in pengumuman_reminder_list %}
+                                  <a href="{% url 'pengumuman:detail' r.pk %}" class="block mb-2 last:mb-0 hover:bg-amber-100/50 p-2 rounded-xl transition-colors">
+                                      <p class="text-sm font-bold text-gray-800">{{ r.judul }}</p>
+                                      <p class="text-xs text-gray-500 mt-0.5">Akan dilaksanakan besok.</p>
+                                  </a>
+                                  {% endfor %}
+                              </div>
+                          {% endif %}
+                          
+                          {% if pengumuman_unread_list %}
+                              <div class="px-4 py-2">
+                                  <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">Pengumuman Baru</p>
+                                  {% for u in pengumuman_unread_list %}
+                                  <a href="{% url 'pengumuman:detail' u.pk %}" class="block mb-2 last:mb-0 hover:bg-gray-50 p-2 rounded-xl transition-colors">
+                                      <div class="flex gap-2">
+                                          <div class="w-2 h-2 mt-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                                          <div>
+                                              <p class="text-sm font-bold text-gray-800">{{ u.judul }}</p>
+                                              <p class="text-[10px] text-gray-400 mt-0.5">{{ u.tanggal_publikasi|date:"d M Y, H:i" }}</p>
+                                          </div>
+                                      </div>
+                                  </a>
+                                  {% endfor %}
+                              </div>
+                          {% endif %}
+                      {% else %}
+                          <div class="p-6 text-center">
+                              <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                              </svg>
+                              <p class="text-sm text-gray-500 font-medium">Belum ada notifikasi.</p>
+                          </div>
+                      {% endif %}
+                  </div>
+                  
+                  <div class="border-t border-gray-100 p-2 bg-gray-50 text-center">
+                      <a href="{% url 'pengumuman:daftar' %}" class="text-[11px] font-bold text-[#1a3a6b] hover:underline">Lihat Semua Pengumuman</a>
+                  </div>
+              </div>
+          </div>
+          
           <span class="text-xs text-gray-500 font-mono">{{ user.nrp }}</span>
+
         </div>
       </header>
 
-      <!-- Messages -->
-      {% if messages %}
-      <div class="px-6 pt-4">
-        {% for message in messages %}
-        <div class="mb-2 px-4 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between
-                  {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
-                  {% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
-                  {% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-700 border border-yellow-200
-                  {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
-          <span>{{ message }}</span>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
+      <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        {% if messages %}
+          <div class="mb-6 space-y-2">
+            {% for message in messages %}
+              <div class="p-4 rounded-xl text-sm font-medium border flex items-center gap-3
+                {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-100
+                {% elif message.tags == 'success' %}bg-green-50 text-green-700 border-green-100
+                {% else %}bg-blue-50 text-blue-700 border-blue-100{% endif %}">
+                <iconify-icon icon="{% if message.tags == 'error' %}heroicons:exclamation-circle{% elif message.tags == 'success' %}heroicons:check-circle{% else %}heroicons:information-circle{% endif %}" class="text-xl"></iconify-icon>
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
 
-      <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto px-6 py-6">
         {% block content %}{% endblock %}
-      </main>
-    </div>
-  </div>
+      </div>
+    </main>
 
+  </div>
   {% else %}
-  {% block full_page %}{% endblock %}
+      {% block full_page %}{% endblock %}
   {% endif %}
 
   {% block extra_scripts %}{% endblock %}
@@ -484,6 +309,22 @@
       document.addEventListener('click', () => {
           document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.add('hidden'));
       });
+
+      // Notification Dropdown Toggle
+      const notifBtn = document.getElementById('notification-btn');
+      const notifMenu = document.getElementById('notification-menu');
+      if (notifBtn && notifMenu) {
+          notifBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              notifMenu.classList.toggle('hidden');
+          });
+          notifMenu.addEventListener('click', (e) => {
+              e.stopPropagation();
+          });
+          document.addEventListener('click', () => {
+              notifMenu.classList.add('hidden');
+          });
+      }
   });
   </script>
 </body>

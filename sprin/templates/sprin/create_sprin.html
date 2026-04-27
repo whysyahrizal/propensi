@@ -32,8 +32,15 @@
 
             <h3 class="text-xs font-bold uppercase tracking-wider text-[#1a3a6b] border-b-2 border-gray-100 pb-2 mb-4 mt-8">Lokasi</h3>
             <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lokasi</label>
-                <input type="text" name="location_name" placeholder="Contoh: Pos Pantau Tol" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors" required>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Lokasi Penugasan</label>
+                <select name="location_id" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors">
+                    <option value="">-- Pilih Lokasi Aktif --</option>
+                    {% for location in active_locations %}
+                    <option value="{{ location.id }}" {% if selected_location_id|stringformat:"s" == location.id|stringformat:"s" %}selected{% endif %}>
+                        {{ location.name }} ({{ location.get_type_display }})
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <h3 class="text-xs font-bold uppercase tracking-wider text-[#1a3a6b] border-b-2 border-gray-100 pb-2 mb-4 mt-8">Waktu & Otoritas</h3>
@@ -52,14 +59,14 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Dibuat Oleh</label>
                     <select name="created_by" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors" required>
                         <option value="">-- Pilih Staf --</option>
-                        {% for p in personel_all %}<option value="{{ p.id }}">{{ p.nama }}</option>{% endfor %}
+                        {% for p in personel_staff %}<option value="{{ p.id }}">{{ p.pangkat }} {{ p.nama_lengkap }} ({{ p.nrp }})</option>{% endfor %}
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pimpinan Penandatangan</label>
                     <select name="approved_by" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors" required>
                         <option value="">-- Pilih Pimpinan --</option>
-                        {% for p in personel_all %}<option value="{{ p.id }}">{{ p.nama }}</option>{% endfor %}
+                        {% for p in personel_pimpinan %}<option value="{{ p.id }}">{{ p.pangkat }} {{ p.nama_lengkap }} ({{ p.nrp }})</option>{% endfor %}
                     </select>
                 </div>
             </div>
@@ -69,7 +76,7 @@
                 <div class="personel-row flex items-center gap-3">
                     <select name="personel_ids[]" class="personel-select flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-[#1a3a6b] focus:border-[#1a3a6b] transition-colors">
                         <option value="">-- Pilih Personel --</option>
-                        {% for p in personel_all %}<option value="{{ p.id }}">{{ p.nama }}</option>{% endfor %}
+                        {% for p in personel_terlibat %}<option value="{{ p.id }}">{{ p.pangkat }} {{ p.nama_lengkap }} ({{ p.nrp }})</option>{% endfor %}
                     </select>
                     <button type="button" onclick="tambahBaris()" class="shrink-0 w-11 h-11 flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors" title="Tambah Personel">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>

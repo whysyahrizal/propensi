@@ -1,8 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from accounts.models import Personel
+from locations.models import Location
 from .models import Sprin, PersonelSprin
-from personel.models import Personel
+
+
+def _active_location_queryset():
+    return Location.objects.filter(is_active=True).order_by('name')
 
 
 def get_user_role(request):
@@ -12,15 +18,37 @@ def get_user_role(request):
     return role
 
 
+@login_required
 def create_sprin(request):
-    personel_all = Personel.objects.filter(is_active=True)
+    if getattr(request.user, 'role', None) not in ('superadmin', 'operator', 'pimpinan'):
+        messages.error(request, "Akses ditolak.")
+        return redirect('dashboard:index')
+
+    personel_all = Personel.objects.filter(is_active=True).order_by('nama_lengkap')
+    personel_staff = personel_all.filter(role__in=['operator', 'superadmin'])
+    personel_pimpinan = personel_all.filter(role='pimpinan')
+    personel_terlibat = personel_all.filter(role='personel')
+    active_locations = _active_location_queryset()
 
     if request.method == 'POST':
+        location_id = request.POST.get('location_id')
+        selected_location = active_locations.filter(pk=location_id).first()
+        if not selected_location:
+            messages.error(request, "Lokasi penugasan wajib dipilih dari daftar wilayah aktif.")
+            return render(request, 'sprin/create_sprin.html', {
+                'personel_all': personel_all,
+                'personel_staff': personel_staff,
+                'personel_pimpinan': personel_pimpinan,
+                'personel_terlibat': personel_terlibat,
+                'active_locations': active_locations,
+                'selected_location_id': location_id,
+            })
+
         # Simpan data utama
         sprin = Sprin.objects.create(
             operation_name=request.POST.get('operation_name'),
             description=request.POST.get('description'),
-            location_name=request.POST.get('location_name'),
+            location_name=f'{selected_location.name} ({selected_location.get_type_display()})',
             # latitude=request.POST.get('latitude'),
             # longitude=request.POST.get('longitude'),
             # radius_meter=request.POST.get('radius_meter', 100),
@@ -39,7 +67,14 @@ def create_sprin(request):
         messages.success(request, "Sprin baru berhasil diterbitkan otomatis!")
         return redirect('sprin:daftar')
 
-    return render(request, 'sprin/create_sprin.html', {'personel_all': personel_all})
+    return render(request, 'sprin/create_sprin.html', {
+        'personel_all': personel_all,
+        'personel_staff': personel_staff,
+        'personel_pimpinan': personel_pimpinan,
+        'personel_terlibat': personel_terlibat,
+        'active_locations': active_locations,
+        'selected_location_id': '',
+    })
 
 def all_sprin(request):
     q = request.GET.get('q', '').strip()

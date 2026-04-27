@@ -4,7 +4,22 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<style>
+  .leaflet-control-geocoder {
+    width: min(420px, calc(100vw - 96px));
+    max-width: 100%;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+    border-radius: 0.75rem;
+    border: 1px solid #d1d5db;
+  }
+  .leaflet-control-geocoder-form input {
+    height: 38px;
+    font-size: 0.875rem;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -48,10 +63,18 @@
           <div class="flex flex-col gap-1.5">
             <label for="id_type" class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Tipe <span class="text-red-500">*</span></label>
             <select name="type" id="id_type" required
-                    class="h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
+                    class="no-custom h-10 px-3 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3a6b]">
               <option value="">— Pilih Tipe —</option>
-              <option value="pos" {% if form.type.value == 'pos' %}selected{% endif %}>Pos</option>
-              <option value="mako" {% if form.type.value == 'mako' %}selected{% endif %}>Mako</option>
+              <option value="pos"
+                {% if form.type.value|lower == 'pos' or not form.type.value and location and location.type == 'pos' %}
+                  selected
+                {% endif %}
+              >Pos</option>
+              <option value="mako"
+                {% if form.type.value|lower == 'mako' or not form.type.value and location and location.type == 'mako' %}
+                  selected
+                {% endif %}
+              >Mako</option>
             </select>
             {% if form.type.errors %}<p class="text-xs text-red-500 mt-0.5">{{ form.type.errors.0 }}</p>{% endif %}
           </div>
@@ -108,14 +131,39 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{{ location_data|default_if_none:""|json_script:"location-data-json" }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var latInput = document.getElementById('id_latitude');
   var lngInput = document.getElementById('id_longitude');
   var radiusInput = document.getElementById('id_radius');
 
-  var existingLat = parseFloat(latInput.value);
-  var existingLng = parseFloat(lngInput.value);
+  function parseCoord(value) {
+    if (value === null || value === undefined) return NaN;
+    return parseFloat(String(value).replace(',', '.'));
+  }
+
+  var locationDataEl = document.getElementById('location-data-json');
+  var locationData = null;
+  if (locationDataEl && locationDataEl.textContent) {
+    try {
+      locationData = JSON.parse(locationDataEl.textContent);
+    } catch (e) {
+      locationData = null;
+    }
+  }
+
+  var existingLat = parseCoord(latInput.value);
+  var existingLng = parseCoord(lngInput.value);
+  if (locationData && !isNaN(parseCoord(locationData.lat)) && !isNaN(parseCoord(locationData.lng))) {
+    existingLat = parseCoord(locationData.lat);
+    existingLng = parseCoord(locationData.lng);
+    latInput.value = existingLat.toFixed(7);
+    lngInput.value = existingLng.toFixed(7);
+    if (locationData.radius && (!radiusInput.value || parseInt(radiusInput.value, 10) <= 0)) {
+      radiusInput.value = String(locationData.radius);
+    }
+  }
   var hasExisting = !isNaN(existingLat) && !isNaN(existingLng);
 
   var initLat = hasExisting ? existingLat : -6.2088;
@@ -132,7 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function updateCircle(lat, lng) {
     if (circle) map.removeLayer(circle);
-    var r = parseInt(radiusInput.value) || 100;
+    var r = parseInt(radiusInput.value, 10);
+    if (isNaN(r) || r <= 0) return;
     circle = L.circle([lat, lng], {
       radius: r,
       color: '#1a3a6b',
@@ -149,6 +198,29 @@ document.addEventListener('DOMContentLoaded', function() {
     lngInput.value = lng.toFixed(7);
     updateCircle(lat, lng);
   }
+
+  var geocoderControl = L.Control.geocoder({
+    defaultMarkGeocode: false,
+    collapsed: false,
+    geocoder: L.Control.Geocoder.nominatim({
+      geocodingQueryParams: {
+        addressdetails: 1,
+      },
+    }),
+    placeholder: 'Cari alamat / nama lokasi...',
+    errorMessage: 'Alamat tidak ditemukan',
+    suggestMinLength: 3
+  }).addTo(map);
+
+  geocoderControl.on('markgeocode', function(e) {
+    var center = e.geocode.center;
+    if (e.geocode.bbox) {
+      map.flyToBounds(e.geocode.bbox, { maxZoom: 16 });
+    } else {
+      map.flyTo(center, 16);
+    }
+    placeMarker(center.lat, center.lng);
+  });
 
   if (hasExisting) {
     placeMarker(existingLat, existingLng);

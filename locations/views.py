@@ -1,9 +1,23 @@
+import json
+import urllib.parse
+import urllib.request
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+from accounts.decorators import cek_akses_menu
 
 from .models import Location
 from .forms import LocationForm
+
+
+def _ensure_location_management_access(request):
+    if request.user.role not in ('pimpinan', 'superadmin'):
+        raise PermissionDenied('Anda tidak memiliki akses ke manajemen wilayah.')
 
 
 def _check_sprin_linked(location):
@@ -20,7 +34,9 @@ def _check_sprin_linked(location):
 
 
 @login_required
+@cek_akses_menu('locations:daftar')
 def location_list(request):
+    _ensure_location_management_access(request)
     qs = Location.objects.all()
 
     search = request.GET.get('q', '').strip()
@@ -46,7 +62,9 @@ def location_list(request):
 
 
 @login_required
+@cek_akses_menu('locations:daftar')
 def location_create(request):
+    _ensure_location_management_access(request)
     if request.method == 'POST':
         form = LocationForm(request.POST)
         if form.is_valid():
@@ -63,7 +81,9 @@ def location_create(request):
 
 
 @login_required
+@cek_akses_menu('locations:daftar')
 def location_edit(request, pk):
+    _ensure_location_management_access(request)
     location = get_object_or_404(Location, pk=pk)
     sprin_linked = _check_sprin_linked(location)
 
@@ -80,11 +100,18 @@ def location_edit(request, pk):
         'form': form,
         'location': location,
         'sprin_linked': sprin_linked,
+        'location_data': {
+            'lat': float(location.latitude),
+            'lng': float(location.longitude),
+            'radius': location.radius,
+        },
     })
 
 
 @login_required
+@cek_akses_menu('locations:daftar')
 def location_map(request):
+    _ensure_location_management_access(request)
     locations = Location.objects.filter(is_active=True)
     locations_data = [
         {
@@ -101,3 +128,49 @@ def location_map(request):
         'locations_data': locations_data,
         'total': locations.count(),
     })
+
+
+@login_required
+@cek_akses_menu('locations:daftar')
+@require_GET
+def geocode_search(request):
+    _ensure_location_management_access(request)
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+
+    params = urllib.parse.urlencode({
+        'q': query,
+        'format': 'jsonv2',
+        'addressdetails': 1,
+        'limit': 5,
+        'countrycodes': 'id',
+    })
+    url = f'https://nominatim.openstreetmap.org/search?{params}'
+    req = urllib.request.Request(
+        url,
+        headers={
+            'User-Agent': 'SIRAGA-Geocoder/1.0',
+            'Accept': 'application/json',
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=8) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+    except Exception:
+        return JsonResponse({'results': [], 'error': 'Layanan geocoding sedang tidak tersedia.'}, status=502)
+
+    results = []
+    for item in payload:
+        try:
+            lat = float(item.get('lat'))
+            lon = float(item.get('lon'))
+        except (TypeError, ValueError):
+            continue
+        results.append({
+            'display_name': item.get('display_name') or 'Alamat tidak diketahui',
+            'lat': lat,
+            'lon': lon,
+        })
+    return JsonResponse({'results': results})

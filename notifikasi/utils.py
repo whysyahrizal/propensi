@@ -30,7 +30,7 @@ def kirim_notifikasi(user, judul, pesan, tipe='info', link='', kirim_email=True)
         user: instance accounts.Personel (penerima)
         judul: str, judul notifikasi
         pesan: str, isi notifikasi
-        tipe: str, salah satu dari 'info'|'cuti'|'sprin'|'presensi'|'sistem'
+        tipe: str, salah satu dari 'info'|'cuti'|'sprin'|'presensi'|'jadwal'|'sistem'
         link: str, URL relatif menuju halaman terkait (opsional)
         kirim_email: bool, apakah email juga dikirim (default True)
 

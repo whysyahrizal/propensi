@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Personel - SIRAGA{% endblock %}
+{% block page_title %}Dashboard Personel{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-900">Jadwal Anda Hari Ini</h3>
+        <a href="{% url 'schedules:my_schedule' %}" class="inline-flex items-center gap-2 text-xs font-semibold text-[#1a3a6b] hover:text-[#2d5da6]">
+          Lihat Timeline
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+
+      <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p class="text-xs text-gray-500 mb-1">Lokasi Penugasan</p>
+        <p class="text-base font-semibold text-gray-900">{{ jadwal_hari_ini.location }}</p>
+        <div class="mt-3 flex flex-wrap gap-2 text-xs">
+          <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">{{ jadwal_hari_ini.shift_label }}</span>
+          <span class="px-2.5 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">{{ jadwal_hari_ini.shift_time }}</span>
+          <span class="px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">{{ jadwal_hari_ini.checkin_status }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white border border-gray-200 rounded-xl p-5">
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">Status Hari Ini</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-500">Tanggal</span>
+          <span class="font-medium text-gray-900">{{ today|date:"d M Y" }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-gray-500">Absensi</span>
+          <span class="font-medium text-gray-900">
+            {% if absensi_hari_ini %}Sudah Absen{% else %}Belum Absen{% endif %}
+          </span>
+        </div>
+        <div class="pt-2">
+          <a href="{% url 'absensi:dashboard' %}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1a3a6b] text-white text-xs font-semibold hover:bg-[#2d5da6] transition-colors">
+            Buka Absensi
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <h3 class="text-sm font-semibold text-gray-900 mb-4">Aksi Cepat</h3>
+    <div class="flex flex-wrap gap-3">
+      <a href="{% url 'absensi:checkin' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1a3a6b] text-white text-sm font-medium hover:bg-[#2d5da6] transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+        </svg>
+        Check-In Absensi
+      </a>
+      <a href="{% url 'absensi:checkout' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Check-Out Absensi
+      </a>
+      <a href="{% url 'absensi:dashboard' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        Absensi Harian
+      </a>
+      <a href="{% url 'absensi:history' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z"/>
+        </svg>
+        Riwayat Absensi
+      </a>
+      <a href="{% url 'absensi:rekap_pribadi' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z"/>
+        </svg>
+        Rekap Absensi Saya
+      </a>
+      <a href="{% url 'schedules:my_schedule' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        Jadwal Saya
+      </a>
+      <a href="{% url 'manajemen_cuti:riwayat' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        Cuti / Izin Saya
+      </a>
+      <a href="{% url 'notifikasi:daftar' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        Notifikasi
+      </a>
+    </div>
+  </section>
+
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-gray-900">Timeline 30 Hari</h3>
+      <span class="text-xs text-gray-500">{{ jadwal_30_hari|length }} jadwal</span>
+    </div>
+    {% if jadwal_30_hari %}
+      <div class="space-y-2">
+        {% for jadwal in jadwal_30_hari %}
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border border-gray-100 rounded-lg p-3">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ jadwal.tanggal|date:"l, d M Y" }}</p>
+              <p class="text-xs text-gray-500">{{ jadwal.location }}</p>
+            </div>
+            <div class="flex gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">{{ jadwal.shift_label }}</span>
+              <span class="px-2.5 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">{{ jadwal.shift_time }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
+        Belum ada jadwal terdaftar untuk 30 hari ke depan.
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

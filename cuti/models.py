@@ -28,7 +28,7 @@ class PengajuanCuti(models.Model):
 
     personel = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name='pengajuan_cuti', verbose_name='Personel'
+        related_name='cuti_pengajuan', verbose_name='Personel'
     )
     jenis_cuti = models.CharField(max_length=20, choices=JENIS_CUTI_CHOICES, verbose_name='Jenis Cuti')
     tanggal_mulai = models.DateField(verbose_name='Tanggal Mulai')
@@ -45,7 +45,7 @@ class PengajuanCuti(models.Model):
     catatan_pimpinan = models.TextField(blank=True, verbose_name='Catatan Pimpinan')
     disetujui_oleh = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='approval_cuti', verbose_name='Diputuskan Oleh'
+        related_name='cuti_persetujuan', verbose_name='Diputuskan Oleh'
     )
     disetujui_pada = models.DateTimeField(null=True, blank=True, verbose_name='Waktu Keputusan')
     
