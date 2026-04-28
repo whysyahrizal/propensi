@@ -5,37 +5,39 @@
 {% block content %}
 <div class="flex flex-col gap-6">
   
-  <div class="flex h-[108px] px-6 pt-6 pb-0 flex-col items-start shrink-0 self-stretch sm:flex-row sm:items-center sm:justify-between sm:h-auto sm:p-0">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-5 w-full">
+    
     <div class="flex items-center gap-4">
-      <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50 text-blue-600 shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       </div>
-      <div>
-        <h1 class="text-xl font-bold text-gray-900 tracking-tight">Direktori Data Personel</h1>
-        <p class="text-sm text-gray-500">{{ total_data_filter }} personel ditemukan (dari filter)</p>
+      <div class="min-w-0">
+        <h1 class="text-xl font-bold text-gray-900 tracking-tight truncate">Direktori Data Personel</h1>
+        <p class="text-sm text-gray-500 truncate">{{ total_data_filter }} personel ditemukan (dari filter)</p>
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
+      
       {% if request.user.is_superadmin or request.user.is_operator %}
-          <a href="{% url 'accounts:daftar_verifikasi' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-orange-50 text-orange-700 border border-orange-200 text-sm font-bold hover:bg-orange-100 transition-colors shadow-sm">
-            <iconify-icon icon="heroicons:clipboard-document-check" class="text-lg"></iconify-icon>
-            Pending Verification ({{ jumlah_pending_verifikasi }})
-          </a>
+        <a href="{% url 'accounts:daftar_verifikasi' %}" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-orange-50 text-orange-700 border border-orange-200 text-sm font-bold hover:bg-orange-100 transition-colors shadow-sm whitespace-nowrap w-full sm:w-auto">
+          <iconify-icon icon="heroicons:clipboard-document-check" class="text-lg"></iconify-icon>
+          Pending Verification ({{ jumlah_pending_verifikasi }})
+        </a>
       {% endif %}
       
       {% if request.user.is_superadmin %}
-      <a href="{% url 'accounts:tambah_personel' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a3a6b] text-white text-sm font-semibold hover:bg-[#11274a] transition-colors shadow-sm mt-4 sm:mt-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Tambah Personel
-      </a>
+        <a href="{% url 'accounts:tambah_personel' %}" class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a3a6b] text-white text-sm font-semibold hover:bg-[#11274a] transition-colors shadow-sm whitespace-nowrap w-full sm:w-auto">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Tambah Personel
+        </a>
       {% endif %}
+      
     </div>
   </div>
-
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
       <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
@@ -138,23 +140,24 @@
   </form>
 
   <div class="rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto min-h-[320px]">
       <table class="w-full text-sm text-left">
         <thead>
           <tr class="border-b border-gray-200 text-gray-500 bg-gray-50/50">
-            <th class="px-6 py-4 text-xs font-semibold tracking-wider w-16">ID</th>
-            <th class="px-4 py-4 text-xs font-semibold tracking-wider w-20">FOTO</th>
-            <th class="px-4 py-4 text-xs font-semibold tracking-wider">NRP & NAMA LENGKAP</th>
-            <th class="px-4 py-4 text-xs font-semibold tracking-wider">PANGKAT/GOL</th>
-            <th class="px-4 py-4 text-xs font-semibold tracking-wider">JABATAN</th>
-            <th class="px-4 py-4 text-xs font-semibold tracking-wider">SATKER</th>
-            <th class="px-4 py-4 text-xs font-semibold tracking-wider">STATUS</th>
-            <th class="px-6 py-4 text-xs font-semibold tracking-wider text-center">AKSI</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Foto</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">NRP & Nama Lengkap</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Pangkat</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Jabatan</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Satuan Kerja</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Role</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
           {% for p in page_obj %}
-          <tr class="hover:bg-gray-50/70 transition-colors group">
+          <tr class="hover:bg-gray-50/50 transition-colors group {% if not p.is_active %}opacity-80 bg-gray-50/30{% endif %}">
             <td class="px-6 py-4 text-gray-500">#{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
             <td class="px-4 py-4">
@@ -181,6 +184,17 @@
             <td class="px-4 py-4 text-gray-600">{{ p.jabatan|default:"—" }}</td>
             <td class="px-4 py-4 text-gray-600">{{ p.satker.nama|default:"—"|title }}</td>
             
+            <td class="px-6 py-4">
+              {% if p.role_obj %}
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-50 text-blue-600 border border-blue-100">
+                  <iconify-icon icon="heroicons:shield-check" class="text-xs"></iconify-icon>
+                  {{ p.role_obj.nama|title }}
+                </span>
+              {% else %}
+                <span class="text-[10px] font-bold text-gray-400 uppercase italic">Belum Set</span>
+              {% endif %}
+            </td>
+            
             <td class="px-4 py-4">
               {% if p.is_active %}
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-600 text-xs font-bold border border-green-100">
@@ -193,29 +207,59 @@
               {% endif %}
             </td>
             
-            <td class="px-6 py-4">
-              <div class="flex items-center justify-center gap-3">
-                <a href="{% url 'accounts:detail_personel' p.pk %}" class="text-gray-400 hover:text-gray-600 transition-colors" title="Lihat Detail">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                </a>
+            <td class="px-6 py-4 text-right">
+              <div class="relative inline-block text-left" x-data="{ menuOpen: false }">
                 
-                {% if request.user.is_superadmin %}
-                  {% if p.is_active %}
-                    <a href="{% url 'accounts:edit_personel' p.pk %}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                    </a>
-                    
-                    <a href="{% url 'accounts:hapus_personel' p.pk %}" class="text-red-400 hover:text-red-600 transition-colors" title="Nonaktifkan">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </a>
-                    
-                  {% else %}
-                    <a href="{% url 'accounts:reaktivasi_personel' p.pk %}" class="text-emerald-500 hover:text-emerald-600 transition-colors" title="Reaktivasi Status">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    </a>
-                    
+                <button @click="menuOpen = !menuOpen" 
+                        @click.outside="menuOpen = false" 
+                        class="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-all focus:outline-none">
+                  <iconify-icon icon="heroicons:ellipsis-vertical" class="text-xl"></iconify-icon>
+                </button>
+
+                <div x-show="menuOpen" 
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="transform opacity-0 scale-95"
+                    x-transition:enter-end="transform opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="transform opacity-100 scale-100"
+                    x-transition:leave-end="transform opacity-0 scale-95"
+                    class="absolute right-0 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 py-1.5
+                            {% if forloop.revcounter <= 2 %} bottom-full mb-2 origin-bottom-right {% else %} top-full mt-2 origin-top-right {% endif %}"
+                    style="display: none;">
+                  
+                  <a href="{% url 'accounts:detail_personel' p.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Lihat Detail
+                  </a>
+                  
+                  {% if request.user.is_superadmin %}
+                    {% if p.is_active %}
+                      
+                      <a href="{% url 'accounts:edit_personel' p.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        Edit Data
+                      </a>
+                      
+                      <hr class="my-1.5 border-gray-100">
+                      
+                      <a href="{% url 'accounts:hapus_personel' p.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Nonaktifkan
+                      </a>
+                      
+                    {% else %}
+                      
+                      <hr class="my-1.5 border-gray-100">
+                      
+                      <a href="{% url 'accounts:reaktivasi_personel' p.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 transition-colors font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reaktivasi Status
+                      </a>
+                      
+                    {% endif %}
                   {% endif %}
-                {% endif %}
+                  
+                </div>
               </div>
             </td>
           </tr>

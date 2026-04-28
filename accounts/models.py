@@ -33,7 +33,6 @@ class Role(models.Model):
     deskripsi = models.TextField(blank=True, verbose_name='Deskripsi')
     dibuat_pada = models.DateTimeField(default=timezone.now, verbose_name='Dibuat Pada')
     menus = models.ManyToManyField(MenuItem, blank=True, related_name='roles', verbose_name='Menu Access')
-    display_label = models.CharField(max_length=100, blank=True, verbose_name='Display Label')
 
     class Meta:
         verbose_name = 'Role'

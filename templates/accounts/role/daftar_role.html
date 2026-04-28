@@ -19,49 +19,84 @@
     <div class="flex items-center gap-3">
         <div class="flex bg-gray-100 p-1 rounded-lg mr-2">
             <a href="{% url 'accounts:daftar_role' %}" class="px-4 py-1.5 text-xs font-bold rounded-md bg-white text-primary shadow-sm">Role</a>
-            <a href="{% url 'accounts:daftar_menu' %}" class="px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">Menu</a>
+            <a href="{% url 'accounts:daftar_menu' %}" class="px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-primary transition-colors">Menu</a>
         </div>
-        <a href="{% url 'accounts:tambah_role' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a3a6b] text-white text-sm font-semibold hover:bg-[#11274a] transition-colors shadow-sm mt-4 sm:mt-0">
-            <iconify-icon icon="heroicons:plus-circle" class="text-lg"></iconify-icon>
-            Tambah Role
+        <a href="{% url 'accounts:tambah_role' %}" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-light shadow-md transition-all">
+          <iconify-icon icon="heroicons:plus-circle" class="text-lg"></iconify-icon>
+          Tambah Role
         </a>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for role in role_list %}
-    <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
-      <div class="flex items-start justify-between mb-4">
-        <div class="flex items-center gap-4">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col hover:shadow-md transition-shadow relative">
+      
+      <div class="flex items-start justify-between mb-4 gap-2">
+        <div class="flex items-center gap-3 min-w-0">
           <div class="w-11 h-11 rounded-xl bg-blue-50 text-primary flex items-center justify-center shrink-0">
             <iconify-icon icon="heroicons:user-group" class="text-xl"></iconify-icon>
           </div>
-          <div>
-            <h3 class="font-bold text-gray-900 leading-tight">{{ role.display_label|default:role.nama }}</h3>
-            <p class="text-xs text-gray-400 font-mono mt-0.5">{{ role.nama }}</p>
+          <div class="min-w-0">
+            <h3 class="font-mono text-gray-900 font-bold leading-tight truncate" title="{{ role.nama|title }}">
+              {{ role.nama|title }}
+            </h3>
           </div>
         </div>
-        <div class="flex items-center gap-1/2">
-          <a href="{% url 'accounts:detail_role' role.pk %}" class="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-all" title="Lihat Detail Role">
-            <iconify-icon icon="heroicons:eye" class="text-lg"></iconify-icon>
-          </a>
-          <a href="{% url 'accounts:edit_role' role.pk %}" class="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-all">
-            <iconify-icon icon="heroicons:pencil-square" class="text-lg"></iconify-icon>
-          </a>
-          <a href="{% url 'accounts:hapus_role' role.pk %}" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-            <iconify-icon icon="heroicons:trash" class="text-lg"></iconify-icon>
-          </a>
+
+        <div class="relative shrink-0" x-data="{ menuOpen: false }">
+          <button @click="menuOpen = !menuOpen" 
+                  @click.outside="menuOpen = false" 
+                  class="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-all focus:outline-none">
+            <iconify-icon icon="heroicons:ellipsis-vertical" class="text-xl"></iconify-icon>
+          </button>
+
+          <div x-show="menuOpen" 
+               x-transition:enter="transition ease-out duration-100"
+               x-transition:enter-start="transform opacity-0 scale-95"
+               x-transition:enter-end="transform opacity-100 scale-100"
+               x-transition:leave="transition ease-in duration-75"
+               x-transition:leave-start="transform opacity-100 scale-100"
+               x-transition:leave-end="transform opacity-0 scale-95"
+               class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-10 py-1.5"
+               style="display: none;">
+            
+            <a href="{% url 'accounts:detail_role' role.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors">
+              <iconify-icon icon="heroicons:eye" class="text-lg"></iconify-icon>
+              Lihat Detail
+            </a>
+            
+            <a href="{% url 'accounts:edit_role' role.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors">
+              <iconify-icon icon="heroicons:pencil-square" class="text-lg"></iconify-icon>
+              Edit
+            </a>
+            
+            <hr class="my-1.5 border-gray-100">
+            
+            <a href="{% url 'accounts:hapus_role' role.pk %}" class="flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors font-medium">
+              <iconify-icon icon="heroicons:trash" class="text-lg"></iconify-icon>
+              Hapus
+            </a>
+          </div>
         </div>
       </div>
 
-      <div class="text-sm text-gray-500 flex-1 mb-6 leading-relaxed">
+      <div class="text-sm text-gray-500 flex-1 mb-6 leading-relaxed line-clamp-3">
         {{ role.deskripsi|default:"Tidak ada deskripsi untuk role ini." }}
       </div>
 
-      <a href="{% url 'accounts:kelola_akses_menu' role.pk %}" class="w-full py-2.5 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-100 text-gray-600 hover:text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
-        <iconify-icon icon="heroicons:adjustments-horizontal" class="text-lg"></iconify-icon>
-        Konfigurasi Hak Akses
+      <a href="{% url 'accounts:kelola_akses_menu' role.pk %}" class="w-full py-2.5 bg-gray-50 text-gray-600 rounded-xl text-xs font-bold text-center hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2">
+        <iconify-icon icon="heroicons:key" class="text-base"></iconify-icon>
+        Kelola Akses Menu
       </a>
+    </div>
+    {% empty %}
+    <div class="col-span-full py-20 bg-white rounded-2xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-center">
+      <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+        <iconify-icon icon="heroicons:shield-exclamation" class="text-3xl text-gray-300"></iconify-icon>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900">Belum Ada Role</h3>
+      <p class="text-sm text-gray-500 max-w-xs mx-auto">Silakan tambahkan role baru untuk mengatur hak akses pengguna aplikasi.</p>
     </div>
     {% endfor %}
   </div>
