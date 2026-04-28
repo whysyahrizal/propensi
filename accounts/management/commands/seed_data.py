@@ -11,7 +11,8 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from accounts.models import MenuItem, Personel, Satker, Role
 from locations.models import Location
-from schedules.models import ShiftSchedule  # Ditambah untuk mengelakkan ProtectedError
+from schedules.models import ShiftSchedule
+from django.db.utils import OperationalError
 
 SATKER_DATA = [
     {"kode": "DITLANTAS",  "nama": "Direktorat Lalu Lintas"},
@@ -23,21 +24,19 @@ SATKER_DATA = [
     {"kode": "NTMC",       "nama": "National Traffic Management Centre"},
 ]
 
+# display_label dihapus dari ROLE_DATA
 ROLE_DATA = [
-    {"nama": "superadmin", "display_label": "Superadmin", "deskripsi": "Akses penuh ke seluruh sistem dan pengaturan."},
-    {"nama": "pimpinan", "display_label": "Pimpinan", "deskripsi": "Akses pemantauan dashboard dan persetujuan."},
-    {"nama": "operator", "display_label": "Operator", "deskripsi": "Akses kelola data personel dan absensi harian."},
-    {"nama": "personel", "display_label": "Personel", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
+    {"nama": "superadmin", "deskripsi": "Akses penuh ke seluruh sistem dan pengaturan."},
+    {"nama": "pimpinan", "deskripsi": "Akses pemantauan dashboard dan persetujuan."},
+    {"nama": "operator", "deskripsi": "Akses kelola data personel dan absensi harian."},
+    {"nama": "personel", "deskripsi": "Akses dasar pengguna untuk absen dan riwayat."},
 ]
 
 MENU_HIERARCHY = [
-    # MENU UTAMA
     {
         "key": "dashboard", "label": "Dashboard", "path": "dashboard:index", "icon": "heroicons:home", "sort_order": 1,
         "children": []
     },
-
-    # GRUP: KEHADIRAN & CUTI 
     {
         "key": "grup_kehadiran", "label": "Kehadiran & Cuti", "path": "", "icon": "heroicons:calendar-days", "sort_order": 30,
         "children": [
@@ -48,8 +47,6 @@ MENU_HIERARCHY = [
             {"key": "rekap_admin", "label": "Rekap Absensi Admin", "path": "absensi:rekap_admin", "icon": "heroicons:presentation-chart-line", "sort_order": 5},
         ]
     },
-
-    # GRUP: PENUGASAN 
     {
         "key": "grup_penugasan", "label": "Penugasan", "path": "", "icon": "heroicons:briefcase", "sort_order": 40,
         "children": [
@@ -59,8 +56,6 @@ MENU_HIERARCHY = [
             {"key": "locations", "label": "Wilayah Penugasan", "path": "locations:daftar", "icon": "heroicons:map-pin", "sort_order": 4},
         ]
     },
-
-    # GRUP: PUSAT INFORMASI
     {
         "key": "grup_info", "label": "Pusat Informasi", "path": "", "icon": "heroicons:megaphone", "sort_order": 50,
         "children": [
@@ -68,15 +63,12 @@ MENU_HIERARCHY = [
             {"key": "pengumuman", "label": "Pengumuman", "path": "pengumuman:daftar", "icon": "heroicons:speaker-wave", "sort_order": 2},
         ]
     },
-
-    # GRUP: ADMINISTRATOR
     {
         "key": "grup_admin", "label": "Administrator", "path": "", "icon": "heroicons:shield-check", "sort_order": 60,
         "children": [
             {"key": "personel", "label": "Direktori Personel", "path": "accounts:daftar_personel", "icon": "heroicons:users", "sort_order": 1},
             {"key": "verifikasi", "label": "Verifikasi Akun", "path": "accounts:daftar_verifikasi", "icon": "heroicons:user-plus", "sort_order": 2},
             {"key": "daftar_role", "label": "Manajemen Role", "path": "accounts:daftar_role", "icon": "heroicons:key", "sort_order": 3},
-            # Catatan: Fitur manajemen menu dinonaktifkan sesuai permintaan klien.
         ]
     }
 ]
@@ -164,7 +156,6 @@ PERSONEL_DATA = [
 ]
 
 LOCATION_DATA = [
-    # Pos-pos pengamanan lalu lintas
     {
         "name": "Pos Lantas Cikampek KM 42",
         "type": "pos",
@@ -200,7 +191,6 @@ LOCATION_DATA = [
         "longitude": 109.0380000,
         "radius": 150,
     },
-    # Mako (Markas Komando)
     {
         "name": "Mako Korlantas Polri",
         "type": "mako",
@@ -222,7 +212,6 @@ LOCATION_DATA = [
         "longitude": 106.8450000,
         "radius": 200,
     },
-    # Pos non-aktif (untuk testing filter)
     {
         "name": "Pos Lantas Cikarang Barat (Nonaktif)",
         "type": "pos",
@@ -241,7 +230,6 @@ LOCATION_DATA = [
     },
 ]
 
-
 class Command(BaseCommand):
     help = 'Seed database dengan data dummy untuk testing (akun per role, satker, role object)'
 
@@ -256,18 +244,16 @@ class Command(BaseCommand):
         if options['reset']:
             self.stdout.write(self.style.WARNING('⚠  Reset: menghapus data lama...'))
             
-            # HAPUS DATA TRANSAKSIONAL (CHILD) TERLEBIH DAHULU
-            # Ini mengelakkan ProtectedError dari jadual yang merujuk kepada lokasi atau personel
-            ShiftSchedule.objects.all().delete()
+            # Daftar model yang akan dihapus (Urutan penting: Child dulu, baru Parent)
+            models_to_reset = [ShiftSchedule, Personel, Satker, Role, MenuItem, Location]
             
-            # (Jika ada model transaksi lain seperti Absensi/Cuti, boleh dipadamkan di sini pada masa hadapan)
-            
-            # BARU HAPUS DATA MASTER (PARENT)
-            Personel.objects.all().delete()
-            Satker.objects.all().delete()
-            Role.objects.all().delete()
-            MenuItem.objects.all().delete()
-            Location.objects.all().delete()
+            for model in models_to_reset:
+                try:
+                    model.objects.all().delete()
+                except OperationalError:
+                    # Jika tabel belum ada di database, abaikan dan lanjut ke model berikutnya
+                    pass
+                    
             self.stdout.write('   Data dihapus.\n')
 
         self.stdout.write(self.style.HTTP_INFO('📦 Menyiapkan Satker...'))
@@ -287,21 +273,19 @@ class Command(BaseCommand):
             obj, created = Role.objects.get_or_create(
                 nama=r['nama'],
                 defaults={
-                    'display_label': r['display_label'],
                     'deskripsi': r['deskripsi']
                 }
             )
             role_obj_map[r['nama']] = obj
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
-            self.stdout.write(f'   [{status}] {obj.nama} — {obj.display_label}')
+            self.stdout.write(f'   [{status}] {obj.nama.title()}')
 
         self.stdout.write(self.style.HTTP_INFO('\n🧭 Menyiapkan Menu Sidebar (Hierarkis)...'))
         menu_map = {}
         for group in MENU_HIERARCHY:
-            # 1. Buat Grup / Menu Induk
             parent_obj, created = MenuItem.objects.get_or_create(
                 path=group['path'], 
-                label=group['label'], # Label dan path sebagai patokan
+                label=group['label'],
                 defaults={
                     'icon': group['icon'],
                     'sort_order': group['sort_order'],
@@ -313,7 +297,6 @@ class Command(BaseCommand):
             status = self.style.SUCCESS('baru') if created else 'sudah ada'
             self.stdout.write(f'   [{status}] {parent_obj.label} (Induk)')
 
-            # 2. Buat Menu Anak untuk Grup Tersebut
             for child in group['children']:
                 child_obj, c_created = MenuItem.objects.get_or_create(
                     path=child['path'],
@@ -322,7 +305,7 @@ class Command(BaseCommand):
                         'icon': child.get('icon', 'heroicons:chevron-right'),
                         'sort_order': child['sort_order'],
                         'is_active': True,
-                        'parent': parent_obj # Kaitkan dengan Induk
+                        'parent': parent_obj
                     },
                 )
                 menu_map[child['key']] = child_obj
@@ -363,7 +346,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 f'   [{self.style.SUCCESS("baru")}] '
-                f'{personel.nrp} — {personel.nama_lengkap} ({role_obj.display_label if role_obj else "Tanpa Role"})'
+                f'{personel.nrp} — {personel.nama_lengkap} ({role_obj.nama.title() if role_obj else "Tanpa Role"})'
             )
 
         self.stdout.write(self.style.HTTP_INFO('\n📍 Menyiapkan Wilayah Penugasan...'))
@@ -391,4 +374,4 @@ class Command(BaseCommand):
         self.stdout.write(f'  {"─"*12} {"─"*28} {"─"*12}')
         for p in PERSONEL_DATA:
             self.stdout.write(f'  {p["nrp"]:<12} {p["nama_lengkap"]:<28} {p["role_slug"]:<12}')
-        self.stdout.write('')
+            self.stdout.write('')

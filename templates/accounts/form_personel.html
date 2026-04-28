@@ -34,8 +34,7 @@
             <input name="nrp" type="text" required maxlength="8" pattern="\d{8}" 
                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                    placeholder="8 Digit Angka" 
-                   {% if action == 'edit' %}value="{{ personel.nrp }}" readonly class="bg-gray-50 cursor-not-allowed"{% else %}value="{{ form_data.nrp }}"{% endif %}
-                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"/>
+                   {% if action == 'edit' %}value="{{ personel.nrp }}" readonly class="h-11 px-4 rounded-lg border border-gray-300 text-sm bg-gray-50 cursor-not-allowed"{% else %}value="{{ form_data.nrp }}" class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"{% endif %}/>
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-gray-700 uppercase">Email <span class="text-red-500">*</span></label>
@@ -45,11 +44,19 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-gray-700 uppercase">Nama Lengkap <span class="text-red-500">*</span></label>
-          <input name="nama_lengkap" type="text" required placeholder="Masukkan Nama Lengkap Sesuai Dokumen" 
-                 value="{% if action == 'edit' %}{{ personel.nama_lengkap }}{% else %}{{ form_data.nama_lengkap }}{% endif %}"
-                 class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+        <div class="grid grid-cols-1 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">Nama Lengkap <span class="text-red-500">*</span></label>
+            <input name="nama_lengkap" type="text" required placeholder="Sesuai Dokumen" 
+                   value="{% if action == 'edit' %}{{ personel.nama_lengkap }}{% else %}{{ form_data.nama_lengkap }}{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-700 uppercase">No. HP <span class="text-red-500">*</span></label>
+            <input name="no_hp" type="text" required placeholder="Contoh: 08123456789" 
+                   value="{% if action == 'edit' %}{{ personel.no_hp }}{% else %}{{ form_data.no_hp }}{% endif %}"
+                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -91,22 +98,45 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2 relative">
-          <label class="text-xs font-bold text-gray-700 uppercase">
-            {% if action == 'edit' %}Ganti Password (Kosongkan jika tidak ganti){% else %}Password <span class="text-red-500">*</span>{% endif %}
-          </label>
-          <div class="relative">
-            <input id="passwordInput" name="password" type="password" {% if action == 'tambah' %}required{% endif %} minlength="8"
-                   placeholder="Minimal 8 karakter"
-                   class="w-full h-11 pl-4 pr-12 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
-            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path id="eyePath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path id="eyePathOuter" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
+        <div class="grid grid-cols-1 gap-5">
+          <div class="flex flex-col gap-2 relative">
+            <label class="text-xs font-bold text-gray-700 uppercase">
+              {% if action == 'edit' %}Ganti Password{% else %}Password <span class="text-red-500">*</span>{% endif %}
+            </label>
+            <div class="relative">
+              <input id="passwordInput" name="password" type="password" {% if action != 'edit' %}required{% endif %} minlength="8"
+                     placeholder="Minimal 8 karakter"
+                     class="w-full h-11 pl-4 pr-12 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+              <button type="button" onclick="togglePasswordVisibility('passwordInput', 'eyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="flex flex-col gap-2 relative">
+            <label class="text-xs font-bold text-gray-700 uppercase">
+              Konfirmasi Password {% if action != 'edit' %}<span class="text-red-500">*</span>{% endif %}
+            </label>
+            <div class="relative">
+              <input id="passwordConfirmInput" name="password_confirm" type="password" {% if action != 'edit' %}required{% endif %} minlength="8"
+                     placeholder="Ulangi Password"
+                     class="w-full h-11 pl-4 pr-12 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+              <button type="button" onclick="togglePasswordVisibility('passwordConfirmInput', 'eyeIconConfirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <svg id="eyeIconConfirm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
+        
+        {% if action == 'edit' %}
+        <p class="text-[11px] text-amber-600 font-bold italic mt-[-10px]">* Kosongkan kolom password di atas jika Anda tidak ingin mengganti kata sandi personel.</p>
+        {% endif %}
 
         <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
           <a href="{% url 'accounts:daftar_personel' %}" class="px-6 py-2.5 rounded-lg border border-gray-300 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Batal</a>
@@ -119,9 +149,9 @@
 </div>
 
 <script>
-  function togglePasswordVisibility() {
-    const pwdInput = document.getElementById('passwordInput');
-    const eyeIcon = document.getElementById('eyeIcon');
+  function togglePasswordVisibility(inputId, iconId) {
+    const pwdInput = document.getElementById(inputId);
+    const eyeIcon = document.getElementById(iconId);
     
     if (pwdInput.type === 'password') {
       pwdInput.type = 'text';
@@ -138,4 +168,3 @@
   }
 </script>
 {% endblock %}
-

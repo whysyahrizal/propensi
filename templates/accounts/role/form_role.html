@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{% if action == 'edit' %}Edit Role - {{ role.nama }}{% else %}Tambah Role{% endif %} — SIRAGA{% endblock %}
+{% block title %}{% if action == 'edit' %}Edit Role - {{ role.nama|title }}{% else %}Tambah Role{% endif %} — SIRAGA{% endblock %}
 {% block page_title %}{% if action == 'edit' %}Edit Role{% else %}Tambah Role{% endif %}{% endblock %}
 
 {% block content %}
@@ -21,23 +21,12 @@
       <form method="POST" class="flex flex-col gap-6">
         {% csrf_token %}
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Internal (Slug) <span class="text-red-500">*</span></label>
-            <input name="nama" type="text" required 
-                   placeholder="cth: auditor_internal" 
-                   {% if action == 'edit' %}value="{{ role.nama }}" readonly class="h-11 px-4 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed font-mono text-sm"{% else %}value="{{ form_data.nama|default:'' }}" class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none font-mono"{% endif %} />
-            <p class="text-[10px] text-gray-400 italic">Identitas unik sistem (huruf kecil & underscore).</p>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Tampilan <span class="text-red-500">*</span></label>
-            <input name="display_label" type="text" required 
-                   placeholder="cth: Auditor Internal" 
-                   value="{% if action == 'edit' %}{{ role.display_label }}{% else %}{{ form_data.display_label|default:'' }}{% endif %}"
-                   class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
-            <p class="text-[10px] text-gray-400 italic">Nama yang akan muncul di antarmuka pengguna.</p>
-          </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Role <span class="text-red-500">*</span></label>
+          <input name="nama" type="text" required 
+                 placeholder="cth: superadmin, pimpinan, atau operator" 
+                 value="{% if action == 'edit' %}{{ role.nama }}{% else %}{{ form_data.nama|default:'' }}{% endif %}"
+                 class="h-11 px-4 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary outline-none transition-all" />
         </div>
 
         <div class="flex flex-col gap-2">

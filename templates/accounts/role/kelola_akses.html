@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block page_title %}Kelola Hak Akses - {{ role.display_label|default:role.nama }}{% endblock %}
+{% block page_title %}Kelola Hak Akses - {{ role.nama }}{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
@@ -11,7 +11,7 @@
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <h2 class="text-lg font-bold text-gray-900">Konfigurasi Hak Akses Menu</h2>
-            <p class="text-sm text-gray-500">Tentukan menu mana saja yang dapat muncul di sidebar untuk role <strong>{{ role.display_label|default:role.nama }}</strong>.</p>
+            <p class="text-sm text-gray-500">Tentukan menu mana saja yang dapat muncul di sidebar untuk role <strong>{{ role.nama }}</strong>.</p>
         </div>
 
         <form method="POST">

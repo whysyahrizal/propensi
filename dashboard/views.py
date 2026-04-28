@@ -48,7 +48,7 @@ def dashboard_view(request):
     if role in ('pimpinan', 'superadmin', 'operator'):
         sprin_aktif = Sprin.objects.filter(status='aktif').select_related('dibuat_oleh')
         pengajuan_menunggu = PengajuanCuti.objects.filter(status='menunggu').count()
-        total_personel = request.user.__class__.objects.filter(is_active=True, role='personel').count()
+        total_personel = request.user.__class__.objects.filter(is_active=True, status_verifikasi='approved', role='personel').count()
         hadir_hari_ini = RekorAbsensi.objects.filter(tanggal=today).count()
         pengumuman_terbaru = _published_pengumuman_queryset()[:5]
 

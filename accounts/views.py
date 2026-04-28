@@ -116,7 +116,10 @@ def daftar_personel_view(request):
     satker_filter = request.GET.get('satker', '').strip()
     status_filter = request.GET.get('status', '').strip()
 
-    personel_list = Personel.objects.select_related('satker').order_by('nama_lengkap')
+    personel_list = Personel.objects.filter(status_verifikasi='approved').select_related('satker', 'role_obj').order_by(
+        '-is_active', 
+        'nama_lengkap'
+    )
 
     if q:
         personel_list = personel_list.filter(Q(nama_lengkap__icontains=q) | Q(nrp__icontains=q))
@@ -136,7 +139,7 @@ def daftar_personel_view(request):
     role_list = Role.objects.all()
     satker_list = Satker.objects.all()
 
-    base_queryset = Personel.objects.all()
+    base_queryset = Personel.objects.filter(status_verifikasi='approved')
     total_keseluruhan = base_queryset.count()
     total_aktif = base_queryset.filter(is_active=True).count()
     total_nonaktif = base_queryset.filter(is_active=False).count()
@@ -164,13 +167,15 @@ def tambah_personel_view(request):
         satker_id = request.POST.get('satker')
         no_hp = request.POST.get('no_hp', '').strip()
         password = request.POST.get('password', '')
-
+        password_confirm = request.POST.get('password_confirm')
         if not nrp.isdigit() or len(nrp) != 8:
             messages.error(request, 'NRP harus berupa 8 digit angka.')
         elif Personel.objects.filter(nrp=nrp).exists():
             messages.error(request, 'NRP sudah terdaftar.')
         elif len(password) < 8:
             messages.error(request, 'Password minimal 8 karakter.')
+        elif password != password_confirm:
+            messages.error(request, 'Password dan konfirmasi password tidak cocok.')
         else:
             satker = Satker.objects.filter(pk=satker_id).first()
             role_obj = Role.objects.filter(pk=role_id).first()
@@ -178,7 +183,8 @@ def tambah_personel_view(request):
             Personel.objects.create_user(
                 nrp=nrp, password=password, nama_lengkap=nama,
                 email=email, pangkat=pangkat, jabatan=jabatan,
-                role_obj=role_obj, satker=satker, no_hp=no_hp
+                role_obj=role_obj, satker=satker, no_hp=no_hp,
+                is_active=True, status_verifikasi='approved'
             )
             messages.success(request, f'Personel {nama} berhasil ditambahkan.')
             return redirect('accounts:daftar_personel')
@@ -211,13 +217,25 @@ def edit_personel_view(request, pk):
             personel.role_obj = Role.objects.filter(pk=role_id).first()
         
         new_password = request.POST.get('password', '').strip()
+        password_confirm = request.POST.get('password_confirm', '').strip()
+        
         if new_password:
             if len(new_password) < 8:
                 messages.error(request, 'Password baru minimal 8 karakter.')
                 return render(request, 'accounts/form_personel.html', {
                     'personel': personel, 'action': 'edit', 
-                    'satker_list': Satker.objects.all(), 'role_list': Role.objects.all()
+                    'satker_list': Satker.objects.all(), 'role_list': Role.objects.all(),
+                    'pangkat_choices': Personel.PANGKAT_CHOICES,
                 })
+            
+            if new_password != password_confirm:
+                messages.error(request, 'Password baru dan konfirmasi password tidak cocok.')
+                return render(request, 'accounts/form_personel.html', {
+                    'personel': personel, 'action': 'edit', 
+                    'satker_list': Satker.objects.all(), 'role_list': Role.objects.all(),
+                    'pangkat_choices': Personel.PANGKAT_CHOICES,
+                })
+            
             personel.set_password(new_password)
             
         personel.save()
@@ -327,20 +345,18 @@ def detail_role(request, pk):
 def tambah_role(request):
     if request.method == 'POST':
         nama = request.POST.get('nama', '').strip().lower()
-        display_label = request.POST.get('display_label', '').strip()
         deskripsi = request.POST.get('deskripsi', '').strip()
 
-        if not nama or not display_label:
-            messages.error(request, 'Role Name dan Display Label wajib diisi.')
+        if not nama:
+            messages.error(request, 'Role Name wajib diisi.')
         elif Role.objects.filter(nama=nama).exists():
             messages.error(request, f'Role "{nama}" sudah digunakan.')
         else:
             role = Role.objects.create(
                 nama=nama, 
-                display_label=display_label, 
                 deskripsi=deskripsi
             )
-            messages.success(request, f'Role "{role.display_label}" berhasil ditambahkan.')
+            messages.success(request, f'Role "{role.nama}" berhasil ditambahkan.')
             return redirect('accounts:daftar_role')
 
     return render(request, 'accounts/role/form_role.html', {'action': 'tambah'})
@@ -350,10 +366,19 @@ def edit_role(request, pk):
     role = get_object_or_404(Role, pk=pk)
 
     if request.method == 'POST':
-        role.display_label = request.POST.get('display_label', '').strip()
+        nama_baru = request.POST.get('nama', '').strip().lower()
+        
+        if nama_baru and nama_baru != role.nama and Role.objects.filter(nama=nama_baru).exists():
+            messages.error(request, f'Role "{nama_baru}" sudah digunakan.')
+            return render(request, 'accounts/role/form_role.html', {'action': 'edit', 'role': role})
+
+        if nama_baru:
+            role.nama = nama_baru
+            
         role.deskripsi = request.POST.get('deskripsi', '').strip()
         role.save()
-        messages.success(request, f'Role "{role.display_label}" berhasil diperbarui.')
+        
+        messages.success(request, f'Role "{role.nama}" berhasil diperbarui.')
         return redirect('accounts:daftar_role')
 
     return render(request, 'accounts/role/form_role.html', {
@@ -371,7 +396,7 @@ def hapus_role(request, pk):
             messages.error(request, f'Role tidak dapat dihapus karena masih digunakan oleh {jumlah_pengguna} pengguna.')
             return redirect('accounts:daftar_role')
             
-        label = role.display_label or role.nama
+        label = role.nama
         role.delete()
         messages.success(request, f'Role "{label}" berhasil dihapus.')
         return redirect('accounts:daftar_role')
@@ -388,7 +413,7 @@ def kelola_akses_menu(request, pk):
     if request.method == 'POST':
         menu_ids = request.POST.getlist('menus')
         role.menus.set(menu_ids)
-        messages.success(request, f'Akses menu untuk Role "{role.display_label or role.nama}" berhasil diperbarui.')
+        messages.success(request, f'Akses menu untuk Role "{role.nama.title()}" berhasil diperbarui.')
         return redirect('accounts:daftar_role')
 
     semua_menu = MenuItem.objects.filter(is_active=True).order_by('sort_order')
@@ -399,7 +424,6 @@ def kelola_akses_menu(request, pk):
         'semua_menu': semua_menu,
         'menu_aktif_ids': menu_aktif_ids,
     })
-
 
 # MANAJEMEN MENU
 @cek_akses_menu('accounts:daftar_menu')

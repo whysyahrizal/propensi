@@ -20,11 +20,7 @@
           <iconify-icon icon="heroicons:shield-check" class="text-3xl"></iconify-icon>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ role.display_label|default:role.nama }}</h1>
-          <p class="text-sm text-gray-500 font-mono mt-1 flex items-center gap-1.5">
-            <iconify-icon icon="heroicons:tag" class="text-gray-400"></iconify-icon>
-            {{ role.nama }}
-          </p>
+          <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ role.nama|title }}</h1>
         </div>
       </div>
       
@@ -40,14 +36,10 @@
       </div>
     </div>
 
-    <div class="p-6 sm:px-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="p-6 sm:px-8 grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="bg-gray-50/80 rounded-xl border border-gray-100 p-4">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Nama Tampilan</p>
-        <p class="text-sm font-bold text-gray-900">{{ role.display_label|default:"-" }}</p>
-      </div>
-      <div class="bg-gray-50/80 rounded-xl border border-gray-100 p-4">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Slug Internal</p>
-        <p class="text-sm font-bold text-gray-900 font-mono">{{ role.nama }}</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Deskripsi Hak Akses</p>
+        <p class="text-sm text-gray-600 leading-relaxed">{{ role.deskripsi|default:"Tidak ada deskripsi yang diatur untuk role ini." }}</p>
       </div>
       <div class="bg-blue-50/50 rounded-xl border border-blue-100 p-4">
         <p class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-1">Total Pengguna</p>
@@ -55,10 +47,6 @@
             <iconify-icon icon="heroicons:users"></iconify-icon>
             {{ pengguna_list.count }} Personel Aktif
         </p>
-      </div>
-      <div class="bg-gray-50/80 rounded-xl border border-gray-100 p-4 md:col-span-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Deskripsi Hak Akses</p>
-        <p class="text-sm text-gray-600 leading-relaxed">{{ role.deskripsi|default:"Tidak ada deskripsi yang diatur untuk role ini." }}</p>
       </div>
     </div>
   </div>
