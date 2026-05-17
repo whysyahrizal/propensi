@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0005_role_display_label'),
+        ('accounts', '0006_personel_status_verifikasi_alter_personel_is_active'),
         ('manajemen_cuti', '0001_initial'),
     ]
 

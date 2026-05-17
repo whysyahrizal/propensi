@@ -271,10 +271,10 @@ class LeaveAdminListView(LoginRequiredMixin, ListView):
 
         dari = self.request.GET.get('dari')
         if dari:
-            qs = qs.filter(tanggal_mulai__gte=dari)
+            qs = qs.filter(tanggal_selesai__gte=dari)
 
         sampai = self.request.GET.get('sampai')
         if sampai:
-            qs = qs.filter(tanggal_selesai__lte=sampai)
+            qs = qs.filter(tanggal_mulai__lte=sampai)
 
         return qs.order_by('-dibuat_pada')

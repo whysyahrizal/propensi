@@ -1,142 +1,391 @@
 {% extends 'base.html' %}
-
 {% block title %}Dashboard Personel - SIRAGA{% endblock %}
 {% block page_title %}Dashboard Personel{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-6">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-semibold text-gray-900">Jadwal Anda Hari Ini</h3>
-        <a href="{% url 'schedules:my_schedule' %}" class="inline-flex items-center gap-2 text-xs font-semibold text-[#1a3a6b] hover:text-[#2d5da6]">
-          Lihat Timeline
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </a>
-      </div>
+<div x-data="personelDashboard()" x-init="initData()" class="max-w-[1400px] mx-auto pb-10">
 
-      <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <p class="text-xs text-gray-500 mb-1">Lokasi Penugasan</p>
-        <p class="text-base font-semibold text-gray-900">{{ jadwal_hari_ini.location }}</p>
-        <div class="mt-3 flex flex-wrap gap-2 text-xs">
-          <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">{{ jadwal_hari_ini.shift_label }}</span>
-          <span class="px-2.5 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">{{ jadwal_hari_ini.shift_time }}</span>
-          <span class="px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">{{ jadwal_hari_ini.checkin_status }}</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-white border border-gray-200 rounded-xl p-5">
-      <h3 class="text-sm font-semibold text-gray-900 mb-4">Status Hari Ini</h3>
-      <div class="space-y-3 text-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-gray-500">Tanggal</span>
-          <span class="font-medium text-gray-900">{{ today|date:"d M Y" }}</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-gray-500">Absensi</span>
-          <span class="font-medium text-gray-900">
-            {% if absensi_hari_ini %}Sudah Absen{% else %}Belum Absen{% endif %}
-          </span>
-        </div>
-        <div class="pt-2">
-          <a href="{% url 'absensi:dashboard' %}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1a3a6b] text-white text-xs font-semibold hover:bg-[#2d5da6] transition-colors">
-            Buka Absensi
-          </a>
-        </div>
-      </div>
-    </section>
+  <!-- Header Banner -->
+  <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Selamat datang, {{ user.nama_lengkap|default:user.nrp }}! 👋</h2>
+      <p class="text-gray-500 mt-1.5 font-medium">Ini adalah ringkasan aktivitas dan penugasan Anda hari ini.</p>
+    </div>
+    <div class="text-right hidden sm:block">
+      <p class="text-sm font-bold text-[#1a3a6b]">{{ today|date:"l, d F Y" }}</p>
+    </div>
   </div>
 
-  <section class="bg-white border border-gray-200 rounded-xl p-5">
-    <h3 class="text-sm font-semibold text-gray-900 mb-4">Aksi Cepat</h3>
-    <div class="flex flex-wrap gap-3">
-      <a href="{% url 'absensi:checkin' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1a3a6b] text-white text-sm font-medium hover:bg-[#2d5da6] transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-        </svg>
-        Check-In Absensi
-      </a>
-      <a href="{% url 'absensi:checkout' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-        </svg>
-        Check-Out Absensi
-      </a>
-      <a href="{% url 'absensi:dashboard' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        Absensi Harian
-      </a>
-      <a href="{% url 'absensi:history' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z"/>
-        </svg>
-        Riwayat Absensi
-      </a>
-      <a href="{% url 'absensi:rekap_pribadi' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h6m0 0l-3-3m3 3l-3 3M5 7h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z"/>
-        </svg>
-        Rekap Absensi Saya
-      </a>
-      <a href="{% url 'schedules:my_schedule' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        Jadwal Saya
-      </a>
-      <a href="{% url 'manajemen_cuti:riwayat' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        Cuti / Izin Saya
-      </a>
-      <a href="{% url 'notifikasi:daftar' %}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-        </svg>
-        Notifikasi
-      </a>
-    </div>
-  </section>
+  <div class="flex flex-col xl:flex-row gap-8 items-start">
+    
+    <!-- LEFT COLUMN (Main Area - 70%) -->
+    <div class="w-full xl:w-2/3 flex flex-col gap-8">
 
-  <section class="bg-white border border-gray-200 rounded-xl p-5">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold text-gray-900">Timeline 30 Hari</h3>
-      <span class="text-xs text-gray-500">{{ jadwal_30_hari|length }} jadwal</span>
-    </div>
-    {% if jadwal_30_hari %}
-      <div class="space-y-2">
-        {% for jadwal in jadwal_30_hari %}
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border border-gray-100 rounded-lg p-3">
-            <div>
-              <p class="text-sm font-medium text-gray-900">{{ jadwal.tanggal|date:"l, d M Y" }}</p>
-              <p class="text-xs text-gray-500">{{ jadwal.location }}</p>
+      <!-- 1. Quick Actions Hero -->
+      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- Check In -->
+        <a :href="!ringkasan.loading && !ringkasan.data?.absensi?.waktu_masuk ? '{% url 'absensi:checkin' %}' : 'javascript:void(0)'"
+           @click="if(ringkasan.loading) { $event.preventDefault(); } else if(ringkasan.data?.absensi?.waktu_masuk) { $event.preventDefault(); alert('Aksi tidak dapat dilakukan: Anda sudah melakukan Check-In hari ini.'); }"
+           :class="{'hover:-translate-y-1 hover:shadow-lg': !ringkasan.loading && !ringkasan.data?.absensi?.waktu_masuk, 'opacity-60 cursor-not-allowed': !ringkasan.loading && ringkasan.data?.absensi?.waktu_masuk, 'animate-pulse pointer-events-none': ringkasan.loading}"
+           class="group relative overflow-hidden rounded-[2rem] bg-[#1a3a6b] hover:bg-[#152e55] p-6 text-white shadow-md transition-all duration-300 min-h-[160px] flex flex-col justify-between">
+          <div class="relative z-10 flex items-center justify-between">
+            <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 shadow-inner border border-white/20 transition-transform duration-300 group-hover:scale-105">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
             </div>
-            <div class="flex gap-2 text-xs">
-              <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">{{ jadwal.shift_label }}</span>
-              <span class="px-2.5 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">{{ jadwal.shift_time }}</span>
+            <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center opacity-50 group-hover:opacity-100 transition-all">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </div>
           </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
-        Belum ada jadwal terdaftar untuk 30 hari ke depan.
-      </div>
-    {% endif %}
-  </section>
+          <div class="relative z-10 mt-6">
+            <h4 class="text-xl font-bold tracking-tight mb-1">Check-In Presensi</h4>
+            <p class="text-xs text-blue-200 font-medium">Mulai jam kerja dan catat lokasi GPS</p>
+          </div>
+        </a>
+
+        <!-- Check Out -->
+        <a :href="!ringkasan.loading && ringkasan.data?.absensi?.waktu_masuk && !ringkasan.data?.absensi?.waktu_keluar ? '{% url 'absensi:checkout' %}' : 'javascript:void(0)'"
+           @click="if(ringkasan.loading) { $event.preventDefault(); } else if(!ringkasan.data?.absensi?.waktu_masuk) { $event.preventDefault(); alert('Aksi tidak dapat dilakukan: Anda belum melakukan Check-In.'); } else if(ringkasan.data?.absensi?.waktu_keluar) { $event.preventDefault(); alert('Aksi tidak dapat dilakukan: Anda sudah melakukan Check-Out hari ini.'); }"
+           :class="{'hover:-translate-y-1 hover:shadow-lg hover:border-gray-300': !ringkasan.loading && ringkasan.data?.absensi?.waktu_masuk && !ringkasan.data?.absensi?.waktu_keluar, 'opacity-60 cursor-not-allowed bg-gray-50 border-gray-200': !ringkasan.loading && (!ringkasan.data?.absensi?.waktu_masuk || ringkasan.data?.absensi?.waktu_keluar), 'animate-pulse pointer-events-none': ringkasan.loading}"
+           class="group relative overflow-hidden rounded-[2rem] bg-white border border-gray-200/80 p-6 shadow-sm transition-all duration-300 min-h-[160px] flex flex-col justify-between">
+          <div class="absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-gray-50 blur-2xl group-hover:bg-gray-100 transition-colors duration-500"></div>
+          <div class="relative z-10 flex items-center justify-between">
+            <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 border border-gray-100 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
+              <svg class="w-7 h-7 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </div>
+            <div class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:text-gray-800 group-hover:bg-gray-50 transition-all">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="relative z-10 mt-6">
+            <h4 class="text-xl font-bold tracking-tight text-gray-900 mb-1">Check-Out Presensi</h4>
+            <p class="text-xs text-gray-500 font-medium">Akhiri jam kerja harian Anda</p>
+          </div>
+        </a>
+
+        <!-- Ajukan Cuti/Izin -->
+        <a href="{% url 'manajemen_cuti:ajukan' %}" 
+           :class="{'animate-pulse pointer-events-none': ringkasan.loading}"
+           class="group relative overflow-hidden rounded-[2rem] bg-orange-50 hover:bg-orange-100 border border-orange-100 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 min-h-[160px] flex flex-col justify-between">
+          <div class="absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-orange-100/50 blur-2xl group-hover:bg-orange-200/50 transition-colors duration-500"></div>
+          <div class="relative z-10 flex items-center justify-between">
+            <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-orange-200 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+              <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="w-10 h-10 rounded-full border border-orange-200 flex items-center justify-center text-orange-400 group-hover:text-orange-600 group-hover:bg-white transition-all">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="relative z-10 mt-6">
+            <h4 class="text-xl font-bold tracking-tight text-orange-900 mb-1">Ajukan Cuti/Izin</h4>
+            <p class="text-xs text-orange-700/80 font-medium">Buat pengajuan cuti tahunan atau izin</p>
+          </div>
+        </a>
+      </section>
+
+      <!-- 2. Papan Pengumuman -->
+      <section class="bg-white border border-gray-100 shadow-sm rounded-[2rem] p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+            </div>
+            Pengumuman Terbaru
+          </h3>
+        </div>
+
+        <!-- Skeleton -->
+        <template x-if="informasi.loading">
+          <div class="space-y-4">
+            <template x-for="i in 3">
+              <div class="animate-pulse flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+                <div class="w-1.5 bg-gray-200 rounded-full h-12"></div>
+                <div class="flex-1 space-y-2 py-1">
+                  <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Empty -->
+        <template x-if="!informasi.loading && (!informasi.data.pengumuman || informasi.data.pengumuman.length === 0)">
+          <div class="py-10 text-center rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-white shadow-sm flex items-center justify-center">
+              <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+            </div>
+            <p class="text-sm font-medium text-gray-500">Tidak ada pengumuman hari ini.</p>
+          </div>
+        </template>
+
+        <!-- Data -->
+        <template x-if="!informasi.loading && informasi.data.pengumuman && informasi.data.pengumuman.length > 0">
+          <div class="space-y-3">
+            <template x-for="item in informasi.data.pengumuman" :key="item.id">
+              <a :href="item.url" class="group flex items-stretch bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all overflow-hidden">
+                <div class="w-1 bg-gray-200 group-hover:bg-[#1a3a6b] transition-colors"></div>
+                <div class="flex-1 p-4 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-[#1a3a6b] transition-colors" x-text="item.judul"></h4>
+                    <p class="text-xs text-gray-500 mt-1 font-medium" x-text="item.tanggal_publikasi"></p>
+                  </div>
+                  <div class="text-gray-300 group-hover:text-[#1a3a6b] transition-colors ml-4 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                  </div>
+                </div>
+              </a>
+            </template>
+          </div>
+        </template>
+      </section>
+
+      <!-- 3. Timeline Jadwal -->
+      <section class="bg-white border border-gray-100 shadow-sm rounded-[2rem] p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            Jadwal 30 Hari Ke Depan
+          </h3>
+          <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">{{ jadwal_30_hari|length }} Shift</span>
+        </div>
+        
+        {% if jadwal_30_hari %}
+          <div class="space-y-3">
+            {% for jadwal in jadwal_30_hari %}
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-100 rounded-xl p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-white border border-gray-200 flex flex-col items-center justify-center shrink-0 shadow-sm">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase leading-none">{{ jadwal.tanggal|date:"M" }}</span>
+                    <span class="text-lg font-black text-gray-800 leading-tight">{{ jadwal.tanggal|date:"d" }}</span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-900">{{ jadwal.tanggal|date:"l" }}</p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">{{ jadwal.location }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 sm:ml-auto">
+                  <span class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold">{{ jadwal.shift_label }}</span>
+                  <span class="px-3 py-1 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold">{{ jadwal.shift_time }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="py-10 text-center rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+            <p class="text-sm font-medium text-gray-500">Belum ada jadwal terdaftar untuk 30 hari ke depan.</p>
+          </div>
+        {% endif %}
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN (Side Panel - 30%) -->
+    <div class="w-full xl:w-1/3 flex flex-col gap-6">
+
+      <!-- Mini Nav / Quick Links -->
+      <section class="grid grid-cols-4 gap-2 bg-white rounded-[2rem] p-4 border border-gray-100 shadow-sm">
+        <a href="{% url 'manajemen_cuti:riwayat' %}" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors group">
+          <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+          <span class="text-[10px] font-bold text-gray-500 group-hover:text-gray-900">Cuti</span>
+        </a>
+        <a href="{% url 'schedules:my_schedule' %}" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors group">
+          <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <span class="text-[10px] font-bold text-gray-500 group-hover:text-gray-900">Jadwal</span>
+        </a>
+        <a href="{% url 'notifikasi:daftar' %}" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors group">
+          <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></div>
+          <span class="text-[10px] font-bold text-gray-500 group-hover:text-gray-900">Notif</span>
+        </a>
+        <a href="{% url 'absensi:dashboard' %}" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors group">
+          <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+          <span class="text-[10px] font-bold text-gray-500 group-hover:text-gray-900">Absen</span>
+        </a>
+      </section>
+
+      <!-- Jadwal Hari Ini (Static Context) -->
+      <section class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm relative overflow-hidden">
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Penugasan Hari Ini
+        </h3>
+        
+        <p class="text-lg font-bold text-gray-900 leading-tight mb-4" title="{{ jadwal_hari_ini.location }}">{{ jadwal_hari_ini.location|truncatechars:40 }}</p>
+        
+        <div class="flex flex-wrap gap-2">
+          <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-xs font-bold">{{ jadwal_hari_ini.shift_label }}</span>
+          <span class="px-2.5 py-1 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-xs font-bold">{{ jadwal_hari_ini.shift_time }}</span>
+        </div>
+      </section>
+
+      <!-- Ringkasan API -->
+      <section class="bg-white border border-gray-100 shadow-sm rounded-[2rem] p-6 flex flex-col gap-4">
+        <h3 class="text-base font-bold text-gray-900 mb-1">Status Cepat</h3>
+
+        <template x-if="ringkasan.loading">
+          <div class="space-y-3">
+            <div class="h-16 bg-gray-50 rounded-xl animate-pulse"></div>
+            <div class="h-16 bg-gray-50 rounded-xl animate-pulse"></div>
+            <div class="h-16 bg-gray-50 rounded-xl animate-pulse"></div>
+            <div class="h-16 bg-gray-50 rounded-xl animate-pulse"></div>
+          </div>
+        </template>
+
+        <template x-if="!ringkasan.loading && ringkasan.data">
+          <div class="space-y-3">
+            <!-- Status Presensi -->
+            <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 font-medium">Presensi</p>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <p class="text-sm font-bold text-gray-900" x-text="ringkasan.data.absensi.status"></p>
+                    <template x-if="ringkasan.data.absensi.waktu_masuk">
+                      <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600 shadow-sm" x-text="ringkasan.data.absensi.waktu_masuk + ' - ' + (ringkasan.data.absensi.waktu_keluar || '...')"></span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sprin Hari Ini -->
+            <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50/50">
+              <div class="flex items-center gap-3 w-full">
+                <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+                <div class="w-full min-w-0">
+                  <div class="flex justify-between items-center w-full">
+                    <p class="text-xs text-gray-500 font-medium">Sprin Hari Ini</p>
+                    <template x-if="ringkasan.data.sprin_hari_ini.ada">
+                      <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                      </span>
+                    </template>
+                  </div>
+                  <template x-if="ringkasan.data.sprin_hari_ini.ada">
+                    <div>
+                      <p class="text-sm font-bold text-gray-900 truncate mt-0.5" x-text="ringkasan.data.sprin_hari_ini.operation_name"></p>
+                      <p class="text-[10px] text-gray-500 truncate" x-text="ringkasan.data.sprin_hari_ini.location"></p>
+                    </div>
+                  </template>
+                  <template x-if="!ringkasan.data.sprin_hari_ini.ada">
+                    <p class="text-sm font-bold text-gray-400 mt-0.5">Tidak ada sprin hari ini</p>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sprin -->
+            <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 font-medium">Sprin Berjalan</p>
+                  <p class="text-sm font-bold text-gray-900" x-text="ringkasan.data.jumlah_sprin_aktif + ' Dokumen'"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cuti -->
+            <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 font-medium">Sisa Cuti</p>
+                  <p class="text-sm font-bold text-gray-900" x-text="ringkasan.data.sisa_cuti_tahunan + ' Hari'"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </section>
+
+      <!-- Aktivitas Terakhir -->
+      <section class="bg-white border border-gray-100 shadow-sm rounded-[2rem] p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Aktivitas Terakhir
+        </h3>
+
+        <template x-if="informasi.loading">
+          <div class="h-20 bg-gray-50 rounded-xl animate-pulse"></div>
+        </template>
+
+        <template x-if="!informasi.loading && !informasi.data.aktivitas_terakhir">
+          <div class="p-4 rounded-xl border border-dashed border-gray-200 text-center">
+            <p class="text-xs font-medium text-gray-500">Tidak ada rekam aktivitas</p>
+          </div>
+        </template>
+
+        <template x-if="!informasi.loading && informasi.data.aktivitas_terakhir">
+          <div class="p-4 rounded-xl bg-blue-50/50 border border-blue-100">
+            <span class="inline-block px-2 py-0.5 rounded bg-blue-100 text-[#1a3a6b] text-[10px] font-bold uppercase tracking-widest mb-2" x-text="informasi.data.aktivitas_terakhir.jenis"></span>
+            <h4 class="text-sm font-bold text-gray-900 leading-snug mb-2" x-text="informasi.data.aktivitas_terakhir.keterangan"></h4>
+            <div class="flex items-center gap-3 text-xs font-medium text-gray-500">
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span x-text="informasi.data.aktivitas_terakhir.tanggal"></span>
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span x-text="informasi.data.aktivitas_terakhir.waktu"></span>
+              </span>
+            </div>
+          </div>
+        </template>
+      </section>
+
+    </div>
+  </div>
 </div>
+
+<script>
+function personelDashboard() {
+  return {
+    ringkasan: {
+      loading: true,
+      data: null
+    },
+    informasi: {
+      loading: true,
+      data: { pengumuman: [], aktivitas_terakhir: null }
+    },
+    initData() {
+      // Fetch Ringkasan Harian
+      fetch('/dashboard/api/ringkasan/')
+        .then(res => res.json())
+        .then(res => {
+          this.ringkasan.data = res;
+          setTimeout(() => { this.ringkasan.loading = false; }, 400);
+        })
+        .catch(err => {
+          console.error("Error fetching ringkasan:", err);
+          this.ringkasan.loading = false;
+        });
+
+      // Fetch Informasi & Aktivitas
+      fetch('/dashboard/api/informasi-aktivitas/')
+        .then(res => res.json())
+        .then(res => {
+          this.informasi.data = res;
+          setTimeout(() => { this.informasi.loading = false; }, 600);
+        })
+        .catch(err => {
+          console.error("Error fetching informasi aktivitas:", err);
+          this.informasi.loading = false;
+        });
+    }
+  }
+}
+</script>
 {% endblock %}
