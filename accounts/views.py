@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from accounts.decorators import cek_akses_menu
-from .models import Personel, Satker, Role, MenuItem
+from .models import AccountStatusHistory, Personel, Satker, Role, MenuItem
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
@@ -180,12 +180,20 @@ def tambah_personel_view(request):
             satker = Satker.objects.filter(pk=satker_id).first()
             role_obj = Role.objects.filter(pk=role_id).first()
             
-            Personel.objects.create_user(
+            personel_baru =Personel.objects.create_user(
                 nrp=nrp, password=password, nama_lengkap=nama,
                 email=email, pangkat=pangkat, jabatan=jabatan,
                 role_obj=role_obj, satker=satker, no_hp=no_hp,
                 is_active=True, status_verifikasi='approved'
             )
+
+            AccountStatusHistory.objects.create(
+                personel=personel_baru,
+                status_baru=True, 
+                alasan='Akun didaftarkan dan diaktifkan langsung oleh Administrator',
+                diubah_oleh=request.user 
+            )
+
             messages.success(request, f'Personel {nama} berhasil ditambahkan.')
             return redirect('accounts:daftar_personel')
 
@@ -261,6 +269,13 @@ def hapus_personel_view(request, pk):
         personel.tanggal_nonaktif = timezone.now()
         personel.alasan_nonaktif = alasan
         personel.save()
+
+        AccountStatusHistory.objects.create(
+            personel=personel,
+            status_baru=False,
+            alasan=alasan,
+            diubah_oleh=request.user
+        )
         
         messages.success(request, f'Akun {personel.nama_lengkap} telah dinonaktifkan.')
         return redirect('accounts:detail_personel', pk=personel.pk)
@@ -270,8 +285,10 @@ def hapus_personel_view(request, pk):
 @cek_akses_menu('accounts:daftar_personel')
 def detail_personel_view(request, pk):
     personel = get_object_or_404(Personel, pk=pk)
+    riwayat_status = personel.status_history.all()
     return render(request, 'accounts/detail_personel.html', {
         'personel': personel,
+        'riwayat_status': riwayat_status,
     })
 
 @cek_akses_menu('accounts:daftar_personel')
@@ -281,8 +298,15 @@ def reaktivasi_personel_view(request, pk):
         nama = personel.nama_lengkap
         personel.is_active = True 
         personel.save()
+        alasan = request.POST.get('alasan', 'Diaktifkan kembali tanpa alasan spesifik')
         messages.success(request, f'Personel {nama} berhasil direaktivasi.')
-        return redirect('accounts:daftar_personel')
+        AccountStatusHistory.objects.create(
+            personel=personel,
+            status_baru=True,
+            alasan=alasan,
+            diubah_oleh=request.user
+        )
+        return redirect('accounts:detail_personel', pk=personel.pk)
 
     return render(request, 'accounts/konfirmasi_reaktivasi.html', {'personel': personel})
 
@@ -316,6 +340,12 @@ def proses_verifikasi_view(request, pk, action):
             personel.is_active = True
             personel.status_verifikasi = 'approved'
             personel.save()
+            AccountStatusHistory.objects.create(
+                personel=personel,
+                status_baru=True,
+                alasan='Akun disetujui melalui proses verifikasi.',
+                diubah_oleh=request.user
+            )
             messages.success(request, f'Akun {personel.nama_lengkap} disetujui.')
         elif action == 'reject':
             personel.delete()

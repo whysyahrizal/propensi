@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Monitoring Kehadiran{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto pb-12 flex flex-col gap-6 font-sans bg-gray-50/30">
+  
+  <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+    <div class="flex flex-col gap-1">
+      
+      {% if satker and role == 'superadmin' or satker and request.user.is_superuser %}
+      <a href="{% url 'dashboard:dashboard_kehadiran_unit' %}?filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}" class="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-[#1a3a6b] transition-colors mb-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Kembali ke Ringkasan
+      </a>
+      {% endif %}
+
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-[#1a3a6b] tracking-tight">
+          {% if satker %}{{ satker.nama|upper }}{% else %}Dashboard Monitoring Kehadiran{% endif %}
+        </h1>
+        {% if satker %}
+          <span class="px-3 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full border border-blue-200 uppercase tracking-widest">Satuan Kerja</span>
+        {% else %}
+          <span class="px-2.5 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded-full border border-purple-200 uppercase tracking-wider">Nasional</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-gray-500 font-medium">
+        {% if satker %}
+          Tampilan detail operasional • <span class="text-gray-800 font-bold">{{ total_personel }} personel</span>
+        {% else %}
+          Analitik rekapitulasi performa kehadiran seluruh unit kerja instansi secara terpusat.
+        {% endif %}
+      </p>
+    </div>
+    
+    <form method="GET" action="" id="filterForm" class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end">
+      {% if satker %}<input type="hidden" name="satker_id" value="{{ satker.id }}">{% endif %}
+      
+      <div class="flex bg-gray-50 p-1 rounded-xl border border-gray-200">
+        <button type="submit" name="filter" value="hari_ini" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors {% if filter_type == 'hari_ini' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-500 hover:text-gray-800{% endif %}">Hari Ini</button>
+        <button type="submit" name="filter" value="7_hari" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors {% if filter_type == '7_hari' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-500 hover:text-gray-800{% endif %}">7 Hari Terakhir</button>
+        <button type="submit" name="filter" value="bulan_ini" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors {% if filter_type == 'bulan_ini' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-500 hover:text-gray-800{% endif %}">Bulan Ini</button>
+      </div>
+
+      <div class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
+        <input type="date" name="start_date" value="{{ start_date }}" class="bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 px-2 py-1 outline-none focus:border-blue-500">
+        <span class="text-gray-400 text-xs">-</span>
+        <input type="date" name="end_date" value="{{ end_date }}" class="bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 px-2 py-1 outline-none focus:border-blue-500">
+        <button type="submit" name="filter" value="kustom" class="px-3 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg hover:bg-gray-800 shadow-sm transition-colors">Kustom Rentang</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-h-[115px]">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Personel</p>
+      <h3 class="text-3xl font-black text-gray-900 tracking-tight mt-2">{{ total_personel }}</h3>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-h-[115px]">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hadir</p>
+      <div class="flex items-baseline justify-between mt-2 gap-2">
+        <h3 class="text-3xl font-black text-gray-900 tracking-tight">{{ total_hadir }}</h3>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-h-[115px]">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tidak Hadir</p>
+      <div class="flex items-baseline justify-between mt-2 gap-2">
+        <h3 class="text-3xl font-black text-gray-900 tracking-tight">{{ total_tidak_hadir }}</h3>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-h-[115px]">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Terlambat</p>
+      <div class="flex items-baseline justify-between mt-2 gap-2">
+        <h3 class="text-3xl font-black text-gray-900 tracking-tight">{{ total_terlambat }}</h3>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-h-[115px]">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tingkat Kehadiran</p>
+      <h3 class="text-3xl font-black text-gray-900 tracking-tight mt-2">{{ tingkat_kehadiran }}<span class="text-base text-gray-400 font-medium">%</span></h3>
+    </div>
+  </div>
+
+  {% if not satker or role == 'pimpinan' %}
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+      <div class="mb-5 flex justify-between items-center">
+        <div>
+          <h3 class="text-base font-bold text-gray-800">Grafik Tren Kehadiran</h3>
+          <p class="text-xs text-gray-400 mt-0.5 font-medium">Visualisasi fluktuasi data hadir vs tidak hadir mingguan.</p>
+        </div>
+        <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100 uppercase tracking-wider">Benchmark: 80%</span>
+      </div>
+      <div class="relative w-full h-[300px] mt-auto">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+      <div>
+        <h3 class="text-base font-bold text-gray-800">Grafik Komposisi</h3>
+        <p class="text-xs text-gray-400 mt-0.5 font-medium">Distribusi persentase status seluruh personel harian.</p>
+      </div>
+      <div class="relative w-full h-[210px] my-4">
+        <canvas id="compositionChart"></canvas>
+      </div>
+      <div class="flex justify-center flex-wrap gap-x-4 gap-y-1.5 pt-4 border-t border-gray-50 text-[11px] font-semibold text-gray-500">
+        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></div>Hadir</div>
+        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[#F97316]"></div>Terlambat</div>
+        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></div>Tidak Hadir</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if satker %}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-8 py-5 border-b border-gray-100 bg-white flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div>
+          <h2 class="text-base font-bold text-gray-900">Kinerja Anggota Unit</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Daftar performa kedisiplinan akumulasi absensi personel di dalam satuan kerja ini.</p>
+        </div>
+        <div class="relative w-full md:w-72">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+          <input type="text" id="tableSearch" onkeyup="filterTableDynamic()" placeholder="Cari Nama atau NRP Anggota..." class="w-full text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-[#1a3a6b] focus:bg-white transition-all shadow-inner">
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100 text-gray-400">
+              <th class="px-6 py-3 text-[11px] font-bold uppercase tracking-wider w-16 text-center">No</th>
+              <th class="px-6 py-3 text-[11px] font-bold uppercase tracking-wider">Personel</th>
+              <th class="px-6 py-3 text-[11px] font-bold uppercase tracking-wider">Unit Kerja</th>
+              <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Hadir</th>
+              <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Tidak Hadir</th>
+              <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Terlambat</th>
+              <th class="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-right">Tingkat Kehadiran</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white" id="pimpinanTableBody">
+            {% for row in kinerja_personel %}
+            <tr class="hover:bg-gray-50/40 transition-colors" data-nama="{{ row.personel.nama_lengkap }}" data-nrp="{{ row.personel.nrp }}">
+              <td class="px-6 py-3.5 text-xs font-semibold text-gray-400 text-center row-counter">{{ forloop.counter }}</td>
+              <td class="px-6 py-3.5">
+                <div class="flex flex-col">
+                  <span class="text-sm font-bold text-[#1a3a6b]">{{ row.personel.nama_lengkap }}</span>
+                  <span class="text-[10px] font-medium text-gray-400 mt-0.5">NRP. {{ row.personel.nrp }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-3.5 text-xs font-bold text-gray-500">{{ row.personel.satker.nama|title }}</td>
+              <td class="px-4 py-3.5 text-center text-sm font-bold text-green-600 bg-green-50/20">{{ row.hadir }}</td>
+              <td class="px-4 py-3.5 text-center text-sm font-bold text-red-500 bg-red-50/20">{{ row.tidak_hadir }}</td>
+              <td class="px-4 py-3.5 text-center text-sm font-bold text-orange-500 bg-amber-50/20">{{ row.terlambat }}</td>
+              <td class="px-6 py-3.5">
+                <div class="flex items-center justify-end gap-3">
+                  <div class="w-24 bg-gray-100 rounded-full h-1.5 overflow-hidden hidden sm:block">
+                    <div class="h-full rounded-full transition-all duration-500 {% if row.persentase >= 90 %}bg-green-500{% elif row.persentase >= 75 %}bg-blue-500{% elif row.persentase >= 50 %}bg-amber-500{% else %}bg-red-500{% endif %}" style="width: {{ row.persentase }}%"></div>
+                  </div>
+                  <span class="text-xs font-black text-gray-900 w-12 text-right">{{ row.persentase }}%</span>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr id="noDataRow"><td colspan="7" class="px-8 py-12 text-center text-gray-400 italic text-xs font-light">Tidak ada data personel terdaftar di unit ini.</td></tr>
+            {% endfor %}
+            <tr id="emptySearchRow" class="hidden"><td colspan="7" class="px-8 py-12 text-center text-gray-400 italic text-xs font-light">Anggota unit dengan kriteria tersebut tidak ditemukan.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+      <div class="mb-5">
+        <h3 class="text-base font-bold text-gray-800">Perbandingan Kinerja Unit</h3>
+        <p class="text-xs text-gray-400 mt-0.5 font-medium">Klik pada salah satu batang grafik divisi untuk melakukan navigasi drill-down menuju laporan operasional unit kerja.</p>
+      </div>
+      <div class="relative w-full h-[340px]">
+        <canvas id="unitChart"></canvas>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+  Chart.defaults.color = '#9CA3AF';
+
+  if (document.getElementById('trendChart')) {
+    const ctxTrend = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctxTrend, {
+      type: 'line',
+      data: {
+        labels: JSON.parse('{{ trend_labels|safe }}'),
+        datasets: [
+          { label: 'Hadir', data: JSON.parse('{{ trend_hadir|safe }}'), borderColor: '#10B981', backgroundColor: '#10B981', tension: 0.38, borderWidth: 2.5, pointRadius: 3 },
+          { label: 'Tidak Hadir', data: JSON.parse('{{ trend_tidak_hadir|safe }}'), borderColor: '#EF4444', backgroundColor: '#EF4444', tension: 0.38, borderWidth: 2.5, pointRadius: 3 },
+          { label: 'Benchmark', data: Array(7).fill(Math.max(...JSON.parse('{{ trend_hadir|safe }}'), 1) * 0.8), borderColor: '#8B5CF6', borderWidth: 1.5, borderDash: [6, 6], pointRadius: 0, fill: false }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, border: { dash: [4, 4] }, grid: { color: '#F3F4F6' } } } }
+    });
+  }
+
+  if (document.getElementById('compositionChart')) {
+    const ctxDonut = document.getElementById('compositionChart').getContext('2d');
+    new Chart(ctxDonut, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hadir', 'Terlambat', 'Tidak Hadir'],
+        datasets: [{ data: JSON.parse('{{ donut_data|safe }}'), backgroundColor: ['#10B981', '#F97316', '#EF4444'], borderWidth: 0, hoverOffset: 3 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
+    });
+  }
+
+  if (document.getElementById('unitChart')) {
+    const barData = JSON.parse('{{ bar_kinerja|safe }}');
+    const barSatkerIds = JSON.parse('{{ bar_satker_ids|safe }}');
+    const barColors = barData.map(val => {
+      if (val === 0) return '#E5E7EB';
+      if (val >= 90) return '#10B981';
+      if (val >= 75) return '#3B82F6';
+      if (val >= 50) return '#F59E0B';
+      return '#EF4444';
+    });
+
+    const ctxUnit = document.getElementById('unitChart').getContext('2d');
+    new Chart(ctxUnit, {
+      type: 'bar',
+      data: {
+        labels: JSON.parse('{{ bar_labels|safe }}'),
+        datasets: [{ data: barData, backgroundColor: barColors, borderRadius: 5, barPercentage: 0.55, minBarLength: 10 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 100 } },
+        onClick: (e, activeElements) => {
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            window.location.href = "{% url 'dashboard:dashboard_kehadiran_unit' %}?satker_id=" + barSatkerIds[idx] + "&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}";
+          }
+        },
+        onHover: (e, el) => { e.native.target.style.cursor = el[0] ? 'pointer' : 'default'; }
+      }
+    });
+  }
+
+  function filterTableDynamic() {
+    const filter = document.getElementById('tableSearch').value.toLowerCase();
+    const rows = document.getElementById('pimpinanTableBody').getElementsByTagName('tr');
+    let count = 0;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].id === 'emptySearchRow' || rows[i].id === 'noDataRow') continue;
+      const n = rows[i].getAttribute('data-nama').toLowerCase();
+      const r = rows[i].getAttribute('data-nrp').toLowerCase();
+      if (n.includes(filter) || r.includes(filter)) {
+        rows[i].classList.remove('hidden'); count++;
+        rows[i].querySelector('.row-counter').innerText = count;
+      } else { rows[i].classList.add('hidden'); }
+    }
+    document.getElementById('emptySearchRow').className = (count === 0 && filter !== "") ? "" : "hidden";
+  }
+</script>
+{% endblock %}
