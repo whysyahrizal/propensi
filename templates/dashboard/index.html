@@ -25,7 +25,6 @@
   {% endif %}
   {% endif %}
 
-  <!-- Statistik hari ini -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-xl border border-gray-200 p-5 flex flex-col justify-between">
       <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Sprin Aktif</p>
@@ -64,12 +63,10 @@
     {% endif %}
   </div>
 
-  <!-- Monitoring Cuti/Izin (PBI-039) -->
   {% if request.user.role in 'superadmin,pimpinan,operator' %}
   <div class="rounded-3xl bg-[#f0f7ff] p-6 sm:p-8 mb-8 border border-[#cce3fc] shadow-sm">
     <div class="flex flex-col xl:flex-row gap-8 items-start justify-between">
       
-      <!-- Left Column: Header, Total, and Form -->
       <div class="w-full xl:w-5/12 flex flex-col gap-6">
         <div>
           <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-[#1a3a6b]">Personel Cuti & Izin</h3>
@@ -112,7 +109,6 @@
         </form>
       </div>
 
-      <!-- Right Column: List -->
       <div class="w-full xl:w-7/12 flex flex-col h-full">
         <div class="bg-white border border-blue-100 rounded-3xl p-5 flex-1 flex flex-col h-full shadow-sm relative overflow-hidden">
           <div class="flex items-center justify-between mb-4">
@@ -166,7 +162,6 @@
   </div>
   {% endif %}
 
-  <!-- Quick Actions -->
   <div class="bg-white rounded-xl border border-gray-200 p-5">
     <h3 class="text-sm font-semibold text-gray-900 mb-4">Aksi Cepat</h3>
     <div class="flex flex-wrap gap-3">
@@ -214,6 +209,25 @@
         Rekap Absensi Admin
       </a>
       {% endif %}
+
+      {% if request.user.role == 'superadmin' or request.user.is_superuser %}
+      <a href="{% url 'dashboard:dashboard_kehadiran_superadmin' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1a3a6b] text-white text-sm font-medium hover:bg-[#152e55] transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        Monitoring Kehadiran
+      </a>
+      {% elif request.user.role == 'pimpinan' %}
+      <a href="{% url 'dashboard:dashboard_kehadiran_pimpinan' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1a3a6b] text-white text-sm font-medium hover:bg-[#152e55] transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        Monitoring Kehadiran
+      </a>
+      {% endif %}
+
       <a href="{% url 'sprin:daftar' %}"
          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -204,5 +204,95 @@
       
     </div>
   </div>
+
+  <div class="mt-4">
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        <div class="p-6 border-b border-gray-100 flex items-start gap-4">
+            <div class="p-2.5 bg-blue-50 rounded-lg text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-semibold text-gray-800">Riwayat Status Akun</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Track semua perubahan status akun personel</p>
+            </div>
+        </div>
+
+        <div class="p-6">
+            {% comment %} <div class="mb-4">
+                <button type="button" class="inline-flex items-center justify-between w-40 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                    Semua Status
+                    <svg class="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+            </div> {% endcomment %}
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 text-xs">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3.5 text-left font-semibold text-gray-500 uppercase tracking-wider">Waktu Perubahan</th>
+                            <th scope="col" class="px-6 py-3.5 text-left font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3.5 text-left font-semibold text-gray-500 uppercase tracking-wider">Alasan</th>
+                            <th scope="col" class="px-6 py-3.5 text-left font-semibold text-gray-500 uppercase tracking-wider">Eksekutor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        
+                        {% for log in riwayat_status %}
+                        <tr class="hover:bg-gray-50/50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                                {{ log.waktu_perubahan|date:"d M Y, H:i" }} WIB
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center gap-2 text-[11px] font-medium">
+                                    {% if log.status_baru %}
+                                        <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-md">Nonaktif</span>
+                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                        </svg>
+                                        <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-md">Aktif</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-md">Aktif</span>
+                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                        </svg>
+                                        <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-md">Nonaktif</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4 text-gray-600 max-w-sm">
+                                {{ log.alasan }}
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">
+                                {% if log.diubah_oleh %}
+                                    {{ log.diubah_oleh.nama_lengkap }}
+                                {% else %}
+                                    <span class="italic text-gray-400 font-normal">Sistem</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic font-light">
+                                Belum ada catatan riwayat aktivitas perubahan status untuk personel ini.
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Monitoring Sprin Aktif{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto pb-12 flex flex-col lg:flex-row gap-6 font-sans bg-gray-50/30">
+  
+  <div class="flex-1 flex flex-col gap-6 w-full lg:w-8/12">
+    
+    <div>
+      <h1 class="text-2xl font-black text-[#1a3a6b] tracking-tight">Dashboard Monitoring Sprin Aktif</h1>
+      <p class="text-xs text-gray-500 font-medium mt-0.5">Monitoring seluruh sprin aktif dan status presensi personel secara real-time.</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
+      <form method="GET" class="flex flex-wrap items-center gap-3">
+        <input type="text" name="q" value="{{ q }}" placeholder="Cari sprin..." class="flex-1 min-w-[180px] text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-[#1a3a6b]">
+        
+        <select name="lokasi" class="text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none cursor-pointer">
+          <option value="">Semua Lokasi</option>
+          {% for loc in lokasi_list %}
+            <option value="{{ loc }}" {% if selected_lokasi == loc %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+
+        {% if role == 'superadmin' or request.user.is_superuser %}
+        <select name="satker_id" class="text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none cursor-pointer">
+          <option value="">Semua Satuan Kerja</option>
+          {% for s in satkers %}
+            <option value="{{ s.id }}" {% if selected_satker == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nama }}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
+
+        <select name="bulan" class="text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none cursor-pointer">
+          <option value="4" {% if selected_bulan == '4' %}selected{% endif %}>April 2026</option>
+          <option value="5" {% if selected_bulan == '5' %}selected{% endif %}>Mei 2026</option>
+        </select>
+
+        <button type="submit" class="px-4 py-2.5 bg-[#1a3a6b] text-white text-xs font-bold rounded-xl hover:bg-[#11274a] transition-colors shadow-sm">Filter</button>
+      </form>
+      <div class="flex"><span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">Aktif: Semua Sprin</span></div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] border-l-4 border-blue-500">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Sprin Aktif</p>
+        <h3 class="text-2xl font-black text-gray-900 tracking-tight">{{ total_sprin_aktif }}</h3>
+        <span class="text-[9px] text-gray-400">Surat Perintah</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] border-l-4 border-purple-500">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Personel</p>
+        <h3 class="text-2xl font-black text-gray-900 tracking-tight">{{ total_personel }}</h3>
+        <span class="text-[9px] text-gray-400">Anggota Dinas</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] border-l-4 border-green-500">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sudah Absen</p>
+        <h3 class="text-2xl font-black text-green-600 tracking-tight">{{ sudah_absen }}</h3>
+        <span class="text-[9px] text-gray-400">Telah Presensi</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] border-l-4 border-red-500">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Belum Absen</p>
+        <h3 class="text-2xl font-black text-red-600 tracking-tight">{{ belum_absen }}</h3>
+        <span class="text-[9px] text-gray-400">Belum Check-in</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] border-l-4 border-amber-500">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tingkat Kehadiran</p>
+        <h3 class="text-2xl font-black text-amber-600 tracking-tight">{{ tingkat_kehadiran }}%</h3>
+        <span class="text-[9px] text-gray-400">Rasio Kumulatif</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100 text-gray-400">
+              <th class="px-5 py-3 text-[11px] font-bold uppercase tracking-wider w-12 text-center">No</th>
+              <th class="px-5 py-3 text-[11px] font-bold uppercase tracking-wider">Nomor / Nama Sprin</th>
+              <th class="px-5 py-3 text-[11px] font-bold uppercase tracking-wider">Lokasi / Unit</th>
+              <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Jumlah Personel</th>
+              <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Sudah Absen</th>
+              <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Belum Absen</th>
+              <th class="px-5 py-3 text-[11px] font-bold uppercase tracking-wider">Status Kelengkapan</th>
+              <th class="px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {% for item in sprin_list_data %}
+            <tr class="hover:bg-gray-50/40 transition-colors">
+              <td class="px-5 py-3.5 text-xs font-semibold text-gray-400 text-center">{{ forloop.counter }}</td>
+              <td class="px-5 py-3.5">
+                <div class="flex flex-col">
+                  <span class="text-xs font-mono font-bold text-gray-400">{{ item.sprin.id_sprin }}</span>
+                  <span class="text-sm font-bold text-[#1a3a6b] mt-0.5">{{ item.sprin.operation_name }}</span>
+                </div>
+              </td>
+              <td class="px-5 py-3.5">
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-gray-700">{{ item.sprin.location_name }}</span>
+                  <span class="text-[10px] font-medium text-gray-400">Korlantas Polri</span>
+                </div>
+              </td>
+              <td class="px-4 py-3.5 text-center text-xs font-bold text-gray-800">{{ item.total_personel }}</td>
+              <td class="px-4 py-3.5 text-center text-xs font-bold text-green-600">{{ item.sudah_absen }}</td>
+              <td class="px-4 py-3.5 text-center text-xs font-bold text-red-500">{{ item.belum_absen }}</td>
+              <td class="px-5 py-3.5">
+                <div class="flex flex-col gap-1 w-24">
+                  <div class="flex items-center justify-between text-[10px] font-bold">
+                    {% if item.status_kelengkapan == 'Lengkap' %}
+                      <span class="text-green-600 bg-green-50 px-1 rounded">Lengkap</span>
+                    {% elif item.status_kelengkapan == 'Sebagian' %}
+                      <span class="text-amber-600 bg-amber-50 px-1 rounded">Sebagian</span>
+                    {% else %}
+                      <span class="text-red-600 bg-red-50 px-1 rounded">Rendah</span>
+                    {% endif %}
+                    <span class="text-gray-700">{{ item.persentase }}%</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
+                    <div class="h-full rounded-full {% if item.status_kelengkapan == 'Lengkap' %}bg-green-500{% elif item.status_kelengkapan == 'Sebagian' %}bg-amber-500{% else %}bg-red-500{% endif %}" style="width: {{ item.persentase }}%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-5 py-3.5 text-center">
+                <a href="{% url 'dashboard:monitoring_sprin_detail' item.sprin.id_sprin %}" class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  Detail
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full lg:w-4/12 flex flex-col gap-6 lg:mt-8">
+    
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+      <div class="w-full text-left mb-4">
+        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Komposisi Presensi</h4>
+      </div>
+      <div class="relative w-full h-[180px]">
+        <canvas id="sprinDonutChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-[#1a3a6b] to-[#2b5998] p-5 rounded-2xl shadow-md text-white flex flex-col gap-4">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <span class="text-xs font-medium text-blue-100">Sprin Lengkap</span>
+        <span class="text-xl font-black text-green-300">{{ sprin_lengkap_count }}</span>
+      </div>
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <span class="text-xs font-medium text-blue-100">Perlu Perhatian</span>
+        <span class="text-xl font-black text-red-300">{{ perlu_perhatian_count }}</span>
+      </div>
+      <div class="flex justify-between items-center pt-1">
+        <span class="text-xs font-medium text-blue-100">Rata-rata Kelengkapan</span>
+        <span class="text-2xl font-black text-white">{{ rata_rata_kelengkapan }}%</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const donutCtx = document.getElementById('sprinDonutChart').getContext('2d');
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Sudah Absen', 'Belum Absen'],
+      datasets: [{
+        data: JSON.parse('{{ donut_data|safe }}'),
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderWidth: 0,
+        hoverOffset: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '74%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: '600' } } } }
+    }
+  });
+</script>
+{% endblock %}

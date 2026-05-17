@@ -166,3 +166,30 @@ class Personel(AbstractBaseUser, PermissionsMixin):
             self.role = self.role_obj.nama.lower()
         
         super(Personel, self).save(*args, **kwargs)
+
+class AccountStatusHistory(models.Model):
+    personel = models.ForeignKey(
+        'Personel', 
+        on_delete=models.CASCADE,
+        related_name='status_history', 
+        verbose_name='Personel'
+    )
+    status_baru = models.BooleanField(verbose_name='Status Baru')
+    alasan = models.TextField(verbose_name='Alasan Perubahan')
+    diubah_oleh = models.ForeignKey(
+        'Personel', 
+        on_delete=models.SET_NULL, 
+        null=True,
+        related_name='status_changes_made', 
+        verbose_name='Diubah Oleh'
+    )
+    waktu_perubahan = models.DateTimeField(auto_now_add=True, verbose_name='Waktu Perubahan')
+
+    class Meta:
+        verbose_name = 'Riwayat Status Akun'
+        verbose_name_plural = 'Riwayat Status Akun'
+        ordering = ['-waktu_perubahan']  
+
+    def __str__(self):
+        status = "Diaktifkan" if self.status_baru else "Dinonaktifkan"
+        return f"{self.personel.nama_lengkap} - {status} pada {self.waktu_perubahan.strftime('%d %b %Y %H:%M')}"
